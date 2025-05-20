@@ -1,0 +1,255 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Criar Motorista{% endblock %}
+
+{% block content %}
+{% include 'partials/nav/nav_fleet.html' %}
+
+<div class="bg-body-content m-0 border border-secondary rounded-bottom-4 border-top-0 flex-grow-1 overflow-auto"
+     style="min-height: 0;">
+
+    <div id="scrollable_content" class="p-4">
+      
+      <div class="d-flex align-items-center justify-content-between mx-5 mb-3">
+        <ol class="breadcrumb text-muted fs-6 fw-semibold">
+          <li class="breadcrumb-item">
+            <a href="{% url 'tmsapp:fleetapp:dashboard' %}" class="text-dark text-hover-primary">Dashboard</a>
+          </li>
+          <li class="breadcrumb-item">
+            <a href="{% url 'tmsapp:fleetapp:driver_list' %}" class="text-dark text-hover-primary">Lista de Motoristas</a>
+          </li>
+          <li class="breadcrumb-item text-muted">Novo Motorista</li>
+        </ol>
+        <div class="d-flex align-items-center">
+          {% if object %}
+          <form data-message="Tem certeza que deseja excluir esse motorista?" class="d-inline" 
+            id="driver-delete" action="{% url 'tmsapp:fleetapp:driver_delete' object.pk %}" method="delete">
+            <button type="submit" class="btn btn-light-danger btn-sm shadow-md me-2">
+              <i class="ki-solid ki-trash fs-4"></i> Remover
+            </button>
+          </form>
+          {% endif %}
+          <button type="button" onclick="document.getElementById('driver-form').submit()"
+              class="btn btn-basic btn-sm shadow-md d-flex align-items-center">
+              <i class="ki-solid bi-plus-circle"></i> Salvar
+          </button>
+        </div>
+
+      </div>
+
+      <div class="card m-5">
+        <form id="driver-form" autocomplete="off" method="post"
+        action="{% if object %}
+                  {% url 'tmsapp:fleetapp:driver_update' object.pk %}
+                {% else %}
+                  {% url 'tmsapp:fleetapp:driver_create' %}
+                {% endif %}">
+       {% csrf_token %}
+        <!-- Nav de abas -->
+        <ul class="nav nav-tabs nav-line-tabs fw-semibold fs-5 px-3" role="tablist">
+          <li class="nav-item" role="presentation">
+            <a class="nav-link active" id="tab-details-tab" data-bs-toggle="tab" href="#tab-details" role="tab">
+              Detalhes
+            </a>
+          </li>
+          <li class="nav-item" role="presentation">
+            <a class="nav-link" id="tab-document-tab" data-bs-toggle="tab" href="#tab-document" role="tab">
+              Documentos
+            </a>
+          </li>
+          <li class="nav-item" role="presentation">
+            <a class="nav-link" id="tab-login-tab" data-bs-toggle="tab" href="#tab-login" role="tab">
+              Login e Acessos
+            </a>
+          </li>
+          <li class="nav-item" role="presentation">
+            <a class="nav-link" id="tab-security-tab" data-bs-toggle="tab" href="#tab-security" role="tab">
+              Segurança
+            </a>
+          </li>
+        </ul>
+
+        <div class="tab-content p-5">
+          <!-- Aba Detalhes -->
+          <div class="tab-pane fade show active" id="tab-details" role="tabpanel">
+            <div class="row gx-7 gy-5">
+              <div class="col-lg-6">
+                <div class="mb-5">
+                  <label for="id_first_name" class="form-label fw-semibold">Nome</label>
+                  <input
+                    type="text"
+                    name="first_name"
+                    id="id_first_name"
+                    required
+                    class="form-control form-control-solid form-control-sm {% if form.first_name.errors %}is-invalid{% endif %}"
+                    placeholder="Digite o nome"
+                    value="{{ form.first_name.value|default_if_none:'' }}"
+                  />
+                  {% for err in form.first_name.errors %}
+                  <div class="invalid-feedback">{{ err }}</div>
+                  {% endfor %}
+                </div>
+                <div class="mb-5">
+                  <label for="id_last_name" class="form-label fw-semibold">Sobrenome</label>
+                  <input
+                    type="text"
+                    name="last_name"
+                    id="id_last_name"
+                    required
+                    class="form-control form-control-solid form-control-sm {% if form.last_name.errors %}is-invalid{% endif %}"
+                    placeholder="Digite o sobrenome"
+                    value="{{ form.last_name.value|default_if_none:'' }}"
+                  />
+                  {% for err in form.last_name.errors %}
+                  <div class="invalid-feedback">{{ err }}</div>
+                  {% endfor %}
+                </div>
+                <div class="mb-5">
+                  <label for="id_license_number" class="form-label fw-semibold">Número da CNH</label>
+                  <input
+                    type="text"
+                    name="license_number"
+                    id="id_license_number"
+                    autocomplete="off"
+                    class="form-control form-control-solid form-control-sm {% if form.license_number.errors %}is-invalid{% endif %}"
+                    placeholder="00000000000"
+                    value="{{ form.license_number.value|default_if_none:'' }}"
+                  />
+                  {% for err in form.license_number.errors %}
+                  <div class="invalid-feedback">{{ err }}</div>
+                  {% endfor %}
+                </div>
+                <div class="mb-5">
+                  <label for="id_license_category" class="form-label fw-semibold">Categoria da CNH</label>
+                  <select
+                    name="license_category"
+                    id="id_license_category"
+                    class="form-select form-select-solid form-select-sm {% if form.license_category.errors %}is-invalid{% endif %}"
+                  >
+                    {% for code,label in form.fields.license_category.choices %}
+                      <option value="{{ code }}"
+                        {% if form.license_category.value == code %}selected{% endif %}>
+                        {{ label }}
+                      </option>
+                    {% endfor %}
+                  </select>
+                  {% for err in form.license_category.errors %}
+                  <div class="invalid-feedback">{{ err }}</div>
+                  {% endfor %}
+                </div>
+                <div class="mb-5">
+                  <label for="id_license_expiry" class="form-label fw-semibold">Validade da CNH</label>
+                  <input
+                    type="text"
+                    name="license_expiry"
+                    id="id_license_expiry"
+                    autocomplete="off"
+                    class="form-control form-control-solid form-control-sm flatpickr {% if form.license_expiry.errors %}is-invalid{% endif %}"
+                    placeholder="dd-mm-aaaa"
+                    value="{{ form.license_expiry.value|date:'d/m/Y' }}"
+                  />
+                  {% for err in form.license_expiry.errors %}
+                  <div class="invalid-feedback">{{ err }}</div>
+                  {% endfor %}
+                </div>
+              </div>
+
+              <div class="col-lg-6">
+                <div class="mb-5">
+                  <label for="id_phone" class="form-label fw-semibold">Telefone</label>
+                  <input
+                    type="tel"
+                    name="phone"
+                    id="id_phone"
+                    class="form-control form-control-solid form-control-sm {% if form.phone.errors %}is-invalid{% endif %}"
+                    placeholder="(00) 00000-0000"
+                    value="{{ form.phone.value|default_if_none:'' }}"
+                  />
+                  {% for err in form.phone.errors %}
+                  <div class="invalid-feedback">{{ err }}</div>
+                  {% endfor %}
+                </div>
+                <div class="mb-5">
+                  <label for="id_email" class="form-label fw-semibold">E-mail</label>
+                  <input
+                    type="email"
+                    name="email"
+                    id="id_email"
+                    class="form-control form-control-solid form-control-sm {% if form.email.errors %}is-invalid{% endif %}"
+                    placeholder="seu@exemplo.com"
+                    value="{{ form.email.value|default_if_none:'' }}"
+                  />
+                  {% for err in form.email.errors %}
+                  <div class="invalid-feedback">{{ err }}</div>
+                  {% endfor %}
+                </div>
+                <div class="form-check form-check-sm mb-5">
+                  <input
+                    class="form-check-input {% if form.is_active.errors %}is-invalid{% endif %}"
+                    type="checkbox"
+                    name="is_active"
+                    id="id_is_active"
+                    {% if form.is_active.value %}checked{% endif %}
+                  />
+                  <label class="form-check-label fw-semibold" for="id_is_active">Ativo</label>
+                  {% for err in form.is_active.errors %}
+                  <div class="invalid-feedback">{{ err }}</div>
+                  {% endfor %}
+                </div>
+                <div class="form-check form-check-sm mb-5">
+                  <input
+                    class="form-check-input {% if form.is_outsourced.errors %}is-invalid{% endif %}"
+                    type="checkbox"
+                    name="is_outsourced"
+                    id="id_is_outsourced"
+                    {% if form.is_outsourced.value %}checked{% endif %}
+                  />
+                  <label class="form-check-label fw-semibold" for="id_is_outsourced">Terceirizado</label>
+                  {% for err in form.is_outsourced.errors %}
+                  <div class="invalid-feedback">{{ err }}</div>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Aba Documentos (vazia por enquanto) -->
+          <div class="tab-pane fade" id="tab-document" role="tabpanel">
+            <!-- campos de Documentos -->
+          </div>
+
+          <!-- Aba Login e Acessos -->
+          <div class="tab-pane fade" id="tab-login" role="tabpanel">
+            <!-- campos de Login e Acessos -->
+          </div>
+
+          <!-- Aba Segurança -->
+          <div class="tab-pane fade" id="tab-security" role="tabpanel">
+            <!-- campos de Segurança -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // Flatpickr para data
+    Inputmask("99/99/9999").mask("#id_license_expiry");
+    // Máscara CNH (11 dígitos)
+    Inputmask({ mask: '9', repeat: 11, greedy: false }).mask('#id_license_number');
+
+    // Telefone (10 ou 11 dígitos BR)
+    Inputmask({ mask: ['(99) 9999-9999', '(99) 99999-9999'], keepStatic: true })
+      .mask('#id_phone');
+
+    // E-mail
+    Inputmask({ alias: 'email', clearIncomplete: true })
+      .mask('#id_email');
+  });
+</script>
+{% endblock %}

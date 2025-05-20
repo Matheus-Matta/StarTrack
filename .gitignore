@@ -1,0 +1,76 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+*.sqlite3
+*.log
+
+# Virtual env
+env/
+venv/
+.venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Django
+*.sqlite3
+*.db
+*.pot
+*.pyc
+*.pyo
+*.pyd
+*.py[cod]
+db.sqlite3
+/media
+/staticfiles/
+staticfiles/
+*.mo
+instance/
+.DS_Store
+
+# Local settings
+.env
+*.env
+
+# VSCode
+.vscode/
+.idea/
+
+# macOS
+.DS_Store
+
+# JetBrains
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Build
+dist/
+build/
+*.tgz
+
+# Tailwind / Webpack
+public/
+
+# Compiled CSS/JS from Tailwind or Webpack
+*.map
+
+# PostCSS cache
+.postcss-cache/
+
+# OS files
+Thumbs.db
+
+temp/
+demo3/

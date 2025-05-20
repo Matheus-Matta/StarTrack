@@ -1,0 +1,292 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{% if object %}Editar Veículo{% else %}Criar Veículo{% endif %}{% endblock %}
+
+{% block content %}
+{% include 'partials/nav/nav_fleet.html' %}
+
+<div class="bg-body-content m-0 border border-secondary rounded-bottom-4 border-top-0 flex-grow-1 overflow-auto"
+    style="min-height: 0;">
+    <div id="scrollable_content" class="p-4">
+
+        <!-- Breadcrumb + Ações -->
+        <div class="d-flex align-items-center justify-content-between mx-5 mb-3">
+            <ol class="breadcrumb text-muted fs-6 fw-semibold">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'tmsapp:fleetapp:dashboard' %}" class="text-dark text-hover-primary">Dashboard</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{% url 'tmsapp:fleetapp:vehicle_list' %}" class="text-dark text-hover-primary">Lista de
+                        Veículos</a>
+                </li>
+                <li class="breadcrumb-item text-muted">{% if object %}Editar{% else %}Novo{% endif %} Veículo</li>
+            </ol>
+            <div class="d-flex align-items-center">
+                {% if object %}
+                <form id="vehicle-deactivate" data-message="Tem certeza que deseja remover este veículo?"
+                    action="{% url 'tmsapp:fleetapp:vehicle_deactivate' object.pk %}" method="delete" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-light-danger btn-sm shadow-md me-2">
+                        <i class="ki-solid ki-trash fs-4"></i> Remover
+                    </button>
+                </form>
+                {% endif %}
+                <button type="button" onclick="document.getElementById('vehicle-form').submit()"
+                    class="btn btn-basic btn-sm shadow-md d-flex align-items-center">
+                    <i class="ki-solid bi-plus-circle"></i> Salvar
+                </button>
+            </div>
+        </div>
+        <div class="card m-5">
+            <form id="vehicle-form" autocomplete="off" method="post"
+                action="{% if object %}{% url 'tmsapp:fleetapp:vehicle_update' object.pk %}{% else %}{% url 'tmsapp:fleetapp:vehicle_create' %}{% endif %}">
+                {% csrf_token %}
+                <!-- Nav de abas -->
+                <ul class="nav nav-tabs nav-line-tabs fw-semibold fs-5 px-3" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link active" data-bs-toggle="tab" href="#tab-general">Geral</a>
+                    </li>
+                </ul>
+
+                <div class="tab-content p-5">
+                    <!-- Aba Detalhes -->
+                    <div class="tab-pane fade show active" id="tab-general" role="tabpanel">
+                        <div class="row gx-7 gy-5">
+                            <div class="col-lg-6">
+                                <div class="mb-5">
+                                    <label for="id_license_plate" class="form-label fw-semibold">Placa</label>
+                                    <input type="text" name="license_plate" id="id_license_plate" required
+                                        class="form-control form-control-solid form-control-sm {% if form.license_plate.errors %}is-invalid{% endif %}"
+                                        placeholder="ABC-1234" value="{{ form.license_plate.value|default_if_none:'' }}">
+                                    {% for err in form.license_plate.errors %}
+                                    <div class="invalid-feedback">{{ err }}</div>
+                                    {% endfor %}
+                                </div>
+                                <div class="mb-5">
+                                    <label for="id_brand" class="form-label fw-semibold">Marca</label>
+                                    <input type="text" name="brand" id="id_brand"
+                                        class="form-control form-control-solid form-control-sm {% if form.brand.errors %}is-invalid{% endif %}"
+                                        placeholder="Volvo" value="{{ form.brand.value|default_if_none:'' }}">
+                                    {% for err in form.brand.errors %}
+                                    <div class="invalid-feedback">{{ err }}</div>
+                                    {% endfor %}
+                                </div>
+                                <div class="mb-5">
+                                    <label for="id_model" class="form-label fw-semibold">Modelo</label>
+                                    <input type="text" name="model" id="id_model"
+                                        class="form-control form-control-solid form-control-sm {% if form.model.errors %}is-invalid{% endif %}"
+                                        placeholder="FH16" value="{{ form.model.value|default_if_none:'' }}">
+                                    {% for err in form.model.errors %}
+                                    <div class="invalid-feedback">{{ err }}</div>
+                                    {% endfor %}
+                                </div>
+                                <div class="mb-5">
+                                    <label for="id_year" class="form-label fw-semibold">Ano</label>
+                                    <input type="number" name="year" id="id_year" min="1900" max="2099" step="1"
+                                        placeholder="YYYY digite o ano do veiculo"
+                                        class="form-control form-control-solid form-control-sm {% if form.year.errors %}is-invalid{% endif %}"
+                                        value="{{ form.year.value|default_if_none:'' }}">
+                                    {% for err in form.year.errors %}
+                                    <div class="invalid-feedback">{{ err }}</div>
+                                    {% endfor %}
+                                </div>
+                                <div class="mb-5">
+                                    <label for="id_vehicle_type" class="form-label fw-semibold">Tipo de veículo</label>
+                                    <select
+                                      name="vehicle_type"
+                                      id="id_vehicle_type"
+                                      class="form-select form-select-solid form-select-sm {% if form.vehicle_type.errors %}is-invalid{% endif %}">
+                                      {% for code,label in form.fields.vehicle_type.choices %}
+                                        <option value="{{ code }}"
+                                          {% if form.vehicle_type.value == code %}selected{% endif %}>
+                                          {{ label }}
+                                        </option>
+                                      {% endfor %}
+                                    </select>
+                                    {% for err in form.vehicle_type.errors %}
+                                      <div class="invalid-feedback">{{ err }}</div>
+                                    {% endfor %}
+                                  </div>
+                                    <div class="mb-5">
+                                        <label for="id_capacity_volume" class="form-label fw-semibold">Volume (m³)</label>
+                                        <input type="text" inputmode="decimal" step="0.01" name="capacity_volume" id="id_capacity_volume" placeholder="0.0 digite a capacidade em metros cubicos da carga"
+                                            class="form-control form-control-solid form-control-sm {% if form.capacity_volume.errors %}is-invalid{% endif %}"
+                                            value="{{ form.capacity_volume.value|default_if_none:'' }}">
+                                        {% for err in form.capacity_volume.errors %}
+                                        <div class="invalid-feedback">{{ err }}</div>
+                                        {% endfor %}
+                                    </div>
+                                    <div class="mb-5">
+                                        <label for="id_capacity_weight" class="form-label fw-semibold">Peso (kg)</label>
+                                        <input type="text" inputmode="decimal" step="0.01" name="capacity_weight" id="id_capacity_weight" placeholder="0.0 digite a capacidade em kilos da carga"
+                                            class="form-control form-control-solid form-control-sm {% if form.capacity_weight.errors %}is-invalid{% endif %}"
+                                            value="{{ form.capacity_weight.value|default_if_none:'' }}">
+                                        {% for err in form.capacity_weight.errors %}
+                                        <div class="invalid-feedback">{{ err }}</div>
+                                        {% endfor %}
+                                    </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="mb-5">
+                                    <label for="id_status" class="form-label fw-semibold">Status</label>
+                                    <select
+                                      name="status"
+                                      id="id_status"
+                                      class="form-select form-select-solid form-select-sm {% if form.status.errors %}is-invalid{% endif %}">
+                                      {% for code,label in form.fields.status.choices %}
+                                        <option value="{{ code }}"
+                                          {% if form.status.value == code %}selected{% endif %}>
+                                          {{ label }}
+                                        </option>
+                                      {% endfor %}
+                                    </select>
+                                    {% for err in form.status.errors %}
+                                      <div class="invalid-feedback">{{ err }}</div>
+                                    {% endfor %}
+                                  </div>
+                                <div class="form-check form-check-sm mb-5">
+                                    <input
+                                    class="form-check-input {% if form.is_active.errors %}is-invalid{% endif %}"
+                                    type="checkbox"
+                                    name="is_outsourced" 
+                                    id="id_is_outsourced" 
+                                    {% if form.is_outsourced.value %}checked{% endif %}>
+                                    <label class="form-check-label fw-semibold" for="id_is_outsourced">Terceirizado</label>
+                                    {% for err in form.is_outsourced.errors %}
+                                    <div class="invalid-feedback">{{ err }}</div>
+                                    {% endfor %}
+                                </div>
+                                <div id="form_carrier" class="mb-5 {% if not form.is_outsourced.value %}hidden{% endif %}">
+                                    <label for="id_carrier" class="form-label fw-semibold">Transportadora</label>
+                                    <select
+                                      name="carrier"
+                                      id="id_carrier"
+                                      class="form-select form-select-solid form-select-sm {% if form.carrier.errors %}is-invalid{% endif %}">
+                                      {% for obj in form.fields.carrier.queryset %}
+                                        <option value="{{ obj.pk }}"
+                                          {% if form.carrier.value|stringformat:"s" == obj.pk|stringformat:"s" %}selected{% endif %}>
+                                          {{ obj }}
+                                        </option>
+                                      {% endfor %}
+                                    </select>
+                                    {% for err in form.carrier.errors %}
+                                      <div class="invalid-feedback">{{ err }}</div>
+                                    {% endfor %}
+                                </div>
+                                <div class="mb-5">
+                                    <label for="id_driver" class="form-label fw-semibold">Motorista</label>
+                                    <select
+                                      name="driver"
+                                      id="id_driver"
+                                      class="form-select form-select-solid form-select-sm {% if form.driver.errors %}is-invalid{% endif %}">
+                                      {% for obj in form.fields.driver.queryset %}
+                                        <option value="{{ obj.pk }}"
+                                          {% if form.driver.value|stringformat:"s" == obj.pk|stringformat:"s" %}selected{% endif %}>
+                                          {{ obj.first_name }} {{ obj.last_name }}
+                                        </option>
+                                      {% endfor %}
+                                    </select>
+                                    {% for err in form.driver.errors %}
+                                      <div class="invalid-feedback">{{ err }}</div>
+                                    {% endfor %}
+                                </div>
+                                <div class="mb-5">
+                                <label for="id_route_area" class="form-label fw-semibold">Área de Rota</label>
+                                <select
+                                    name="route_area"
+                                    id="id_route_area"
+                                    class="form-select form-select-solid form-select-sm {% if form.route_area.errors %}is-invalid{% endif %}"
+                                >
+                                    <option value="">---</option>
+                                    {% for ra in form.fields.route_area.queryset %}
+                                    <option value="{{ ra.pk }}"
+                                        {% if form.route_area.value|stringformat:"s" == ra.pk|stringformat:"s" %}selected{% endif %}
+                                    >
+                                        {{ ra.name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                                {% for err in form.route_area.errors %}
+                                    <div class="invalid-feedback">{{ err }}</div>
+                                {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Mascaras (Inputmask)
+        Inputmask({
+        mask: "*{3}-*{4}",
+        placeholder: "",
+        definitions: {
+            '*': {
+            validator: "[0-9A-Za-z]",
+            cardinality: 1
+            }
+        }
+        }).mask("#id_license_plate");
+
+        Inputmask("9999").mask("#id_year");
+          
+        const decimalOpts = {
+        alias: 'decimal',
+        radixPoint: '.',     // ponto como separador
+        groupSeparator: '',   // sem separador de milhares
+        digits: 2,            // sempre 2 casas
+        digitsOptional: false,
+        placeholder: '0.00',
+        autoGroup: false,
+        rightAlign: false,
+
+        // converte vírgula → ponto antes de mostrar (carga inicial e re-render)
+        onBeforeMask(value) {
+        return typeof value === 'string' ? value.replace(/,/g, '.') : value;
+        },
+
+        // converte vírgula → ponto a cada tecla
+        onBeforeWrite(event, buffer, caretPos) {
+        const newBuffer = buffer.map(ch => (ch === ',' ? '.' : ch));
+        return { buffer: newBuffer, caret: caretPos };
+        },
+
+        // remove tudo que não for dígito+radixPoint antes do submit
+        removeMaskOnSubmit: true,
+       };
+
+    Inputmask(decimalOpts).mask('#id_capacity_volume');
+    Inputmask(decimalOpts).mask('#id_capacity_weight');
+
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const chk = document.getElementById('id_is_outsourced');
+        const carrier = document.getElementById('form_carrier');
+
+        function toggleCarrier() {
+            if (chk.checked) {
+                carrier.classList.remove('hidden');
+            } else {
+                carrier.classList.add('hidden');
+                const sel = carrier.querySelector('select');
+                if (sel) sel.value = ''
+            }
+        }
+
+        // inicializa
+        toggleCarrier();
+        // escuta alteração
+        chk.addEventListener('change', toggleCarrier);
+    });
+</script>
+{% endblock %}

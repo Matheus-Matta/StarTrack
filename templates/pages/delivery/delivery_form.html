@@ -1,0 +1,256 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{% if object %}Editar Entrega{% else %}Criar Entrega{% endif %}{% endblock %}
+
+{% block content %}
+{% include 'partials/nav/nav_delivery.html' %}
+
+<div class="bg-body-content m-0 border border-secondary rounded-bottom-4 border-top-0 flex-grow-1 overflow-auto"
+     style="min-height: 0;">
+  <div id="scrollable_content" class="p-4">
+
+    <div class="d-flex align-items-center justify-content-between mx-5 mb-3">
+      <ol class="breadcrumb text-muted fs-6 fw-semibold">
+        <li class="breadcrumb-item">
+          <a href="#" class="text-dark text-hover-primary">Dashboard</a>
+        </li>
+        <li class="breadcrumb-item">
+          <a href="{% url 'tmsapp:scriptapp:delivery_list' %}" class="text-dark text-hover-primary">Lista de Entregas</a>
+        </li>
+        <li class="breadcrumb-item text-muted">{% if object %}Editar{% else %}Nova{% endif %} Entrega</li>
+      </ol>
+      <div class="d-flex align-items-center">
+        {% if object %}
+        <form id="delivery-delete"
+              data-message="Tem certeza que deseja excluir esta entrega?"
+              action="{% url 'tmsapp:scriptapp:delivery_cancel' object.pk %}"
+              method="post"
+              class="d-inline">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-light-danger btn-sm shadow-md me-2">
+            <i class="ki-solid ki-trash fs-4"></i> Remover
+          </button>
+        </form>
+        {% endif %}
+        <button type="button"
+                onclick="document.getElementById('delivery-form').submit()"
+                class="btn btn-basic btn-sm shadow-md d-flex align-items-center">
+          <i class="ki-solid bi-plus-circle fs-4 me-1"></i> Salvar
+        </button>
+      </div>
+    </div>
+
+    <div class="card m-5">
+      <form id="delivery-form"
+            method="post"
+            autocomplete="off"
+            action="{% if object %}
+                      {% url 'tmsapp:scriptapp:delivery_update' object.pk %}
+                    {% else %}
+                      {% url 'tmsapp:scriptapp:delivery_create' %}
+                    {% endif %}">
+        {% csrf_token %}
+
+        <!-- Nav de abas -->
+        <ul class="nav nav-tabs nav-line-tabs fw-semibold fs-5 px-3" role="tablist">
+          <li class="nav-item" role="presentation">
+            <a class="nav-link active"
+               data-bs-toggle="tab"
+               href="#tab-details"
+               role="tab">Detalhes</a>
+          </li>
+          <li class="nav-item" role="presentation">
+            <a class="nav-link"
+               data-bs-toggle="tab"
+               href="#tab-observation"
+               role="tab">Observação</a>
+          </li>
+        </ul>
+
+        <div class="tab-content p-5">
+          <!-- Aba Detalhes -->
+          <div class="tab-pane fade show active" id="tab-details" role="tabpanel">
+            <div class="row gx-7 gy-5">
+              <div class="col-lg-6">
+                <div class="mb-5">
+                  <label for="id_customer_name" class="form-label fw-semibold">Nome do Cliente</label>
+                  <input type="text"
+                         name="customer_name"
+                         id="id_customer_name"
+                         required
+                         class="form-control form-control-solid form-control-sm {% if form.customer_name.errors %}is-invalid{% endif %}"
+                         placeholder="Nome do cliente"
+                         value="{{ form.customer_name.value|default_if_none:'' }}">
+                  {% for err in form.customer_name.errors %}
+                  <div class="invalid-feedback">{{ err }}</div>
+                  {% endfor %}
+                </div>
+
+                <div class="mb-5">
+                  <label for="id_order_number" class="form-label fw-semibold">Número do Pedido</label>
+                  <input type="text"
+                         name="order_number"
+                         id="id_order_number"
+                         class="form-control form-control-solid form-control-sm {% if form.order_number.errors %}is-invalid{% endif %}"
+                         placeholder="00012345"
+                         value="{{ form.order_number.value|default_if_none:'' }}">
+                  {% for err in form.order_number.errors %}
+                  <div class="invalid-feedback">{{ err }}</div>
+                  {% endfor %}
+                </div>
+
+                <div class="mb-5">
+                  <label for="id_street" class="form-label fw-semibold">Rua</label>
+                  <input type="text"
+                         name="street"
+                         id="id_street"
+                         class="form-control form-control-solid form-control-sm {% if form.street.errors %}is-invalid{% endif %}"
+                         placeholder="Rua Exemplo"
+                         value="{{ form.street.value|default_if_none:'' }}">
+                  {% for err in form.street.errors %}
+                  <div class="invalid-feedback">{{ err }}</div>
+                  {% endfor %}
+                </div>
+
+                <div class="mb-5">
+                  <label for="id_number" class="form-label fw-semibold">Número</label>
+                  <input type="text"
+                         name="number"
+                         id="id_number"
+                         class="form-control form-control-solid form-control-sm {% if form.number.errors %}is-invalid{% endif %}"
+                         placeholder="123"
+                         value="{{ form.number.value|default_if_none:'' }}">
+                  {% for err in form.number.errors %}
+                  <div class="invalid-feedback">{{ err }}</div>
+                  {% endfor %}
+                </div>
+
+                <div class="mb-5">
+                  <label for="id_neighborhood" class="form-label fw-semibold">Bairro</label>
+                  <input type="text"
+                         name="neighborhood"
+                         id="id_neighborhood"
+                         class="form-control form-control-solid form-control-sm {% if form.neighborhood.errors %}is-invalid{% endif %}"
+                         placeholder="Centro"
+                         value="{{ form.neighborhood.value|default_if_none:'' }}">
+                  {% for err in form.neighborhood.errors %}
+                  <div class="invalid-feedback">{{ err }}</div>
+                  {% endfor %}
+                </div>
+              </div>
+
+              <div class="col-lg-6">
+                <div class="mb-5">
+                  <label for="id_city" class="form-label fw-semibold">Município</label>
+                  <input type="text"
+                         name="city"
+                         id="id_city"
+                         class="form-control form-control-solid form-control-sm {% if form.city.errors %}is-invalid{% endif %}"
+                         placeholder="São Paulo"
+                         value="{{ form.city.value|default_if_none:'' }}">
+                  {% for err in form.city.errors %}
+                  <div class="invalid-feedback">{{ err }}</div>
+                  {% endfor %}
+                </div>
+
+                <div class="mb-5">
+                  <label for="id_state" class="form-label fw-semibold">Estado</label>
+                  <input type="text"
+                         name="state"
+                         id="id_state"
+                         class="form-control form-control-solid form-control-sm {% if form.state.errors %}is-invalid{% endif %}"
+                         placeholder="SP"
+                         value="{{ form.state.value|default_if_none:'' }}">
+                  {% for err in form.state.errors %}
+                  <div class="invalid-feedback">{{ err }}</div>
+                  {% endfor %}
+                </div>
+
+                <div class="mb-5">
+                  <label for="id_postal_code" class="form-label fw-semibold">CEP</label>
+                  <input type="text"
+                         name="postal_code"
+                         id="id_postal_code"
+                         class="form-control form-control-solid form-control-sm {% if form.postal_code.errors %}is-invalid{% endif %}"
+                         placeholder="00000-000"
+                         value="{{ form.postal_code.value|default_if_none:'' }}">
+                  {% for err in form.postal_code.errors %}
+                  <div class="invalid-feedback">{{ err }}</div>
+                  {% endfor %}
+                </div>
+
+                <div class="mb-5">
+                  <label for="id_phone" class="form-label fw-semibold">Telefone</label>
+                  <input type="tel"
+                         name="phone"
+                         id="id_phone"
+                         class="form-control form-control-solid form-control-sm {% if form.phone.errors %}is-invalid{% endif %}"
+                         placeholder="(00) 00000-0000"
+                         value="{{ form.phone.value|default_if_none:'' }}">
+                  {% for err in form.phone.errors %}
+                  <div class="invalid-feedback">{{ err }}</div>
+                  {% endfor %}
+                </div>
+
+                <div class="mb-5">
+                  <label for="id_cpf" class="form-label fw-semibold">CPF</label>
+                  <input type="text"
+                         name="cpf"
+                         id="id_cpf"
+                         class="form-control form-control-solid form-control-sm {% if form.cpf.errors %}is-invalid{% endif %}"
+                         placeholder="000.000.000-00"
+                         value="{{ form.cpf.value|default_if_none:'' }}">
+                  {% for err in form.cpf.errors %}
+                  <div class="invalid-feedback">{{ err }}</div>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Aba Observação -->
+          <div class="tab-pane fade" id="tab-observation" role="tabpanel">
+            <div class="mb-5">
+              <label for="id_observation" class="form-label fw-semibold">Observação</label>
+              <textarea name="observation"
+                        id="id_observation"
+                        rows="4"
+                        class="form-control form-control-solid form-control-sm {% if form.observation.errors %}is-invalid{% endif %}"
+                        placeholder="Alguma observação…">{{ form.observation.value|default_if_none:'' }}</textarea>
+              {% for err in form.observation.errors %}
+              <div class="invalid-feedback">{{ err }}</div>
+              {% endfor %}
+            </div>
+
+            <div class="mb-5">
+              <label for="id_reference" class="form-label fw-semibold">Ponto de Referência</label>
+              <input type="text"
+                     name="reference"
+                     id="id_reference"
+                     class="form-control form-control-solid form-control-sm {% if form.reference.errors %}is-invalid{% endif %}"
+                     placeholder="Ex.: Entrada lateral"
+                     value="{{ form.reference.value|default_if_none:'' }}">
+              {% for err in form.reference.errors %}
+              <div class="invalid-feedback">{{ err }}</div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // Máscaras básicas
+    Inputmask("99999-999").mask("#id_postal_code");
+    Inputmask({ mask: ["(99) 9999-9999", "(99) 99999-9999"], keepStatic: true }).mask("#id_phone");
+    Inputmask("999.999.999-99").mask("#id_cpf");
+  });
+</script>
+{% endblock %}

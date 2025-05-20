@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Criando Rotas...{% endblock %}
+
+{% block content %}
+<!-- Navbar -->
+<div class="flex items-stretch lg:fixed z-5 top-[--tw-header-height] start-[--tw-sidebar-width] end-5 h-[--tw-navbar-height] mx-5 lg:mx-0 bg-[--tw-page-bg] dark:bg-[--tw-page-bg-dark]"
+    id="navbar">
+    <div
+        class="rounded-t-xl border border-gray-400 dark:border-gray-200 border-b-gray-300 dark:border-b-gray-200 bg-[--tw-content-bg] dark:bg-[--tw-content-bg-dark] flex items-stretch grow">
+        <!-- Container -->
+        <div class="container-fluid flex justify-between items-stretch gap-5">
+            <div class="grid items-stretch">
+                <div class="scrollable-x-auto flex items-stretch">
+                    <div class="menu gap-5 lg:gap-7.5" data-menu="true">
+                        <div class="menu-item border-b-2 border-b-transparent menu-item-active:border-b-gray-900 menu-item-here:border-b-gray-900"
+                            data-menu-item-placement="bottom-start" data-menu-item-placement-rtl="bottom-end"
+                            data-menu-item-toggle="dropdown" data-menu-item-trigger="click|lg:hover">
+                            <a
+                                class="menu-link text-primary border-b-2 border-primary"
+                                tabindex="0">
+                                <span id="currentMenuTitle"
+                                    class="menu-title text-nowrap text-sm text-gray-800 menu-item-active:text-gray-900 menu-item-active:font-medium menu-item-here:text-gray-900 menu-item-here:font-medium menu-item-show:text-gray-900 menu-link-hover:text-gray-900">
+                                </span>
+                                Carregando...
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End of Container -->
+    </div>
+</div>
+<!-- End of Navbar -->
+<div
+    class="flex grow rounded-b-xl bg-[--tw-content-bg] dark:bg-[--tw-content-bg-dark] border-x border-b border-gray-400 dark:border-gray-200 lg:mt-[--tw-navbar-height] mx-5 lg:ms-[--tw-sidebar-width] mb-5">
+    <div class="flex flex-col grow lg:scrollable-y lg:[scrollbar-width:auto] lg:light:[--tw-scrollbar-thumb-color:var(--tw-content-scrollbar-color)] pt-7 lg:[&_.container-fluid]:pe-4"
+        id="scrollable_content">
+        <main  class="grow pb-7" role="content">
+            <!-- Container -->
+            <div style="height: 90%;" class="container-fluid flex justify-center" >
+                <div class="grid gap-5 lg:gap-7.5">
+                    <div class="flex flex-col justify-center items-center">
+                       
+                        <!-- Animação de map -->
+                        <img 
+                            src="{% static 'assets/media/gif/map-light.gif' %}" 
+                            alt="Logística Light" 
+                            width="30%" 
+                            class="block dark:hidden w-24 md:w-32"
+                        >
+
+                        <!-- GIF para modo escuro -->
+                        <img 
+                            src="{% static 'assets/media/gif/map-dark.gif' %}" 
+                            alt="Logística Dark"
+                            width="30%" 
+                            class="hidden dark:block w-24 md:w-32"
+                        >
+                         
+                        <!-- Mensagem -->
+                        <h2 id="status-message" class="text-lg font-semibold text-gray-700 dark:text-gray-700 text-center mb-3">
+                            Inicializando roteirização...
+                        </h2>
+                    
+                        <!-- Barra de Progresso Bonita -->
+                        <div class="w-full max-w-md">
+                            <div class="bg-gray-100 rounded-full h-6 overflow-hidden shadow-inner shadow-dark-inner">
+                                <div style="width: 3%;" id="progress-bar-fill" class="bg-primary h-full text-white text-center text-2xs font-bold leading-6 rounded-full transition-all duration-700 ease-in-out">
+                                    3%
+                                </div>
+                            </div>
+                        </div>
+                    
+                    </div>
+                </div>
+            </div>
+            <!-- End of Container -->
+        </main>
+    </div>
+</div>
+<!-- End of Main -->
+
+{% endblock %}
+
+{% block script %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const taskId = "{{ task_id }}";
+        const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+        const wsUrl = `${wsProtocol}://${window.location.host}/ws/tasks/${taskId}/`;
+
+        let socket;
+        let reconnectAttempts = 0;
+
+        function connectWebSocket() {
+            socket = new WebSocket(wsUrl);
+
+            socket.onopen = function () {
+                console.log('✅ WebSocket conectado.');
+                reconnectAttempts = 0;
+            };
+
+            socket.onmessage = function (e) {
+                const data = JSON.parse(e.data);
+                console.log('📩 Progresso recebido:', data);
+
+                document.querySelector('#status-message').innerText = data.progress;
+                document.querySelector('#progress-bar-fill').style.width = `${data.percent}%`;
+                document.querySelector('#progress-bar-fill').innerText = `${data.percent}%`;
+
+                if (parseInt(data.percent) === 100 && data.composition_id) {
+                    console.log('✅ Task finalizada, redirecionando...');
+                    setTimeout(function () {
+                        window.location.href = `/tms/app/scripting/explore/${data.composition_id}/`;
+                    }, 1000);
+                }
+            };
+
+            socket.onerror = function (e) {
+                console.error('❌ Erro no WebSocket:', e);
+                socket.close(); // força o fechamento para reconectar
+            };
+
+            socket.onclose = function (e) {
+                console.warn('⚠️ WebSocket desconectado. Tentando reconectar...');
+                setTimeout(connectWebSocket, 2000);
+            };
+        }
+
+        connectWebSocket();
+    });
+</script>
+{% endblock %}

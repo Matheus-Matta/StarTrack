@@ -1,0 +1,147 @@
+<div id="datatable-wrapper"
+     data-url="{% url 'tmsapp:scriptapp:route_compositions_data' %}"
+     class="card h-100 w-100"
+     style="min-height:440px;">
+
+  <!-- Card header with search -->
+  <div class="card-header d-flex align-items-center justify-content-between py-3">
+    <h3 class="card-title m-0">Composições</h3>
+    <div class="input-group input-group-sm w-200px">
+      <span class="input-group-text bg-body border-0">
+        <i class="ki-solid ki-magnifier fs-3"></i>
+      </span>
+      <input
+        type="text"
+        id="datatable_search"
+        class="form-control form-control-solid"
+        placeholder="Procurar composições"
+      />
+    </div>
+  </div>
+
+  <!-- Card body with table -->
+  <div class="card-body p-0">
+    <div class="table-responsive" style="max-height:360px; overflow:auto;">
+      <table class="table table-rounded table-row-dashed gy-3 align-middle m-0"
+             data-datatable-table="true">
+        <thead class="sticky-top bg-body">
+          <tr class="fw-semibold text-muted">
+            <th data-datatable-column="id" class="min-w-50px">
+              ID <span class="sort-icon"></span>
+            </th>
+            <th data-datatable-column="name" class="min-w-200px">
+              Nome <span class="sort-icon"></span>
+            </th>
+            <th data-datatable-column="type" class="min-w-125px">
+              Tipo <span class="sort-icon"></span>
+            </th>
+            <th class="min-w-125px">
+              Total de entregas
+            </th>
+            <th class="min-w-125px">
+              Duração
+            </th>
+          </tr>
+        </thead>
+        <tbody id="datatable-body">
+          {# conteúdo via JS #}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Card footer with size selector & pagination info -->
+  <div class="card-footer d-flex flex-column flex-sm-row align-items-center justify-content-between py-3">
+    <div class="d-flex align-items-center gap-2">
+      <span class="fs-7">Mostrar</span>
+      <select id="datatable_size" class="form-select form-select-sm w-75px">
+        <option value="5" selected>5</option>
+        <option value="10">10</option>
+        <option value="25">25</option>
+      </select>
+      <span class="fs-7">por página</span>
+    </div>
+    <div class="d-flex align-items-center gap-4 mt-3 mt-sm-0">
+      <span id="datatable_info" class="fs-7 text-muted"></span>
+      <nav>
+        <ul id="datatable-pagination" class="pagination pagination-sm pagination-rounded mb-0"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  let currentPage = 1, pageSize = 5, currentSearch = '',
+      currentOrderBy = 'id', currentOrderDir = 'desc';
+
+  function loadPage(page = 1) {
+    currentPage = page;
+    fetchData();
+  }
+
+  function changePageSize(size) {
+    pageSize = size;
+    currentPage = 1;
+    fetchData();
+  }
+
+  function searchCompositions(term) {
+    currentSearch = term;
+    currentPage = 1;
+    fetchData();
+  }
+
+  function fetchData() {
+    const wrapper = document.getElementById('datatable-wrapper');
+    const urlBase = wrapper.dataset.url;
+    const url = `${urlBase}?page=${currentPage}&size=${pageSize}&search=${encodeURIComponent(currentSearch)}&order_by=${currentOrderBy}&order_dir=${currentOrderDir}`;
+
+    document.getElementById('datatable-body').innerHTML = `
+      <tr><td colspan="5" class="text-center py-4">
+        <i class="ki-solid ki-spinner ki-spin fs-2 text-muted"></i>
+      </td></tr>`;
+
+    fetch(url)
+      .then(r => r.json())
+      .then(data => {
+        document.getElementById('datatable-body').innerHTML = data.table_html;
+        document.getElementById('datatable-info').innerText = data.info_text;
+        document.getElementById('datatable-pagination').innerHTML = data.pagination_html;
+      })
+      .catch(() => {
+        document.getElementById('datatable-body').innerHTML = `
+          <tr><td colspan="5" class="text-danger text-center py-4">
+            Erro ao carregar dados.
+          </td></tr>`;
+      });
+  }
+
+  document.getElementById('datatable_size')
+    .addEventListener('change', e => changePageSize(e.target.value));
+
+  const debounce = (fn, delay) => {
+    let t;
+    return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), delay); };
+  };
+
+  document.getElementById('datatable_search')
+    .addEventListener('input', debounce(e => searchCompositions(e.target.value), 300));
+
+  document.querySelectorAll('th[data-datatable-column]').forEach(th => {
+    th.addEventListener('click', () => {
+      const col = th.dataset.datatableColumn;
+      if (currentOrderBy === col) {
+        currentOrderDir = currentOrderDir === 'asc' ? 'desc' : 'asc';
+      } else {
+        currentOrderBy = col;
+        currentOrderDir = 'asc';
+      }
+      fetchData();
+    });
+  });
+
+  window.loadPage = loadPage;
+  fetchData();
+});
+</script>

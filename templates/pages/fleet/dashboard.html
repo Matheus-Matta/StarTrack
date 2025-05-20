@@ -1,0 +1,270 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Painel da Frota{% endblock %}
+
+{% block content %}
+{% include 'partials/nav/nav_fleet.html' %}
+<div class="bg-body-content m-0 border border-secondary rounded-bottom-4 border-top-0 flex-grow-1 overflow-auto"
+    style="min-height: 0;">
+    <div id="scrollable_content" class="p-4">
+        <main role="content" class="row g-5">
+
+            {# === 4 Cartões de Métricas (4 cols × 1 row) === #}
+            <div class="col-12 row p-0 m-0 gy-5">
+                <div class="col-lg-3">
+                    <div class="card p-4">
+                        <h5 class="text-primary mb-2">Veiculos em transito</h5>
+                        <div class="fs-2 fw-bold">{{ routes.in_transit.count|default:0 }}</div>
+                        <span class="text-muted">Veiculos em rota de entrega no momento</span>
+                    </div>
+                </div>
+                <div class="col-lg-3">
+                    <div class="card p-4">
+                        <h5 class="text-warning mb-2">Motoristas</h5>
+                        <div class="fs-2 fw-bold">{{ frota.drivers.count|default:0 }}</div>
+                        <span class="text-muted">Motoristas ativos no momento</span>
+                    </div>
+                </div>
+                <div class="col-lg-3">
+                    <div class="card p-4">
+                        <h5 class="text-info mb-2">Veículos</h5>
+                        <div class="fs-2 fw-bold">{{ frota.vehicles.count|default:0 }}</div>
+                        <span class="text-muted">Veiculos ativos no momento</span>
+                    </div>
+                </div>
+                <div class="col-lg-3">
+                    <div class="card p-4">
+                        <h5 class="text-success mb-2">Transportadoras</h5>
+                        <div class="fs-2 fw-bold">{{ frota.carriers.count|default:0 }}</div>
+                        <span class="text-muted">Transportadoras ativas no momento</span>
+                    </div>
+                </div>
+            </div>
+
+            {# === Gráfico (4 cols × 2 rows) === #}
+            <div class="col-12">
+                <div class="card p-4 mb-5">
+                    <h4 class="fw-semibold mb-3">Visão Geral da Frota</h4>
+                    <canvas id="frotaChart" style="width:100%; height:300px;"></canvas>
+                </div>
+            </div>
+
+            {# === Tabela de Motoristas (2 cols) === #}
+            <div class="col-lg-6">
+                <div class="card p-4">
+                    <div class="d-grid" style="grid-column: 1 / -1;">
+                        <div id="my-drivers-table" class="px-5" data-url="{% url 'djangotables' %}" data-model="driver">
+                            {# Tabela responsiva #}
+                            <h3 class="fw-semibold py-2">Motoristas</h3>
+                            <div class="table-responsive mb-3"
+                                style="min-height: 280px; max-height: 280px; overflow:auto;">
+                                <table class="table table-rounded border-separate p-0 m-0 align-middle m-0"
+                                    data-datatable-table="true">
+                                    <thead class="fw-bolder sticky-top bg-gray-100 pb-2">
+                                        <tr class="fw-semibold text-muted">
+                                            <th data-field="id,first_name,last_name" class="ps-5 py-2 text-hover-dark">Nome
+                                            </th>
+                                            <th data-field="phone" class="py-2 text-hover-dark">Telefone</th>
+                                            <th data-field="email" class="py-2 text-hover-dark">E-mail</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="datatable-body">
+
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="d-flex justify-content-between pt-2 align-items-center mh-35px min-h-35px">
+                                <div class="">
+                                    <a href="{% url 'tmsapp:fleetapp:driver_list' %}"
+                                        class="btn btn-light btn-sm me-2"><i class="fa fa-list"></i>Lista completa</a>
+                                    <a href="{% url 'tmsapp:fleetapp:driver_create' %}"
+                                        class="btn btn-light btn-sm me-2"><i class="fa bi-plus-circle"></i>Adicionar</a>
+                                </div>
+                                <nav>
+                                    <ul id="datatable-pagination" data-pagination
+                                        class="pagination pagination-sm pagination-rounded mb-0"></ul>
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            {# === Tabela de Veículos (2 cols) === #}
+            <div class="col-lg-6">
+                <div class="card p-4">
+                    <div id="my-vehicles-table" class="px-5" data-url="{% url 'djangotables' %}" data-model="vehicle">
+                        <h3 class="fw-semibold py-2">Veículos</h3>
+                        <div class="table-responsive mb-3" style="min-height:280px; max-height:280px; overflow:auto;">
+                            <table class="table table-rounded border-separate p-0 m-0 align-middle"
+                                data-datatable-table="true">
+                                <thead class="fw-bolder sticky-top bg-gray-100 pb-2">
+                                    <tr class="fw-semibold text-muted">
+                                        <th data-field="id,license_plate" class="py-2 ps-5 text-hover-dark">Placa</th>
+                                        <th data-field="vehicle_type" class="py-2 text-hover-dark">Tipo</th>
+                                        <th data-field="driver" class="py-2 text-hover-dark">Motorista</th>
+                                        <th data-field="is_outsourced" class="py-2 text-hover-dark">Terceirizado</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="datatable-body"></tbody>
+                            </table>
+                        </div>
+                        <!-- Footer -->
+                        <div class="d-flex justify-content-between pt-2 align-items-center mh-35px min-h-35px">
+                            <div class="">
+                                <a href="{% url 'tmsapp:fleetapp:vehicle_list' %}" class="btn btn-light btn-sm me-2"><i
+                                        class="fa fa-list"></i>Lista completa</a>
+                                <a href="{% url 'tmsapp:fleetapp:vehicle_create' %}"
+                                    class="btn btn-light btn-sm me-2"><i class="fa bi-plus-circle"></i>Adicionar</a>
+                            </div>
+                            <nav>
+                                <ul id="datatable-pagination" data-pagination
+                                    class="pagination pagination-sm pagination-rounded mb-0"></ul>
+                            </nav>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const labels     = {{ chart.labels|safe }};
+      const volumeData = {{ chart.volume_data|safe }};
+      const weightData = {{ chart.weight_data|safe }};
+      
+      // calcula as médias
+      const meanVol = volumeData.reduce((sum, v) => sum + v, 0) / volumeData.length;
+      const meanWgt = weightData.reduce((sum, v) => sum + v, 0) / weightData.length;
+  
+      const ctx = document.getElementById('frotaChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [
+            {
+              label: 'Volume (m³)',
+              data: volumeData,
+              backgroundColor: '#198754',
+              borderWidth: 1
+            },
+            {
+              label: 'Peso (kg)',
+              data: weightData,
+              backgroundColor: '#0dcaf0',
+              borderWidth: 1
+            }
+          ]
+        },
+        options: {
+          indexAxis: 'y',    // barras horizontais
+          scales: {
+            x: {
+              beginAtZero: true,
+              max: 100,
+              title: { display: true, text: 'Capacidade' }
+            },
+            y: {
+              title: { display: true, text: 'Veículos' }
+            }
+          },
+          plugins: {
+            legend: { position: 'top' },
+            annotation: {
+              annotations: {
+                // linha média de volume
+                meanVolLine: {
+                  type: 'line',
+                  xMin: meanVol,
+                  xMax: meanVol,
+                  borderColor: '#198754',
+                  borderWidth: 2,
+                  borderDash: [4, 4],
+                  label: {
+                    enabled: true,
+                    position: 'start',
+                    backgroundColor: '#198754',
+                    color: '#fff'
+                  }
+                },
+                // linha média de peso
+                meanWgtLine: {
+                  type: 'line',
+                  xMin: meanWgt,
+                  xMax: meanWgt,
+                  borderColor: '#0dcaf0',
+                  borderWidth: 2,
+                  borderDash: [4, 4],
+                  label: {
+                    enabled: true,
+                    position: 'start',
+
+                    backgroundColor: '#0dcaf0',
+                    color: '#fff'
+                  }
+                }
+              }
+            }
+          }
+        }
+      });
+    });
+  </script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const wrapper = document.getElementById('my-drivers-table');
+        window.DT = new DjangoDataTable({
+            root: document.getElementById('my-drivers-table'),
+            pageSize: 5,
+            cellClassName: 'px-2 py-1 text-sm',
+            rowRenderer: row => {
+                // Exemplo de linha customizada:
+                const url = `/tms/fleet/driver/${row.id}/update/`;
+                return `
+                    <tr
+                    class="cursor-pointer bg-hover-light border-1 border-bottom border-gray-200"
+                    onclick="window.location='${url}'"
+                    >
+                    <td class="text-gray-900 ps-5">${row.first_name} ${row.last_name}</td>
+                    <td class="text-gray-700">${row.phone}</td>
+                    <td class="text-gray-700">${row.email}</td>
+                    </tr>
+                `;
+            }
+        });
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        window.DT = new DjangoDataTable({
+            root: document.getElementById('my-vehicles-table'),
+            pageSize: 2,
+            cellClassName: 'px-2 py-1 text-sm',
+            rowRenderer: row => {
+                // Exemplo de linha customizada:
+                const url = `/tms/fleet/vehicle/${row.id}/update/`;
+                const driverUrl = `/tms/fleet/driver/${row.driver.id}/update/`;
+                const type = row.vehicle_type === 'driving-car' ? 'Carro' : 'Caminhão/Veículo pesado';
+                return `
+                <tr onclick="window.location='${url}'" 
+                    class="cursor-pointer bg-hover-light border-1 border-bottom border-gray-200">
+                    <td class="text-gray-900 ps-5">${row.license_plate}</td>
+                    <td class="text-gray-700">${type}</td>
+                    <td class="text-gray-700">${row.driver.label}</td>
+                    <td class="text-gray-700">${row.is_outsourced ? 'Sim' : 'Não'}</td>
+                </tr>`;
+            }
+        });
+    });
+</script>
+{% endblock %}

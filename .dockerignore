@@ -1,0 +1,61 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+
+# Django files
+*.sqlite3
+*.db
+db.sqlite3
+/media/
+*.pot
+*.mo
+*.log
+
+# Env & config
+.env
+*.env
+
+# Virtual environments
+env/
+venv/
+.venv/
+ENV/
+env.bak/
+venv.bak/
+
+# VSCode, PyCharm & JetBrains
+.vscode/
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# macOS
+.DS_Store
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Build output
+build/
+dist/
+*.tgz
+*.map
+
+# Tailwind / Webpack
+public/
+
+# PostCSS cache
+.postcss-cache/
+
+# OS
+Thumbs.db
+
+demo3/

@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Veículos{% endblock %}
+
+{% block content %}
+{% include 'partials/nav/nav_fleet.html' %}
+
+<div class="bg-body-content m-0 border border-secondary rounded-bottom-4 border-top-0 flex-grow-1 overflow-auto"
+    style="min-height: 0;">
+    <div id="scrollable_content" class="p-4">
+        <main role="content" class="d-grid gap-5 pb-7" style="grid-template-columns: repeat(3, 1fr);">
+
+            <div class="card h-100 d-flex flex-column px-4 pb-4" style="grid-column: 1 / -1;">
+                <div class="d-grid gap-4" style="grid-template-columns: repeat(4, 1fr);">
+                    <div class="d-grid" style="grid-column: 1 / -1;">
+                        <div id="my-vehicles-table" class="px-5" data-url="{% url 'djangotables' %}"
+                            data-model="vehicle">
+
+                            <!-- Cabeçalho -->
+                            <div
+                                class="card-header p-0 d-flex align-items-center justify-content-between border-bottom mb-3">
+                                <h3 class="card-title m-0">Veículos</h3>
+                                <div class="d-flex align-items-center gap-5">
+                                    <div class="input-group-sm position-relative w-300px">
+                                        <i
+                                            class="ki-solid ki-magnifier fs-3 position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+                                        <input type="text" data-search class="form-control form-control-solid ps-10"
+                                            placeholder="Procurar veículos" />
+                                    </div>
+                                    <a href="{% url 'tmsapp:fleetapp:vehicle_create' %}"
+                                        class="btn btn-basic btn-sm shadow-md">
+                                        <i class="ki-solid bi-plus-circle"></i>
+                                        Adicionar
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- Table -->
+                            <div class="table-responsive mb-3"
+                                style="min-height:600px; max-height:600px; overflow:auto;">
+                                <table class="table table-rounded border-separate p-0 m-0 align-middle"
+                                    data-datatable-table="true">
+                                    <thead class="fw-bolder sticky-top bg-gray-100 pb-2">
+                                        <tr class="fw-semibold text-muted">
+                                            <th data-field="id" class="w-10px py-2 ps-5 rounded-start-5">
+                                                <div class="form-check form-check-sm form-check-custom">
+                                                    <input class="form-check-input" type="checkbox" data-kt-check="true"
+                                                        data-kt-check-target="#datatable-body .form-check-input" />
+                                                </div>
+                                            </th>
+                                            <th data-field="license_plate" class="py-2 text-hover-dark">Placa</th>
+                                            <th data-field="brand" class="py-2 text-hover-dark">Marca</th>
+                                            <th data-field="model" class="py-2 text-hover-dark">Modelo</th>
+                                            <th data-field="year" class="py-2 text-hover-dark">Ano</th>
+                                            <th data-field="capacity_volume" class="py-2 text-hover-dark">capacidade
+                                                (m3)</th>
+                                            <th data-field="capacity_weight" class="py-2 text-hover-dark">capacidade
+                                                (kg)</th>
+                                            <th data-field="driver" class="py-2 text-hover-dark">Motorista</th>
+                                            <th data-field="is_outsourced" class="py-2 text-hover-dark">Terceirizado
+                                            </th>
+                                            <th data-field="status" class="py-2 text-hover-dark">Status</th>
+                                            <th class="rounded-end-5 py-2"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="datatable-body"></tbody>
+                                </table>
+                            </div>
+
+                            <!-- Footer -->
+                            <div class="d-flex justify-content-between pt-2 align-items-center">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="fs-7">Mostrar</span>
+                                    <select data-page-size class="form-select form-select-sm w-75px">
+                                        <option value="10" selected>10</option>
+                                        <option value="20">20</option>
+                                        <option value="50">50</option>
+                                        <option value="100">100</option>
+                                    </select>
+                                    <span class="fs-7">por página</span>
+                                </div>
+                                <nav>
+                                    <ul id="datatable-pagination" data-pagination
+                                        class="pagination pagination-sm pagination-rounded mb-0"></ul>
+                                </nav>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+</div>
+{% endblock %}
+
+
+{% block script %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        window.VT = new DjangoDataTable({
+            root: document.getElementById('my-vehicles-table'),
+            pageSize: 10,
+            cellClassName: 'px-2 py-1 text-sm',
+            rowRenderer: row => {
+                // Exemplo de linha customizada:
+                const url = `/tms/fleet/vehicle/${row.id}/update/`;
+                const driverUrl = `/tms/fleet/driver/${row.driver.id}/update/`;	
+                const statusClass =
+                    row.status === 'active' ? 'success' :
+                        row.status === 'maintenance' ? 'warning' :
+                            'danger';
+
+                // 2) Defino o texto de exibição
+                const statusLabel =
+                    row.status === 'active' ? 'Ativo' :
+                        row.status === 'maintenance' ? 'Em manutenção' :
+                            'Baixado';
+                return `
+                <tr class="cursor-pointer bg-hover-light border-1 border-bottom border-gray-200">
+                    <td class="ps-5"><div class="form-check form-check-sm form-check-custom"><input type="checkbox" class="form-check-input" value="${row.id}"></div></td>
+                    <td class="text-dark fs-4 fw-bold">${row.license_plate}</td>
+                    <td class="text-gray-700 fs-5">${row.brand}</td>
+                    <td class="text-gray-700 fs-5">${row.model}</td>
+                    <td class="text-gray-700 fs-5">${row.year}</td>
+                    <td class="text-gray-700 fs-5">${row.capacity_volume} (m3)</td>
+                    <td class="text-gray-700 fs-5">${row.capacity_weight} (kg)</td>
+                    <td><a class="text-hover-primary text-gray-700 fs-5" href="${url}">${row.driver.label}</a></td>
+                    <td class="text-gray-700 fs-5">${row.is_outsourced ? 'Sim' : 'Não'}</td>
+                    <td>
+                        <span class="badge badge-${statusClass} badge-outline rounded-[30px]">
+                            <span class="w-5px h-5px rounded-circle bg-${statusClass} me-1"></span>
+                            ${statusLabel}
+                        </span>
+                    </td>
+                    <td>
+                        <a class="text-hover-primary text-muted" href="${url}"><i class="fa fa-edit fs-2"></i></a>
+                    </td>
+                </tr>`;
+            }
+        });
+    });
+</script>
+{% endblock %}

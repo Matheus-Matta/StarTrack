@@ -1,0 +1,270 @@
+.hidden {
+  display: none !important;
+}
+
+.bg-body-content {
+  background-color: #fcfcfc !important;
+}
+
+[data-bs-theme="dark"] .bg-body-content {
+  background-color: #0D0E12 !important;
+}
+
+.btn-basic,
+.btn-basic i {
+  background-color: #0D0E12 !important;
+  color: #e6e6e6 !important;
+}
+
+[data-bs-theme="dark"] .btn-basic,
+[data-bs-theme="dark"] .btn-basic i {
+  background-color: #f1f1f1 !important;
+  color: #0D0E12 !important;
+}
+
+.btn-basic:active,
+.btn-basic:active i {
+  background-color: #343434 !important;
+  color: #e6e6e6 !important;
+}
+
+[data-bs-theme="dark"] .btn-basic:active,
+[data-bs-theme="dark"] .btn-basic:active i {
+  background-color: #ccc !important;
+  color: #0D0E12 !important;
+}
+
+[data-bs-theme="light"] .logo-light {
+  display: none;
+}
+
+[data-bs-theme="dark"] .logo-dark {
+  display: none;
+}
+
+/* 1) BACKGROUND HOVERS */
+.bg-hover-primary:hover {
+  background-color: var(--bs-primary) !important;
+}
+
+.bg-hover-primary-light:hover {
+  background-color: var(--bs-primary-light) !important;
+}
+
+.bg-hover-secondary:hover {
+  background-color: var(--bs-secondary) !important;
+}
+
+.bg-hover-secondary-light:hover {
+  background-color: var(--bs-secondary-light) !important;
+}
+
+.bg-hover-success:hover {
+  background-color: var(--bs-success) !important;
+}
+
+.bg-hover-success-light:hover {
+  background-color: var(--bs-success-light) !important;
+}
+
+.bg-hover-info:hover {
+  background-color: var(--bs-info) !important;
+}
+
+.bg-hover-info-light:hover {
+  background-color: var(--bs-info-light) !important;
+}
+
+.bg-hover-warning:hover {
+  background-color: var(--bs-warning) !important;
+}
+
+.bg-hover-warning-light:hover {
+  background-color: var(--bs-warning-light) !important;
+}
+
+.bg-hover-danger:hover {
+  background-color: var(--bs-danger) !important;
+}
+
+.bg-hover-danger-light:hover {
+  background-color: var(--bs-danger-light) !important;
+}
+
+.bg-hover-dark:hover {
+  background-color: var(--bs-dark) !important;
+}
+
+.bg-hover-dark-light:hover {
+  background-color: var(--bs-dark-light) !important;
+}
+
+
+/* 2) TEXT HOVERS */
+.text-hover-primary:hover {
+  color: var(--bs-primary) !important;
+}
+
+.text-hover-primary-light:hover {
+  color: var(--bs-primary-text-emphasis) !important;
+}
+
+.text-hover-secondary:hover {
+  color: var(--bs-secondary) !important;
+}
+
+.text-hover-secondary-light:hover {
+  color: var(--bs-secondary-light) !important;
+}
+
+.text-hover-success:hover {
+  color: var(--bs-success) !important;
+}
+
+.text-hover-success-light:hover {
+  color: var(--bs-success-light) !important;
+}
+
+.text-hover-info:hover {
+  color: var(--bs-info) !important;
+}
+
+.text-hover-info-light:hover {
+  color: var(--bs-info-light) !important;
+}
+
+.text-hover-warning:hover {
+  color: var(--bs-warning) !important;
+}
+
+.text-hover-warning-light:hover {
+  color: var(--bs-warning-light) !important;
+}
+
+.text-hover-danger:hover {
+  color: var(--bs-danger) !important;
+}
+
+.text-hover-danger-light:hover {
+  color: var(--bs-danger-light) !important;
+}
+
+
+.text-hover-dark:hover {
+  color: var(--bs-dark) !important;
+}
+
+.text-hover-dark-light:hover {
+  color: var(--bs-dark-light) !important;
+}
+
+
+/* 3) TRANSIÇÕES SUAVES */
+[class*="bg-hover-"],
+[class*="text-hover-"] {
+  transition: background-color .1s, color .1s;
+}
+
+/* torna a tabela em coluna flexível */
+.table-fixed {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* thead fica com altura automática, sem scroll */
+.table-fixed thead {
+  flex: 0 0 auto;
+}
+
+/* tbody ocupa o resto e ganha scroll interno */
+.table-fixed tbody {
+  flex: 1 1 auto;
+  display: block;
+  overflow-y: auto;
+  overflow-x: auto;
+
+}
+
+/* força linhas e cabeçalho a manterem o layout de tabela */
+.table-fixed thead,
+.table-fixed tbody tr {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+
+
+.nav-tabs .nav-link.active {
+  color: var(--bs-dark) !important;
+  border-bottom-width: 3px;
+  border-bottom-color: var(--bs-dark) !important;
+}
+
+/* Se quiser um hover diferente na aba ativa */
+.nav-tabs .nav-link:hover {
+  color: var(--bs-dark) !important;
+  border-bottom-width: 3px;
+  border-bottom-color: var(--bs-dark) !important;
+}
+
+@keyframes slide-in-down {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-in-down {
+  animation: slide-in-down 0.3s ease-out forwards;
+}
+
+/* Aplica só no modo dark */
+:root[data-bs-theme="dark"] .leaflet-popup-content-wrapper {
+  background-color: var(--bs-body-bg) !important;
+  color: var(--bs-light) !important;
+}
+
+/* Triângulo de “ponteiro” do popup */
+:root[data-bs-theme="dark"] .leaflet-popup-tip,
+:root[data-bs-theme="dark"] .leaflet-popup-tip-container .leaflet-popup-tip {
+  background-color: var(--bs-body-bg) !important;
+}
+
+:root[data-bs-theme="dark"] .leaflet-popup-content-wrapper a:hover {
+  color: var(--bs-primary) !important;
+}
+
+/* Define os keyframes da animação */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Classe utilitária para aplicar o efeito */
+.animation-fade-up {
+  animation: fadeUp 0.5s ease-out forwards;
+}
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Classe utilitária para aplicar o efeito de spin */
+.animation-spin {
+  animation: spin 1s linear infinite;
+}

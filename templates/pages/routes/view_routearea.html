@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Criar Rotas{% endblock %}
+{% block css %}
+<style>
+  .leaflet-div-icon {
+    background: red !important;
+    border: 2px solid white !important;
+    border-radius: 50% !important;
+    width: 10px !important;
+    height: 10px !important;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+{% include 'partials/nav/nav_route.html' %}
+<div class="bg-body-content m-0 border border-secondary rounded-bottom-4 border-top-0 flex-grow-1 overflow-auto"
+  style="min-height: 0;">
+  <div id="scrollable_content" class="p-4">
+    <main role="content" class="d-grid gap-5">
+      <!-- Painel de Ações e Resumo da Rota -->
+               <!-- Breadcrumb + Ações -->
+        <div class="d-flex align-items-center justify-content-between mx-5 mb-3">
+            <ol class="breadcrumb text-muted fs-6 fw-semibold">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'tmsapp:scriptapp:create_scripting' %}" class="text-dark text-hover-primary">Roteirização</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{% url 'tmsapp:scriptapp:route' %}" class="text-dark text-hover-primary">Lista de
+                        Rotas</a>
+                </li>
+                <li class="breadcrumb-item text-muted">{{ rota.name }}</li>
+            </ol>
+        </div>
+      <div class="row g-4">
+        <div class="col-12 mt-0 col-lg-3">
+          <div class="card h-100">
+            <div class="card-body pb-2 d-flex flex-column">
+
+              <!-- Busca por Bairro -->
+              <form id="bairroForm" onsubmit="event.preventDefault();">
+                <div class="dropdown mb-4" id="bairroDropdown">
+                  <div class="position-relative">
+                    <i class="ki-solid fs-2 ki-magnifier position-absolute text-muted"
+                      style="top:50%; left:0.7rem; transform:translateY(-50%);"></i>
+
+                    <!-- Toggle do Dropdown -->
+                    <input id="bairroInput" type="text" class="form-control ps-10 dropdown-toggle"
+                      placeholder="Buscar região" autocomplete="off" aria-expanded="false">
+
+                    <!-- Loader dentro do mesmo container, mas fora da hierarquia input→menu -->
+                    <div id="loader" class=" spinner-border animation-spin spinner-border-sm text-primary position-absolute end-0 me-3 top-35 hidden
+                      role=" status">
+                      <span class="sr-only">Loading...</span>
+                    </div>
+                  </div>
+                  <!-- Menu do Dropdown -->
+                  <ul id="dropdownMenu" class="dropdown-menu w-100 mt-1" aria-labelledby="bairroInput">
+
+                  </ul>
+                </div>
+              </form>
+
+              <!-- Botões de Ações -->
+              <div class="h-100 d-flex flex-column justify-content-between">
+                <form id="editRouteForm"" action=" {% url 'tmsapp:scriptapp:edit_routearea' rota.id %}" method="post"
+                  class="d-flex align-items-center justify-content-between gap-2">
+                  {% csrf_token %}
+                  <input type="submit" class="hidden">
+                  {# — seus hidden inputs para geojson, métricas, etc. — #}
+                  <input id="areaTotalInput" name="areatotal" type="hidden" value="{{ rota.areatotal }}">
+                  <input id="distanciaTotalInput" name="kmtotal" type="hidden" value="{{ rota.kmtotal }}">
+                  <input id="geojsonInput" name="geojson" type="hidden" value="{{ rota.geojson }}"
+                    data-other-routes="{{ outras }}">
+                  {# — o modal — #}
+                  <div class="w-100">
+                    <div class="mb-3">
+                      <label for="nomeRota" class="form-label">Nome</label>
+                      <input type="text" class="form-control form-control-solid form-control-sm" id="nomeRota"
+                        name="nomeRota" value="{{ rota.name }}" required>
+                    </div>
+                    <div class="mb-3">
+                      <label for="statusRota" class="form-label">Status</label>
+                      <select class="form-control form-control-solid form-control-sm form-select-sm" id="statusRota"
+                        name="statusRota" required>
+                        <option value="active" {% if rota.status == 'active' %}selected{% endif %}>Ativo</option>
+                        <option value="disabled" {% if rota.status == 'disabled' %}selected{% endif %}>Desabilitado
+                        </option>
+                      </select>
+                    </div>
+                    <div class="mb-3">
+                          <label for="vehiclesSelect" class="form-label">Veículos</label>
+                          <select
+                            id="vehiclesSelect"
+                            name="vehicles"
+                            multiple="multiple"
+                            class="form-select form-select-solid form-control-sm w-100"
+                            language="pt-BR"
+                            data-control="select2"
+                            data-placeholder="Selecione veículos..."
+                          >
+                            <option></option>
+                            {% for v in all_vehicles %}
+                              <option value="{{ v.id }}"
+                                {% if v.route_area_id == rota.id %}selected{% endif %}
+                              >
+                                {{ v.license_plate }} / {{ v.driver }}
+                              </option>
+                            {% endfor %}
+                          </select>
+                        </div>
+                      <div class="mb-3">
+                        <label for="hex_color" class="form-label">Cor da Rota</label>
+                        <input type="color"
+                          class="form-control form-control-solid form-control-sm form-control-color w-100" id="hex_color"
+                          name="hex_color" value="{{ rota.hex_color|default:'#0074D9' }}" pattern="#[0-9A-Fa-f]{6}"
+                          title="Escolha a cor">
+                      </div>
+                  </div>
+                </form>
+                {# Botões de ação #}
+                <div class="d-flex align-items-center justify-content-between gap-2"">
+                <form action=" {% url 'tmsapp:scriptapp:delete_routearea' rota.id %}" method="delete">
+                  <button type="submit" class="btn btn-sm btn-light-danger px-2 py-1">
+                    <i class="ki-solid p-0 ki-trash"></i>
+                  </button>
+                  </form>
+                  <div>
+                    <button onclick="document.querySelector('#editRouteForm').submit()"
+                      class="btn btn-sm py-1 btn-light-success">
+                      <i class="ki-outline ki-check-square"></i> Finalizar
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="card-footer p-4 bg-light">
+              <dl class="row mb-0 small text-muted align-items-center">
+                <dt class="col-4 d-flex align-items-center">
+                  <i class="ki-solid ki-user-tick me-2 fw-semibold"></i> Criado por
+                </dt>
+                <dd class="col-8">
+                  {{ rota.created_by }}
+                </dd>
+
+                <dt class="col-4 d-flex align-items-center">
+                  <i class="ki-solid ki-calendar-add me-2 fw-semibold"></i> Criado em
+                </dt>
+                <dd class="col-8">
+                  {{ rota.created_at|date:"d/m/Y H:i" }}
+                </dd>
+
+                <dt class="col-4 d-flex align-items-center">
+                  <i class="ki-solid ki-arrows-loop me-2 fw-semibold"></i> Atualizado em
+                </dt>
+                <dd class="col-8">
+                  {{ rota.updated_at|date:"d/m/Y H:i" }}
+                </dd>
+              </dl>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Mapa e Estatísticas -->
+        <div class="col-12 col-lg-9 mt-0">
+          <div class="card mb-4">
+            <div class="card-body p-0 position-relative" style="height: 500px;">
+              <div id="map" class="w-100 h-100 rounded-3"></div>
+              <div id="saveMap"
+                class="z-index-2 card hidden position-absolute bottom-0 start-50 translate-middle-x m-3 py-1 ps-5 pe-1 animation-fade-up">
+                <span class="d-flex align-items-center">Alterações não salvas.<button
+                    class="btn btn-sm btn-success px-3 py-2 ms-2 d-inline-block"
+                    onclick="saveGeoJSON()">Salvar</button></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Estatísticas de Área e Distância -->
+          <div class="row g-4">
+            <div class="col-12 col-md-6">
+              <div class="card">
+                <div class="card-body p-4">
+                  <h6 class="text-warning">Área Total</h6>
+                  <p id="areaTotal" class="fs-4 mb-1">{{ rota.areatotal|floatformat:2 }} m²</p>
+                  <small class="text-muted">Tamanho total da área da rota</small>
+                </div>
+              </div>
+            </div>
+            <div class="col-12 col-md-6">
+              <div class="card">
+                <div class="card-body p-4">
+                  <h6 class="text-info">Distância Total</h6>
+                  <p id="distanciaTotal" class="fs-4 mb-1">{{ rota.kmtotal|floatformat:2 }} km</p>
+                  <small class="text-muted">Tamanho da maior distância entre polos</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script src="{% static 'assets/js/custom/pages/routearea/view_routearea.js' %}"></script>
+{% endblock %}

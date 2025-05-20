@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{% if object %}Editar Transportadora{% else %}Nova Transportadora{% endif %}{% endblock %}
+
+{% block content %}
+{% include 'partials/nav/nav_fleet.html' %}
+
+<div class="bg-body-content m-0 border border-secondary rounded-bottom-4 border-top-0 flex-grow-1 overflow-auto" style="min-height:0">
+  <div id="scrollable_content" class="p-4">
+
+    <div class="d-flex align-items-center justify-content-between mx-5 mb-3">
+      <ol class="breadcrumb text-muted fs-6 fw-semibold">
+        <li class="breadcrumb-item">
+          <a href="{% url 'tmsapp:fleetapp:dashboard' %}" class="text-dark text-hover-primary">Dashboard</a>
+        </li>
+        <li class="breadcrumb-item">
+          <a href="{% url 'tmsapp:fleetapp:carrier_list' %}" class="text-dark text-hover-primary">Lista de Transportadoras</a>
+        </li>
+        <li class="breadcrumb-item text-muted">{% if object %}Editar{% else %}Nova{% endif %} Transportadora</li>
+      </ol>
+      <div class="d-flex align-items-center">
+        {% if object %}
+        <form id="carrier-delete" data-message="Tem certeza que deseja desativar esta transportadora?" action="{% url 'tmsapp:fleetapp:carrier_deactivate' object.pk %}" method="delete" class="d-inline">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-light-danger btn-sm shadow-md me-2">
+            <i class="ki-solid ki-trash fs-4"></i> Remover
+          </button>
+        </form>
+        {% endif %}
+        <button type="button" onclick="document.getElementById('carrier-form').submit()"
+            class="btn btn-basic btn-sm shadow-md d-flex align-items-center">
+            <i class="ki-solid bi-plus-circle"></i> Salvar
+        </button>
+      </div>
+    </div>
+
+    <div class="card m-5">
+      <form id="carrier-form" autocomplete="off" method="post"
+            action="{% if object %}{% url 'tmsapp:fleetapp:carrier_update' object.pk %}{% else %}{% url 'tmsapp:fleetapp:carrier_create' %}{% endif %}">
+        {% csrf_token %}
+            <ul class="nav nav-tabs nav-line-tabs fw-semibold fs-5 px-3" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link active" id="tab-details-tab" data-bs-toggle="tab" href="#tab-details" role="tab">
+                    Detalhes
+                    </a>
+                </li>
+            </ul>
+        <div class="tab-content p-5">
+          <div class="row gx-7 gy-5" id="tab-details" role="tabpanel">
+            <div class="col-lg-6">
+              <div class="mb-5">
+                <label for="id_name" class="form-label fw-semibold">Nome da Transportadora</label>
+                <input type="text" name="name" id="id_name" required
+                       class="form-control form-control-solid form-control-sm {% if form.name.errors %}is-invalid{% endif %}"
+                       placeholder="Nome"
+                       value="{{ form.name.value|default_if_none:'' }}">
+                {% for err in form.name.errors %}
+                  <div class="invalid-feedback">{{ err }}</div>
+                {% endfor %}
+              </div>
+              <div class="mb-5">
+                <label for="description" class="form-label fw-semibold">Descrição</label>
+                <input type="text" name="description" id="description"
+                       class="form-control form-control-solid form-control-sm {% if form.description.errors %}is-invalid{% endif %}"
+                       placeholder="Descrição da transportadora"
+                       value="{{ form.description.value|default_if_none:'' }}">
+                {% for err in form.description.errors %}
+                  <div class="invalid-feedback">{{ err }}</div>
+                {% endfor %}
+              </div>
+              <div class="mb-5">
+                <label for="id_phone" class="form-label fw-semibold">Telefone</label>
+                <input type="tel" name="phone" id="id_phone"
+                       class="form-control form-control-solid form-control-sm {% if form.phone.errors %}is-invalid{% endif %}"
+                       placeholder="(00) 00000-0000"
+                       value="{{ form.phone.value|default_if_none:'' }}">
+                {% for err in form.phone.errors %}
+                  <div class="invalid-feedback">{{ err }}</div>
+                {% endfor %}
+              </div>
+              <div class="mb-5">
+                <label for="id_email" class="form-label fw-semibold">E-mail</label>
+                <input type="email" name="email" id="id_email"
+                       class="form-control form-control-solid form-control-sm {% if form.email.errors %}is-invalid{% endif %}"
+                       placeholder="contato@transportadora.com"
+                       value="{{ form.email.value|default_if_none:'' }}">
+                {% for err in form.email.errors %}
+                  <div class="invalid-feedback">{{ err }}</div>
+                {% endfor %}
+              </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="row gx-7 gy-5">
+                    <!-- Coluna inteira para o endereço completo -->
+                    <div class="col-12 mb-5">
+                      <label for="cnpj" class="form-label fw-semibold">CNPJ</label>
+                      <input type="text" name="cnpj" id="cnpj"
+                             class="form-control form-control-solid form-control-sm {% if form.cnpj.errors %}is-invalid{% endif %}"
+                             placeholder="00.000.000/0000-00"
+                             value="{{ form.cnpj.value|default_if_none:'' }}">
+                      {% for err in form.cnpj.errors %}
+                        <div class="invalid-feedback">{{ err }}</div>
+                      {% endfor %}
+                    </div>
+
+                    <div class="col-12 mt-0 mb-5">
+                      <label for="des_address" class="form-label fw-semibold">Endereço</label>
+                      <input type="text" name="des_address" id="des_address"
+                             class="form-control form-control-solid form-control-sm {% if form.des_address.errors %}is-invalid{% endif %}"
+                             placeholder="Rua dos Bobos, n39"
+                             value="{{ form.des_address.value|default_if_none:'' }}">
+                      {% for err in form.des_address.errors %}
+                        <div class="invalid-feedback">{{ err }}</div>
+                      {% endfor %}
+                    </div>
+                  
+                    <!-- Agora os campos separados em duas colunas -->
+                    <div class="col-md-6 mt-0 mb-5">
+                      <label for="id_street" class="form-label fw-semibold">Bairro</label>
+                      <input type="text" name="street" id="id_street"
+                             class="form-control form-control-solid form-control-sm {% if form.street.errors %}is-invalid{% endif %}"
+                             placeholder="Ex: Avenida Paulista"
+                             value="{{ form.street.value|default_if_none:'' }}">
+                      {% for err in form.street.errors %}
+                        <div class="invalid-feedback">{{ err }}</div>
+                      {% endfor %}
+                    </div>
+                    <div class="col-md-2 mt-0 mb-5">
+                      <label for="id_number" class="form-label fw-semibold">Número</label>
+                      <input type="text" name="number" id="id_number"
+                             class="form-control form-control-solid form-control-sm {% if form.number.errors %}is-invalid{% endif %}"
+                             placeholder="123"
+                             value="{{ form.number.value|default_if_none:'' }}">
+                      {% for err in form.number.errors %}
+                        <div class="invalid-feedback">{{ err }}</div>
+                      {% endfor %}
+                    </div>
+                    <div class="col-md-4 mt-0 mb-5">
+                      <label for="id_zip_code" class="form-label fw-semibold">CEP</label>
+                      <input type="text" name="zip_code" id="id_zip_code"
+                             class="form-control form-control-solid form-control-sm {% if form.zip_code.errors %}is-invalid{% endif %}"
+                             placeholder="01234-000"
+                             value="{{ form.zip_code.value|default_if_none:'' }}">
+                      {% for err in form.zip_code.errors %}
+                        <div class="invalid-feedback">{{ err }}</div>
+                      {% endfor %}
+                    </div>
+                  
+                    <!-- Em uma nova linha, cidade e estado -->
+                    <div class="col-md-6 mt-0 mb-5">
+                      <label for="id_city" class="form-label fw-semibold">Cidade</label>
+                      <input type="text" name="city" id="id_city"
+                             class="form-control form-control-solid form-control-sm {% if form.city.errors %}is-invalid{% endif %}"
+                             placeholder="Niteroi"
+                             value="{{ form.city.value|default_if_none:'' }}">
+                      {% for err in form.city.errors %}
+                        <div class="invalid-feedback">{{ err }}</div>
+                      {% endfor %}
+                    </div>
+                    <div class="col-md-6 mt-0 mb-5">
+                      <label for="id_state" class="form-label fw-semibold">Estado</label>
+                      <input type="text" name="state" id="id_state"
+                             class="form-control form-control-solid form-control-sm {% if form.state.errors %}is-invalid{% endif %}"
+                             placeholder="RJ"
+                             value="{{ form.state.value|default_if_none:'' }}">
+                      {% for err in form.state.errors %}
+                        <div class="invalid-feedback">{{ err }}</div>
+                      {% endfor %}
+                    </div>
+                  </div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+  document.addEventListener('DOMContentLoaded', function(){
+    // Máscaras
+    Inputmask({ mask: ["(99) 9999-9999", "(99) 99999-9999"], keepStatic: true })
+      .mask('#id_phone');
+    Inputmask({ mask: "99.999.999/9999-99", keepStatic: true })
+      .mask('#cnpj');
+  });
+</script>
+{% endblock %}

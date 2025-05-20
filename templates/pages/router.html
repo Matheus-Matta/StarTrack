@@ -1,0 +1,263 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Roteirização{% endblock %}
+{% block content %}
+{% include 'partials/nav/nav_route.html' %}
+
+<div class="bg-body-content m-0 border border-secondary rounded-bottom-4 border-top-0 flex-grow-1 overflow-auto"
+  style="min-height: 0;">
+  <div id="scrollable_content" class="p-4">
+    <main role="content">
+      <div class="row g-5">
+
+        <!-- Coluna do Formulário (8/12) -->
+        <div class="col-md-8">
+          <div class="card h-100">
+            <div class="card-header">
+              <h3 class="card-title">Gerencie seus dados</h3>
+            </div>
+            <div class="card-body p-0">
+              <form method="post" action="{% url 'tmsapp:scriptapp:create_routes' %}" enctype="multipart/form-data"
+                class="p-5 d-flex gap-5">
+                {% csrf_token %}
+
+                <!-- Left side of form -->
+                <div style="min-width:400px;">
+                  <div class="mb-5">
+                    <h4 class="fs-6 fw-semibold mb-3">Modo de Geração</h4>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                      <label class="form-check-label" for="routeSingle">
+                        <span class="fw-semibold text-gray-800">Rota Personalizadas</span><br />
+                        <small class="text-muted">Separar as rotas com base na areas de rotas criadas <a href="{% url 'tmsapp:scriptapp:route' %}">aqui</a></small>
+                      </label>
+                      <div class="form-check form-switch">
+                        <input class="form-check-input h-20px w-30px" type="radio" name="sp_router" id="routeSingle" value="route_perso" checked/>
+                      </div>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                      <label class="form-check-label" for="routeByCity">
+                        <span class="fw-semibold text-gray-800">Rotas por Cidade</span><br />
+                        <small class="text-muted">Agrupa automaticamente entregas por município.</small>
+                      </label>
+                      <div class="form-check form-switch">
+                        <input class="form-check-input h-20px w-30px" type="radio" name="sp_router" id="routeByCity" value="route_city" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="d-flex justify-content-between align-items-center mb-5">
+                    <div>
+                      <span class="fw-semibold">Prioridade de Entrega</span><br />
+                      <small class="text-muted">Permite priorizar entregas mais críticas</small>
+                    </div>
+                    <div class="form-check form-switch form-check-success form-check-solid">
+                      <input class="form-check-input h-20px w-30px" type="checkbox" name="priority_router" checked
+                        id="prioritySwitch" />
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                      <div>
+                        <span class="fw-semibold">Importar</span><br />
+                        <small class="text-muted">Importar planilha de entregas</small>
+                      </div>
+                      <div class="d-flex align-items-center gap-2">
+                        <input type="file" id="upload_file" name="upload_file" accept=".xlsx,.xls,.csv"
+                          class="visually-hidden" required onchange="handleFileSelect(event)" />
+                        <button type="button" class="btn btn-basic btn-sm"
+                          onclick="document.getElementById('upload_file').click()">
+                          <i class="ki-solid ki-file-up fs-3"></i> Importar
+                        </button>
+                      </div>
+                    </div>
+                    <div id="file-name" class="fs-7 text-primary d-none mt-2"></div>
+                  </div>
+                </div>
+
+                <!-- Right side illustration & call-to-action -->
+                <div class="d-flex flex-column align-items-center text-center">
+                  <img src="{% static 'assets/media/illustrations/18.svg' %}" alt="Illustration"
+                    class="d-block d-dark-none mb-4" style="max-height:180px;" />
+                  <img src="{% static 'assets/media/illustrations/18-dark.svg' %}" alt="Illustration"
+                    class="d-none d-dark-block mb-4" style="max-height:180px;" />
+                  <h2 class="fs-2 fw-semibold mb-2">Criação Ágil de Rotas</h2>
+                  <p class="fs-7 text-muted mb-4">
+                    Facilite a formação e gestão de rotas com ferramentas intuitivas
+                    para comunicação, organização de paradas e acompanhamento de
+                    entregas, tudo em um só lugar.
+                  </p>
+                  <button type="submit" class="btn btn-basic btn-sm shadow-md d-flex align-items-center">
+                    <i class="ki-solid bi-plus-circle"></i> Criar Rota
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Coluna da Lista de Motoristas (4/12) -->
+        <div class="col-md-4">
+          <div class="card h-100">
+            <div id="my-vehicles-table" class="h-100 d-flex flex-column justify-content-between"
+              data-url="{% url 'djangotables' %}" data-model="vehicle">
+              <div>
+                <div class="card-header">
+                  <h3 class="card-title">Veículos vinculados em rotas</h3>
+                </div>
+                <div class="card-body table-responsive mb-3" style="min-height:280px; max-height:280px; overflow:auto;">
+                  <table class="table table-rounded border-separate p-0 m-0 align-middle" data-datatable-table="true">
+                    <thead class="fw-bolder sticky-top bg-gray-100 pb-2">
+                      <tr class="fw-semibold text-muted">
+                        <th data-field="id,license_plate" class="py-2 ps-5 text-hover-dark">Placa</th>
+                        <th data-field="driver" class="py-2 text-hover-dark">Motorista</th>
+                        <th data-field="route_area" class="py-2 text-hover-dark">Rota</th>
+                      </tr>
+                    </thead>
+                    <tbody id="datatable-body"></tbody>
+                  </table>
+                </div>
+              </div>
+              <!-- Footer -->
+              <div class="p-5 d-flex justify-content-end pt-2 align-items-center mh-35px min-h-35px">
+                <nav>
+                  <ul id="datatable-pagination" data-pagination
+                    class="pagination pagination-sm pagination-rounded mb-0">
+
+                  </ul>
+                </nav>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-12">
+          <div class="card h-100 d-flex flex-column px-4 pb-4" style="grid-column: 1 / -1;">
+            <div class="d-grid gap-4" style="grid-template-columns: repeat(4, 1fr);">
+
+              {# Tabela de Composições ocupa as 4 colunas #}
+              <div class="d-grid" style="grid-column: 1 / -1;">
+                <div id="my-compositions-table" class="px-5" data-url="{% url 'djangotables' %}"
+                  data-model="routecomposition">
+                  {# Cabeçalho com busca e botão “Criar” #}
+                  <div class="card-header p-0 d-flex align-items-center justify-content-between border-bottom mb-3">
+                    <h3 class="card-title m-0">Roterização de Rota</h3>
+                  </div>
+
+                  {# Tabela responsiva #}
+                  <div class="table-responsive mb-3" style="min-height: 400px; max-height: 400px; overflow:auto;">
+                    <table class="table table-rounded border-separate p-0 m-0 align-middle" data-datatable-table="true">
+                      <thead class="fw-bolder sticky-top bg-gray-100 pb-2">
+                        <tr class="fw-semibold text-muted">
+                          <th class="w-10px py-2 ps-5 rounded-start-5">
+                            <div class="form-check form-check-sm form-check-custom">
+                              <input class="form-check-input" type="checkbox" data-kt-check="true"
+                                data-kt-check-target="#datatable-body .form-check-input" />
+                            </div>
+                          </th>
+                          <th data-field="name" class="py-2 text-hover-dark">Nome</th>
+                          <th data-field="type" class="py-2 text-hover-dark">Tipo</th>
+                          <th data-field="total_deliveries" class="py-2 text-hover-dark">Entregas</th>
+                          <th data-field="total_distance" class="py-2 text-hover-dark">Distância (km)</th>
+                          <th data-field="total_time" class="py-2 text-hover-dark">Tempo Máx.</th>
+                          <th class="rounded-end-5"></th>
+                        </tr>
+                      </thead>
+                      <tbody id="datatable-body"></tbody>
+                    </table>
+                  </div>
+
+                  {# Footer com page size e paginação #}
+                  <div class="d-flex justify-content-between pt-2 align-items-center">
+                    <div class="d-flex align-items-center gap-2">
+                      <span class="fs-7">Mostrar</span>
+                      <select data-page-size class="form-select form-select-sm w-75px">
+                        <option value="10" selected>10</option>
+                        <option value="20">20</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                      </select>
+                      <span class="fs-7">por página</span>
+                    </div>
+                    <nav>
+                      <ul id="datatable-pagination" data-pagination
+                        class="pagination pagination-sm pagination-rounded mb-0"></ul>
+                    </nav>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- Pequeno script para exibir nome do arquivo -->
+{% endblock %}
+{% block script %}
+<script>
+  function handleFileSelect(e) {
+    const fn = e.target.files[0]?.name;
+    const el = document.getElementById('file-name');
+    if (fn) {
+      el.textContent = fn;
+      el.classList.remove('d-none');
+    } else {
+      el.classList.add('d-none');
+    }
+  }
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    new DjangoDataTable({
+      root: document.getElementById('my-vehicles-table'),
+      pageSize: 5,
+      cellClassName: 'px-2 py-1 text-sm',
+      filters: {
+        route_area: { value: false, method: 'isnull' }
+      },
+      rowRenderer: row => {
+        console.log(row)
+        // Exemplo de linha customizada:
+        const url = `/tms/fleet/vehicle/${row.id}/update/`;
+        return `
+                <tr onclick="window.location='${url}'" 
+                    class="cursor-pointer bg-hover-light border-1 border-bottom border-gray-200">
+                    <td class="text-gray-800 ps-5">${row.license_plate}</td>
+                    <td class="text-gray-700">${row.driver.label}</td>
+                    <td class="text-gray-700">${row.route_area.label}</td>
+                </tr>`;
+      }
+    });
+  });
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  new DjangoDataTable({
+    root: document.getElementById('my-compositions-table'),
+    pageSize: 10,
+    cellClassName: 'px-2 py-1 text-sm',
+    rowRenderer: row => {
+      const url = `/tms/scriptapp/routecomposition/${row.id}/`;  // ajuste à sua URL real
+      return `
+        <tr class="cursor-pointer bg-hover-light border-bottom border-gray-200"
+            onclick="window.location='${url}'">
+          <td class="ps-5"><div class="form-check form-check-sm form-check-custom">
+                <input class="form-check-input" type="checkbox"/>
+              </div></td>
+          <td class="ps-5 text-gray-900">${row.name}</td>
+          <td class="text-gray-700">${row.type}</td>
+          <td class="text-gray-700">${row.total_deliveries}</td>
+          <td class="text-gray-700">${row.total_distance}</td>
+          <td class="text-gray-700">${row.total_time}</td>
+          <td></td>
+        </tr>`;
+    }
+  });
+});
+</script>
+<!-- aqui você pode adicionar outros scripts se necessário -->
+{% endblock %}

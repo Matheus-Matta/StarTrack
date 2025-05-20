@@ -1,0 +1,39 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt_BR" dir="ltr"
+      data-kt-name="metronic"
+      data-bs-theme="dark"
+      class="h-100">
+
+<head>
+    {% include 'partials/head.html' %}
+    <title>Mx Router – {% block title %}Login{% endblock %}</title>
+
+    {% block css %}{% endblock %}
+
+    <style>
+        /* background personalizado */
+        .page-bg {
+            background-image: url('{% static "assets/media/images/2600x1200/bg-10.png" %}');
+        }
+        /* dark mode via data-theme="dark" */
+        [data-bs-theme="dark"] .page-bg {
+            background-image: url('{% static "assets/media/images/2600x1200/bg-10-dark.png" %}');
+        }
+    </style>
+</head>
+
+<body  id="kt_body" class="app-page d-flex flex-column flex-root h-100">
+
+    <!-- begin::App wrapper -->
+    <div class="app-wrapper flex-column flex-root">
+        {% block content %}{% endblock %}
+    </div>
+    <!-- end::App wrapper -->
+
+    <!-- Scripts Metronic já importados em partials/script.html -->
+    {% include 'partials/script.html' %}
+    {% block script %}{% endblock %}
+
+</body>
+</html>

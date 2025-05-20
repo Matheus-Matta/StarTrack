@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Criar Rotas{% endblock %}
+
+{% block content %}
+{% include 'partials/nav/nav_route.html' %}
+
+<div class="bg-body-content m-0 border border-secondary rounded-bottom-4 border-top-0 flex-grow-1 overflow-auto"
+  style="min-height: 0;">
+  <div id="scrollable_content" class="p-4">
+    <main role="content" class="row g-5">
+      <div class="col-12 px-4 pt-7 d-flex justify-content-between align-items-center p-0 m-0 gy-5"> <!-- novo filtro de área -->
+        <div class="d-flex align-items-center">
+          <select id="filterArea" class="form-select form-select-sm w-200px">
+            <option value="all">Todas</option>
+            {% for area in areas %}
+            <option value="{{ area.id }}">{{ area.name }}</option>
+            {% endfor %}
+          </select>
+          <label for="filterArea" class="fw-semibold ms-2 text-muted">Filtrar Área</label>
+        </div>
+        <button
+          type="button"
+          class="btn btn-sm btn-basic d-flex align-items-center"
+          data-bs-toggle="modal"
+          data-bs-target="#modalCriarRota"
+        >
+          <i class="bi bi-plus-circle"></i> Nova Rota
+        </button>
+      </div>
+      <div class="col-12 row p-0 m-0 gy-5">
+        <div class="col-lg-4  mt-2">
+          <div class="card p-4">
+            <div id="my-areas-table" data-url="{% url 'djangotables' %}" data-model="routearea">
+              <h3 class="fw-semibold py-2">Áreas de Rota</h3>
+              <div class="table-responsive mb-3" style="min-height:440px; max-height:440px; overflow:auto;">
+                <table class="table table-rounded border-separate p-0 m-0 align-middle" data-datatable-table="true">
+                  <thead class="fw-bolder sticky-top bg-gray-100 pb-2">
+                    <tr class="fw-semibold text-muted">
+                      <th data-field="id,name,hex_color" class="py-2 ps-5 text-hover-dark">Nome</th>
+                      <th data-field="vehicle_count" class="py-2 ps-5 text-center text-hover-dark">veiculos</th>
+                      <th data-field="status" class="py-2 text-hover-dark">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="datatable-body"></tbody>
+                </table>
+              </div>
+              <!-- Footer: paginação e page-size -->
+              <div class="d-flex justify-content-between pt-2 align-items-center mh-35px min-h-35px">
+                <div class="d-flex align-items-center gap-2">
+                  <select data-page-size class="form-select form-select-sm w-75px">
+                    <option value="10" selected>10</option>
+                    <option value="20">20</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                  </select>
+                  <span class="fs-7 text-muted">por página</span>
+                </div>
+                <nav>
+                  <ul id="datatable-pagination" data-pagination
+                    class="pagination pagination-sm pagination-rounded mb-0">
+                  </ul>
+                </nav>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-8  mt-2">
+          <div class="card h-100 d-flex flex-column">
+            <div class="flex-grow-1 d-flex flex-column justify-content-center p-2">
+
+              <div id="map" class="w-100 h-100 rounded overflow-hidden position-relative"></div>
+
+              {{ areas|json_script:"areas-data" }}
+            </div>
+          </div>
+        </div>
+        <div class="row col-lg-12 mt-4">
+          <div class="col-6">
+            <div class="card p-3 h-100">
+              <h6 class="mb-2 p-2">Top 5 Áreas (m²)</h6>
+              <canvas id="chartArea" height="200"></canvas>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="card p-3 h-100">
+              <h6 class="mb-2 p-2">Top 5 Distâncias (km)</h6>
+              <canvas id="chartKm" height="200"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+  </div>
+  </main>
+</div>
+</div>
+{% include 'partials/modals/route/create_routearea.html' %}
+{% endblock %}
+
+{% block script %}
+<script src="{% static 'assets/js/custom/pages/routearea/list_routearea.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,127 @@
+{% load static %}
+<header id="kt_header"
+        class="d-flex align-items-center justify-content-between position-fixed top-0 start-0 end-0 bg-body px-5"
+        style="height:58px; z-index:1000;">
+
+    <div class="d-flex align-items-center">
+
+        <!-- sidebar toggle for mobile -->
+        <button class="btn btn-icon btn-light btn-sm d-lg-none me-3"
+                data-drawer-toggle="#sidebar">
+            <i class="ki-solid ki-menu fs-2"></i>
+        </button>
+
+        <!-- logo -->
+        <a href="{% url 'homeapp:dashboard' %}" class="d-flex align-items-center text-decoration-none me-4">
+            <img src="{% static 'assets/media/app/mini-logo-primary.svg' %}"      class="logo-light h-24px" />
+            <img src="{% static 'assets/media/app/mini-logo-primary-dark.svg' %}" class="logo-dark  h-24px" />
+        </a>
+
+        <!-- breadcrumb/title -->
+        <h3 class="fs-5 ms-2 fw-semibold m-0 text-muted me-2">Equipe MxRouter</h3>
+
+    </div>
+
+    <div class="d-flex align-items-center gap-3">
+
+
+        <!-- search -->
+        <button class="btn rounded-circle btn-icon btn-active-light-primary btn-sm"
+                data-bs-toggle="modal" data-bs-target="#kt_modal_search">
+            <i class="ki-solid ki-magnifier fs-1"></i>
+        </button>
+
+        <!-- notifications -->
+        <button class="btn btn-icon btn-active-light-primary rounded-circle btn-sm position-relative">
+            <i class="ki-duotone ki-notification-status fs-1">
+                <span class="path1"></span>
+                <span class="path2"></span>
+                <span class="path3"></span>
+                <span class="path4"></span>
+            </i>
+        </button>
+
+        <!-- user dropdown -->
+        <div class="dropdown">
+            <button class="btn btn-icon btn-active-light-primary btn-sm rounded-circle border border-gray-300"
+                    data-bs-toggle="dropdown">
+                    <div class="symbol symbol-30px symbol-circle">
+                        <div class="symbol-label fs-4 fw-semibold text-success">{{ request.user.username|title|slice:"0:1" }}</div>
+                    </div>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end pt-0 p-2">
+                <li class="px-3 py-2">
+                    <div class="d-flex align-items-center">
+                        <div class="symbol symbol-50px symbol-circle me-4 border border-gray-300">
+                            <div class="symbol-label fs-2 fw-semibold text-success">{{ request.user.username|title|slice:"0:1" }}</div>
+                        </div>
+                        <div>
+                            <div class="fs-6 fw-semibold">{{ request.user.username }}</div>
+                            <div class="fs-8 text-muted">{{ request.user.email }}</div>
+                        </div>
+                    </div>
+                </li>
+                <!-- links de perfil e configurações -->
+                <li>
+                    <a class="dropdown-item d-flex align-items-center rounded text-gray-800 text-hover-dark"
+                    href="#">
+                        <i class="ki-solid fs-2 ki-profile-circle me-2"></i>Meu Perfil
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item d-flex align-items-center rounded text-gray-800 text-hover-dark"
+                    href="#">
+                        <i class="ki-solid fs-2 ki-setting-2 me-2"></i>Configurações
+                    </a>
+                </li>
+                <li><hr class="dropdown-divider"/></li>
+                <!-- switch de tema -->
+                <li>
+                    <div class="rounded form-check form-switch dropdown-item d-flex align-items-center justify-content-between text-gray-800 text-hover-dark">
+                        <div class="d-flex align-items-center">
+                              <i class="ki-outline ki-moon fs-2"></i>
+                            <span class="menu-title fw-semibold ms-2 text-gray-800">Dark Mode</span>
+                        </div>
+                        <input class="form-check-input" type="checkbox" id="kt_theme_mode_toggle"/>
+                    </div>
+                </li>
+                <!-- formulário de logout -->
+                <li class="px-3 py-2">
+                    <form method="post" action="{% url 'authapp:logout' %}">
+                        {% csrf_token %}
+                        <button type="submit"
+                                class="btn btn-light w-100 btn-sm">
+                            <span class="menu-title fw-semibold ms-2">Desconectar</span>
+                        </button>
+                    </form>
+                </li>
+            </ul>
+        </div>
+
+    </div>
+</header>
+<script>
+    // Pega o elemento <html>
+    const html = document.documentElement;
+    const themeToggle = document.getElementById('kt_theme_mode_toggle');
+
+    // Ao mudar o switch, ajusta data-bs-theme em <html>
+    themeToggle.addEventListener('change', () => {
+        if (themeToggle.checked) {
+            html.setAttribute('data-bs-theme', 'dark');
+            localStorage.setItem('kt_theme_mode', 'dark');
+        } else {
+            html.setAttribute('data-bs-theme', 'light');
+            localStorage.setItem('kt_theme_mode', 'light');
+        }
+    });
+
+    // No carregamento, aplica o tema salvo em <html>
+    const savedMode = localStorage.getItem('kt_theme_mode') || 'light';
+    if (savedMode === 'dark') {
+        themeToggle.checked = true;
+        html.setAttribute('data-bs-theme', 'dark');
+    } else {
+        html.setAttribute('data-bs-theme', 'light');
+    }
+</script>

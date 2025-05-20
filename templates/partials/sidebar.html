@@ -1,0 +1,28 @@
+{% load static %}
+<aside id="kt_sidebar" class="d-flex flex-column position-fixed start-0 top-0 bottom-0 bg-body"
+    style="width:56px; padding-top:64px;">
+
+    <div class="d-flex flex-column align-items-center">
+        <a href="{% url 'homeapp:dashboard' %}"
+            class="btn btn-icon btn-active-light-primary btn-sm w-40px h-40px rounded-circle mb-3 {% if '/home/' in request.path %}active border border-gray-300{% endif %}"
+            data-bs-toggle="tooltip" data-bs-placement="right" title="Home">
+            <i class="ki-outline ki-home fs-3"></i>
+        </a>
+        <a href="{% url 'tmsapp:scriptapp:create_scripting' %}"
+            class="btn btn-icon btn-active-light-primary btn-sm w-40px h-40px rounded-circle mb-3 {% if '/tms/script' in request.path %}active border border-gray-300{% endif %}"
+            data-bs-toggle="tooltip" data-bs-placement="right" title="Roterização">
+            <i class="ki-outline ki-geolocation fs-3"></i>
+        </a>
+        <a href="{% url 'tmsapp:fleetapp:dashboard' %}"
+            class="btn btn-icon btn-active-light-primary btn-sm w-40px h-40px rounded-circle mb-3 {% if '/tms/fleet' in request.path %}active border border-gray-300{% endif %}"
+            data-bs-toggle="tooltip" data-bs-placement="right" title="Frota">
+            <i class="ki-outline ki-delivery fs-3"></i>
+        </a>
+        <a href="{% url 'tmsapp:scriptapp:delivery_list' %}"
+            class="btn btn-icon btn-active-light-primary btn-sm w-40px h-40px rounded-circle mb-3 {% if '/tms/fleet' in request.path %}active border border-gray-300{% endif %}"
+            data-bs-toggle="tooltip" data-bs-placement="right" title="Entregas">
+            <i class="ki-outline ki-delivery-3 fs-3"></i>
+        </a>
+
+    </div>
+</aside>
