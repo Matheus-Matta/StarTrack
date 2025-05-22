@@ -199,20 +199,31 @@
     _showLoadingRow() {
       const colspan = this.ths.length || 1;
       this.tbody.innerHTML =
-        `<tr><td></td></tr><tr><td colspan="${colspan}" class="${this.cellClassName} text-center"><div class="spinner-border text-primary" role="status"></div></td></tr>`;
+        `<tr><td></td></tr>
+        <tr><td></td>
+        <td colspan="${colspan}" class="${this.cellClassName} text-center"><div class="spinner-border text-primary" role="status"></div>
+        </td>
+        </tr>`;
     }
 
     _showErrorRow() {
       const colspan = this.ths.length || 1;
       this.tbody.innerHTML =
-        `<tr><td></td></tr><tr><td colspan="${colspan}" class="${this.cellClassName} text-center text-danger">Erro ao carregar dados.</td></tr>`;
+        `<tr><td></td></tr>
+        <tr><td></td>
+        <td colspan="${colspan}" class="${this.cellClassName} w-100 text-center text-danger">Erro ao carregar dados.</td>
+        </tr>`;
     }
 
     _renderRows(data) {
       if (!Array.isArray(data) || data.length === 0) {
         const colspan = this.ths.length || 1;
         this.tbody.innerHTML =
-          `<tr><td></td></tr><tr><td colspan="${colspan}" class="${this.cellClassName} text-center">Nenhum registro encontrado.</td></tr>`;
+          `<tr><td></td></tr>
+          <tr>
+          <td></td>
+          <td colspan="${colspan}" class="${this.cellClassName} text-muted text-center">Nenhum registro encontrado.</td>
+          </tr>`;
         return;
       }
       this.tbody.innerHTML = '<tr><td></td></tr>' + data.map(row => {

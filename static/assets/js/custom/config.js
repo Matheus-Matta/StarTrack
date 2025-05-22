@@ -37,19 +37,20 @@
 
 document.addEventListener('DOMContentLoaded', function () {
   // Seleciona todos os forms cujo action contenha "driver_delete"
-  document.querySelectorAll('form[method="delete"]').forEach(form => {
-    console.log(form);
+  document.querySelectorAll('.form-confirm').forEach(form => {
     form.addEventListener('submit', function (e) {
       e.preventDefault();
+      const cl = this.dataset.color || 'danger';
+      const btn = `btn btn-${cl}`;
       Swal.fire({
-        text: this.dataset.message || "Tem certeza que deseja excluir?",
-        icon: "warning",
+        text: this.dataset.message || "Tem certeza que deseja prosseguir?",
+        icon: this.dataset.icon || 'warning',
         showCancelButton: true,
         buttonsStyling: false,
-        confirmButtonText: "Sim, excluir",
+        confirmButtonText: "Sim",
         cancelButtonText: "Cancelar",
         customClass: {
-          confirmButton: "btn btn-danger",
+          confirmButton:  btn,
           cancelButton: "btn btn-secondary ms-2"
         }
       }).then((result) => {

@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from simple_history.models import HistoricalRecords
-from .Delivery import Delivery
+from tmsapp.deliveryApp.models import Delivery
 from auditlog.registry import auditlog
 
 class Route(models.Model):
@@ -19,6 +19,8 @@ class Route(models.Model):
     deliveries = models.ManyToManyField(
         Delivery, through='RouteDelivery', related_name='routes', verbose_name='Entregas'
     )
+
+    is_active = models.BooleanField('Ativo', default=True)
 
     created_at = models.DateTimeField('Criado em', auto_now_add=True)
     updated_at = models.DateTimeField('Atualizado em', auto_now=True)

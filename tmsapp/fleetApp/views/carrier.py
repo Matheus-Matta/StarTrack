@@ -70,6 +70,7 @@ class CarrierDeactivateView(LoginRequiredMixin, View):
 
     def post(self, request, pk):
         carrier = get_object_or_404(Carrier, pk=pk)
-        carrier.delete()  # ou marque como inativo
+        carrier.is_active = False
+        carrier.save()
         messages.success(request, 'Transportadora removida com sucesso.')
         return redirect('tmsapp:fleetapp:carrier_list')

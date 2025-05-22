@@ -25,7 +25,7 @@
             <div class="d-flex align-items-center">
                 {% if object %}
                 <form id="vehicle-deactivate" data-message="Tem certeza que deseja remover este veículo?"
-                    action="{% url 'tmsapp:fleetapp:vehicle_deactivate' object.pk %}" method="delete" class="d-inline">
+                    action="{% url 'tmsapp:fleetapp:vehicle_deactivate' object.pk %}" method="post" class="d-inline form-confirm">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-light-danger btn-sm shadow-md me-2">
                         <i class="ki-solid ki-trash fs-4"></i> Remover

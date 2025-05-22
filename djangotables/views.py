@@ -23,7 +23,11 @@ def djangotables(request):
     if model_class is None:
         return JsonResponse({'error': f'Modelo "{model_name}" não encontrado.'}, status=404)
 
-    qs = model_class.objects.all()
+    try:
+        qs = model_class.objects.filter(is_active=True)
+    except FieldError:
+        qs = model_class.objects.all()
+
 
     # extrai e parseia o JSON de “filters”
     raw = request.GET.get('filters','').strip()

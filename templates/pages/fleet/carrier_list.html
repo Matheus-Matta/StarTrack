@@ -59,7 +59,7 @@
                                             <th data-field="cnpj" class="py-2 text-hover-dark">CNPJ</th>
                                             <th data-field="phone" class="py-2 text-hover-dark">Telefone</th>
                                             <th data-field="email" class="py-2 text-hover-dark">E-mail</th>
-                                            <th data-field="address" class="py-2 text-hover-dark">Endereço</th>
+                                            <th data-field="full_address" class="py-2 text-hover-dark">Endereço</th>
                                             <th class="rounded-end-5"></th>
                                         </tr>
                                     </thead>
@@ -107,6 +107,7 @@
             pageSize: 10,
             cellClassName: 'px-2 py-1 text-sm w-100',
             rowRenderer: row => {
+                console.log(row);
                 const editUrl = `/tms/fleet/carrier/${row.id}/update/`;
                 return `
         <tr class="cursor-pointer bg-hover-light border-1 border-bottom border-gray-200">
@@ -115,14 +116,14 @@
                 <input type="checkbox" class="form-check-input" value="${row.id}" />
             </div>
             </td>
-            <td class="text-dark fs-4 fw-bold">
-            <a href="${editUrl}" class="fs-4 text-dark">${row.name}</a>
+            <td class="text-dark fw-bold">
+            <a href="${editUrl}" class="text-dark">${row.name}</a>
             </td>
-            <td class="text-gray-700 fs-5">${row.description}</td>
-            <td class="text-gray-700 fs-5">${row.cnpj}</td>
-            <td class="text-gray-700 fs-5">${row.phone}</td>
-            <td class="text-gray-700 fs-5">${row.email}</td>
-            <td class="text-gray-700 fs-5">${row.address}</td>
+            <td class="text-gray-700">${row.description}</td>
+            <td class="text-gray-700">${row.cnpj}</td>
+            <td class="text-gray-700">${row.phone}</td>
+            <td class="text-gray-700">${row.email}</td>
+            <td class="text-gray-700">${row.full_address}</td>
             <td>
             <a class="text-hover-primary text-muted" href="${editUrl}">
                 <i class="fa fa-edit fs-2"></i>

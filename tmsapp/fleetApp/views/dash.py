@@ -15,15 +15,8 @@ class FleetDashboardView(LoginRequiredMixin, View):
 
         # 2) Motoristas, veículos e transportadoras ativas
         drivers  = Driver.objects.filter(is_active=True)
-        vehicles = Vehicle.objects.filter(status='active')
-        carriers = Carrier.objects.all()
-
-        # 3) Top 5 veículos por capacidade de volume (m³)
-        top_vehicles = (
-            vehicles
-            .order_by('-capacity_volume')
-            .values('license_plate', 'capacity_volume')[:5]
-        )
+        vehicles = Vehicle.objects.filter(is_active=True, status='active')
+        carriers = Carrier.objects.filter(is_active=True)
 
         context = {
             # cartão "em trânsito"

@@ -1,19 +1,18 @@
 {% load static %}
 <header id="kt_header"
-        class="d-flex align-items-center justify-content-between position-fixed top-0 start-0 end-0 bg-body px-5"
-        style="height:58px; z-index:1000;">
+    class="d-flex align-items-center justify-content-between position-fixed top-0 start-0 end-0 bg-body px-5"
+    style="height:58px; z-index:1000;">
 
     <div class="d-flex align-items-center">
 
         <!-- sidebar toggle for mobile -->
-        <button class="btn btn-icon btn-light btn-sm d-lg-none me-3"
-                data-drawer-toggle="#sidebar">
+        <button class="btn btn-icon btn-light btn-sm d-lg-none me-3" data-drawer-toggle="#sidebar">
             <i class="ki-solid ki-menu fs-2"></i>
         </button>
 
         <!-- logo -->
         <a href="{% url 'homeapp:dashboard' %}" class="d-flex align-items-center text-decoration-none me-4">
-            <img src="{% static 'assets/media/app/mini-logo-primary.svg' %}"      class="logo-light h-24px" />
+            <img src="{% static 'assets/media/app/mini-logo-primary.svg' %}" class="logo-light h-24px" />
             <img src="{% static 'assets/media/app/mini-logo-primary-dark.svg' %}" class="logo-dark  h-24px" />
         </a>
 
@@ -26,28 +25,184 @@
 
 
         <!-- search -->
-        <button class="btn rounded-circle btn-icon btn-active-light-primary btn-sm"
-                data-bs-toggle="modal" data-bs-target="#kt_modal_search">
+        <button class="btn rounded-circle btn-icon btn-active-light-primary btn-sm" data-bs-toggle="modal"
+            data-bs-target="#kt_modal_search">
             <i class="ki-solid ki-magnifier fs-1"></i>
         </button>
 
-        <!-- notifications -->
-        <button class="btn btn-icon btn-active-light-primary rounded-circle btn-sm position-relative">
-            <i class="ki-duotone ki-notification-status fs-1">
-                <span class="path1"></span>
-                <span class="path2"></span>
-                <span class="path3"></span>
-                <span class="path4"></span>
-            </i>
-        </button>
+
+        <!-- botão que aciona o dropdown -->
+        <div class="d-flex align-items-center">
+            <!-- notifications -->
+            <a id="kt_header_notifications_toggle" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end" 
+               class="btn btn-icon btn-active-light-primary pulse pulse-danger rounded-circle btn-sm position-relative">
+                <i class="ki-duotone ki-notification-status fs-1">
+                    <span id="unhead-notifications" class="path1"></span>
+                    <span class="path2"></span>
+                    <span class="path3"></span>
+                    <span class="path4"></span>
+                </i>
+                <span class="pulse-ring d-none"></span>
+            </a>
+
+            <!-- menu dropdown -->
+            <div class="bg-body-content border min-h-475px border-gray-200 menu-sub menu-sub-dropdown menu-column w-450px"
+                data-kt-menu="true" aria-labelledby="kt_header_notifications_toggle">
+
+                <!-- cabeçalho com as duas abas -->
+                <div style="background-image: url('{% static "assets/media/images/600x400/34.png" %}') !important;"
+                    class="px-4 pt-4 rounded-top">
+                    <div class="w-100 d-flex justify-content-between mb-2">
+                        <p class="fs-4 fw-bold text-white m-0 px-4">Notificações</p>
+                        <i class="ki-solid ki-cross fs-1 cursor-pointer text-white text-hover-danger"
+                            data-kt-menu-dismiss="true"></i>
+                    </div>
+                    <ul class="px-4 nav nav-tabs nav-white border-0 nav-line-tabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link py-3 border-bottom-3 fs-5 cursor-pointer text-white active"
+                                data-bs-toggle="pill" data-bs-target="#notifications_tab_alerts" role="tab">
+                                Alertas
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link py-3 border-bottom-3 fs-5 cursor-pointer text-white"
+                                data-bs-toggle="pill" data-bs-target="#notifications_tab_tasks" role="tab">
+                                Tarefas
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- conteúdo das abas -->
+                <div class="card-body tab-content">
+                    <!-- Abas de Alerts -->
+                    <div class="tab-pane fade show active" id="notifications_tab_alerts" role="tabpanel">
+                        <div class="mh-400px py-2" data-kt-scrollable="true" data-kt-scroll-height="300px"
+                            data-kt-scroll-dependencies="#kt_header"
+                            data-kt-scroll-wrappers="#notifications_tab_alerts">
+                            <!-- aqui você empurra via WS os alerts -->
+                            <div id="alerts_container">
+                                {% if notifications %}
+                                {% for note in notifications %}
+                                    <!-- begin::Item -->
+                                    <div {% if note.link %}onclick="location.href='{{ note.link }}"{% endif %} class="d-flex px-4 flex-column py-2 {% if not forloop.last %}border-bottom border-gray-200{% endif %} cursor-pointer bg-hover-gray-100">
+                                        <!-- symbol + level color -->
+                                        <div class="d-flex align-items-center">
+                                            <div data-symbol class="symbol symbol-35px me-4">
+                                            <span class="symbol-label bg-light-{{ note.level }}">
+                                                <i class="{{ note.level_icon }} fs-2 text-{{ note.level }}">
+                                                </i>
+                                            </span>
+                                            </div>
+                                            <!-- title + message + timestamp -->
+                                            <div>
+                                            <div class="min-w-375px d-flex justify-content-between">
+                                                <div data-title class="fs-6 text-gray-800 fw-bold">{{ note.title }}</div>
+                                                <small data-created class="text-gray-500">{{ note.created_at|date:"d/m/Y H:i" }}</small>
+                                            </div>
+                                            <div data-message class="fs-7 text-gray-500">{{ note.message }}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- end::Item -->
+                                {% endfor %}
+                                {% else %}
+                                <div class="text-center text-muted py-3">Nenhuma notificação</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Abas de Tasks -->
+                    <div class="tab-pane fade" id="notifications_tab_tasks" role="tabpanel">
+                        <div class="mh-600px py-2" data-kt-scrollable="true" data-kt-scroll-height="300px"
+                            data-kt-scroll-dependencies="#kt_header" data-kt-scroll-wrappers="#notifications_tab_tasks">
+                            <!-- aqui você empurra via WS o progresso das tasks -->
+                            <div id="tasks_container">
+                                {% if tasks %}
+                                {% for t in tasks %}
+                                <!-- begin::Item -->
+                                <div data-task-id="{{ t.task_id }}" class="d-flex {% if not forloop.last %}border-bottom border-gray-200{% endif %} flex-column justify-content-center py-2">
+                                    <!-- Section -->
+                                    <div class="d-flex ps-5 w-425px align-items-center">
+                                        <!-- Symbol -->
+                                        <div data-symbol class="symbol symbol-35px me-4">
+                                            {% if t.status == 'success' %}
+                                            <span class="symbol-label bg-light-primary">
+                                                <i class="ki-solid ki-verify fs-2 text-success">
+                                                </i>
+                                            </span>
+                                            {% elif t.status == 'failure' %}
+                                            <span class="symbol-label bg-light-danger">
+                                                <i 
+                                                    class="ki-solid ki-cross fs-2 text-danger">
+                                                </i>
+                                            </span>
+                                            {% else %}
+                                            <span class="symbol-label bg-light-primary">
+                                                <i
+                                                    class="animation-spin fs-2 ki-duotone ki-abstract-12 text-primary">
+                                                    <span class="path1"></span>
+                                                    <span class="path2"></span>
+                                                </i>
+                                            </span>
+                                            {% endif %}
+                                        </div>
+                                        <!-- Title + message -->
+                                        <div class="mb-0 me-2">
+                                            <div class="w-375px d-flex align-items-center justify-content-between pe-2">
+                                                <div class="d-flex flex-column justify-content-center">
+                                                    <a data-title href="#" class="fs-6 text-gray-800 text-hover-primary fw-bold">
+                                                        {{ t.name|default:'Tarefa sem nome' }}
+                                                    </a>
+                                                    <div data-message class="text-gray-500 fs-7">
+                                                        {{ t.message|default:"message não definido" }}
+                                                    </div>
+                                                </div>
+                                                {% if t.status == 'success' %}
+                                                <span data-badge class="badge badge-light-success fs-8">Concluida</span>
+                                                {% elif t.status == 'failure' %}
+                                                <span data-badge class="badge badge-light-danger fs-8">Falha</span>
+                                                {% else %}
+                                                <span data-badge class="badge badge-light-primary fs-8">Em andamento</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% if t.status == 'progress' or t.status == 'started' %}
+                                    <div data-bar class="px-4 mt-2 min-w-425px">
+                                        <div class="progress w-100 h-7px">
+                                            <div class="progress-bar bg-primary" style="width: {{ t.porcent }}%;">{{ t.porcent }}</div>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <!-- end::Item -->
+                                <!-- begin::Progress bar -->
+
+                                <!-- end::Progress bar -->
+                                {% endfor %}
+                                {% else %}
+                                <div class="text-center text-muted py-3">
+                                    Nenhuma task em andamento
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
 
         <!-- user dropdown -->
         <div class="dropdown">
             <button class="btn btn-icon btn-active-light-primary btn-sm rounded-circle border border-gray-300"
-                    data-bs-toggle="dropdown">
-                    <div class="symbol symbol-30px symbol-circle">
-                        <div class="symbol-label fs-4 fw-semibold text-success">{{ request.user.username|title|slice:"0:1" }}</div>
+                data-bs-toggle="dropdown">
+                <div class="symbol symbol-30px symbol-circle">
+                    <div class="symbol-label fs-4 fw-semibold text-success">{{ request.user.username|title|slice:"0:1"}}
                     </div>
+                </div>
             </button>
             <ul class="dropdown-menu dropdown-menu-end pt-0 p-2">
                 <li class="px-3 py-2">
@@ -63,34 +218,34 @@
                 </li>
                 <!-- links de perfil e configurações -->
                 <li>
-                    <a class="dropdown-item d-flex align-items-center rounded text-gray-800 text-hover-dark"
-                    href="#">
+                    <a class="dropdown-item d-flex align-items-center rounded text-gray-800 text-hover-dark" href="#">
                         <i class="ki-solid fs-2 ki-profile-circle me-2"></i>Meu Perfil
                     </a>
                 </li>
                 <li>
-                    <a class="dropdown-item d-flex align-items-center rounded text-gray-800 text-hover-dark"
-                    href="#">
+                    <a class="dropdown-item d-flex align-items-center rounded text-gray-800 text-hover-dark" href="#">
                         <i class="ki-solid fs-2 ki-setting-2 me-2"></i>Configurações
                     </a>
                 </li>
-                <li><hr class="dropdown-divider"/></li>
+                <li>
+                    <hr class="dropdown-divider" />
+                </li>
                 <!-- switch de tema -->
                 <li>
-                    <div class="rounded form-check form-switch dropdown-item d-flex align-items-center justify-content-between text-gray-800 text-hover-dark">
+                    <div
+                        class="rounded form-check form-switch dropdown-item d-flex align-items-center justify-content-between text-gray-800 text-hover-dark">
                         <div class="d-flex align-items-center">
-                              <i class="ki-outline ki-moon fs-2"></i>
+                            <i class="ki-outline ki-moon fs-2"></i>
                             <span class="menu-title fw-semibold ms-2 text-gray-800">Dark Mode</span>
                         </div>
-                        <input class="form-check-input" type="checkbox" id="kt_theme_mode_toggle"/>
+                        <input class="form-check-input" type="checkbox" id="kt_theme_mode_toggle" />
                     </div>
                 </li>
                 <!-- formulário de logout -->
                 <li class="px-3 py-2">
                     <form method="post" action="{% url 'authapp:logout' %}">
                         {% csrf_token %}
-                        <button type="submit"
-                                class="btn btn-light w-100 btn-sm">
+                        <button type="submit" class="btn btn-light w-100 btn-sm">
                             <span class="menu-title fw-semibold ms-2">Desconectar</span>
                         </button>
                     </form>

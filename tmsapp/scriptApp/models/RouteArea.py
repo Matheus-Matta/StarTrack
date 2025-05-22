@@ -30,6 +30,9 @@ class RouteArea(models.Model):
         choices=[('active','Ativo'),('disabled','Desabilitado')],
         default='active'
     )
+
+    is_active = models.BooleanField('Ativo', default=True)
+    
     # Cor hexadecimal personalizada
     hex_color = models.CharField(
         'Cor HEX', max_length=7,

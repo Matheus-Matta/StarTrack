@@ -123,7 +123,7 @@
                 </form>
                 {# Botões de ação #}
                 <div class="d-flex align-items-center justify-content-between gap-2"">
-                <form action=" {% url 'tmsapp:scriptapp:delete_routearea' rota.id %}" method="delete">
+                <form class="form-delete-confirm" action=" {% url 'tmsapp:scriptapp:delete_routearea' rota.id %}" method="post">
                   <button type="submit" class="btn btn-sm btn-light-danger px-2 py-1">
                     <i class="ki-solid p-0 ki-trash"></i>
                   </button>

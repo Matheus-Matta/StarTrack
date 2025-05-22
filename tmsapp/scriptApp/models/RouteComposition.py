@@ -27,6 +27,9 @@ class RouteComposition(models.Model):
         User, verbose_name='Criado por', on_delete=models.SET_NULL, null=True, blank=True,
         related_name='route_compositions_created'
     )
+    
+    is_active = models.BooleanField('Ativo', default=True)
+
     history = HistoricalRecords()
 
     class Meta:

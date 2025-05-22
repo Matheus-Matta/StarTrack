@@ -81,7 +81,7 @@ class DriverDeactivateView(LoginRequiredMixin, View):
         driver.is_active = False
         driver.save()
         messages.success(request, 'Motorista desativado com sucesso.')
-        return redirect('driver_list')
+        return redirect('tmsapp:fleetapp:driver_list')
 
 
 

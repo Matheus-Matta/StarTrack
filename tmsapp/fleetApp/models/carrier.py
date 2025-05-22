@@ -19,11 +19,10 @@ class Carrier(models.Model):
     number = models.CharField('Número', max_length=20,  blank=True, null=True)
     city = models.CharField('Cidade', max_length=100, blank=True, null=True)
     state = models.CharField('Estado', max_length= 50, blank=True, null=True)
-    zip_code = models.CharField('CEP', max_length=20,  blank=True, null=True)
+    postal_code = models.CharField('CEP', max_length=20,  blank=True, null=True)
+    neighborhood = models.CharField('Bairro', max_length=100, blank=True, null=True)
 
-    des_address = models.CharField('Endereço', max_length=500, null=True, blank=True, default='')
-    address = models.CharField('Endereço Completo', max_length=500, null=True, blank=True, default='')
-
+    is_active = models.BooleanField('Ativo', default=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -51,24 +50,11 @@ class Carrier(models.Model):
         ordering = ['name']
         indexes = [models.Index(fields=['name']), models.Index(fields=['description'])]
 
-    def save(self, *args, **kwargs):
-        # assemble full address when any component is present
-        parts = []
-        if self.des_address:
-            parts.append(self.des_address)
-        if self.street:
-            parts.append(self.street)
-        if self.number:
-            parts[-1] = f"{parts[-1]}, {self.number}" if parts else self.number
-        if self.city:
-            parts.append(self.city)
-        if self.state:
-            parts[-1] = f"{parts[-1]}/{self.state}" if parts else self.state
-        if self.zip_code:
-            parts.append(self.zip_code)
-        self.address = ' - '.join(parts)
-        super().save(*args, **kwargs)
-
+    @property
+    def full_address(self):
+        parts = [self.street, self.number, self.neighborhood, self.city]
+        return ', '.join(filter(None, parts))
+    
     def __str__(self):
         return self.name
 

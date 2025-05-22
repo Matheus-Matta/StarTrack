@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Clientes{% endblock %}
+
+{% block content %}
+{% include 'partials/nav/nav_crm.html' %}
+
+<div class="bg-body-content m-0 border border-secondary rounded-bottom-4 border-top-0 flex-grow-1 overflow-auto" style="min-height: 0;">
+  <div id="scrollable_content" class="p-4">
+    <div class="row">
+      <div class="col-12 mb-4">
+        <div id="my-customers-table"
+             class="card h-100 px-4 pb-4"
+             data-url="{% url 'djangotables' %}"
+             data-model="customer">
+
+          {# Cabeçalho com busca e ação #}
+          <div class="card-header p-0 d-flex align-items-center justify-content-between border-bottom mb-3">
+            <h3 class="card-title m-0">Clientes</h3>
+            <div class="d-flex align-items-center gap-5">
+              <div class="input-group-sm position-relative w-300px">
+                <i class="ki-solid ki-magnifier fs-3 position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+                <input type="text"
+                       id="datatable_search"
+                       data-search
+                       class="form-control form-control-solid ps-10"
+                       placeholder="Procurar nome, e-mail..." />
+              </div>
+              <a href="{% url 'crmapp:customer_create' %}" class="btn btn-basic btn-sm shadow-md">
+                <i class="ki-solid bi-plus-circle"></i> Adicionar
+              </a>
+            </div>
+          </div>
+
+          {# Tabela responsiva #}
+          <div class="table-responsive mb-3" style="min-height: 600px; max-height: 600px; overflow:auto;">
+            <table class="table table-rounded border-separate p-0 m-0 align-middle"
+                   data-datatable-table="true">
+              <thead class="fw-bolder sticky-top bg-gray-100 pb-2">
+                <tr class="fw-semibold text-muted">
+                  <th class="w-10px py-2 ps-5 rounded-start-5">
+                    <div class="form-check form-check-sm form-check-custom">
+                      <input class="form-check-input h-15px w-15px"
+                             type="checkbox"
+                             data-kt-check="true"
+                             data-kt-check-target="#datatable-body .form-check-input" />
+                    </div>
+                  </th>
+                  <th data-field="id,full_name"    class="py-2 text-hover-dark">Nome</th>
+                  <th data-field="email"        class="py-2 text-hover-dark">E-mail</th>
+                  <th data-field="phone"        class="py-2 text-hover-dark">Telefone</th>
+                  <th data-field="cpf"          class="py-2 text-hover-dark">CPF</th>
+                  <th data-field="created_at"   class="py-2 text-hover-dark">Criado em</th>
+                  <th class="rounded-end-5"></th>
+                </tr>
+              </thead>
+              <tbody id="datatable-body"></tbody>
+            </table>
+          </div>
+
+          {# Footer com page size e paginação #}
+          <div class="d-flex justify-content-between pt-2 align-items-center">
+            <div class="d-flex align-items-center gap-2">
+              <span class="fs-7">Mostrar</span>
+              <select data-page-size class="form-select form-select-sm w-75px">
+                <option value="10">10</option>
+                <option value="25" selected>25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+              </select>
+              <span class="fs-7">por página</span>
+            </div>
+            <nav>
+              <ul id="datatable-pagination"
+                  data-pagination
+                  class="pagination pagination-sm pagination-rounded mb-0"></ul>
+            </nav>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  new DjangoDataTable({
+    root: document.getElementById('my-customers-table'),
+    pageSize: 25,
+    cellClassName: 'px-2 py-1 text-sm',
+    orderBy: 'full_name',
+    orderDir: 'asc',
+    rowRenderer: row => {
+      // URL de edição do cliente
+      const url = `/crm/customer/${row.id}/update/`;
+      return `
+        <tr class="cursor-pointer bg-hover-light h-15px border-1 border-bottom border-gray-200">
+          <td class="ps-5 py-1">
+            <div class="form-check form-check-sm form-check-custom">
+              <input type="checkbox" class="form-check-input h-15px w-15px" value="${row.id}">
+            </div>
+          </td>
+          <td class="py-1">
+            <a href="${url}" class="text-gray-800 fw-bold fs-8">
+              ${row.full_name}
+            </a>
+          </td>
+          <td class="text-gray-700 py-1">${row.email || '—'}</td>
+          <td class="text-gray-700 py-1">${row.phone || '—'}</td>
+          <td class="text-gray-700 py-1">${row.cpf || '—'}</td>
+          <td class="text-gray-700 py-1">${new Date(row.created_at).toLocaleDateString()}</td>
+          <td class="py-1">
+            <a href="${url}" class="text-hover-primary text-muted">
+              <i class="fa fa-edit"></i>
+            </a>
+          </td>
+        </tr>`;
+    }
+  });
+});
+</script>
+{% endblock %}

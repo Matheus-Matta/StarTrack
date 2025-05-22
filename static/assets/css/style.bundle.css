@@ -2107,6 +2107,7 @@ progress {
   --bs-table-hover-bg: var(--bs-gray-100);
   width: 100%;
   margin-bottom: 1rem;
+  position: relative;
   vertical-align: top;
   border-color: var(--bs-table-border-color);
 }
@@ -2355,6 +2356,7 @@ progress {
 .form-control {
   display: block;
   width: 100%;
+  color: var(--bs-gray-900);
   padding: 0.775rem 1rem;
   font-size: 1.1rem;
   font-weight: 500;
@@ -3604,7 +3606,7 @@ textarea.form-control-lg {
 }
 
 .dropdown-menu {
-  --bs-dropdown-zindex: 1000;
+  --bs-dropdown-zindex: 2000 ;
   --bs-dropdown-min-width: 10rem;
   --bs-dropdown-padding-x: 0;
   --bs-dropdown-padding-y: 0.5rem;
@@ -3631,7 +3633,7 @@ textarea.form-control-lg {
   --bs-dropdown-header-padding-x: 0.85rem;
   --bs-dropdown-header-padding-y: 0.5rem;
   position: absolute;
-  z-index: var(--bs-dropdown-zindex);
+  z-index: var(--bs-dropdown-zindex) !important;
   display: none;
   min-width: var(--bs-dropdown-min-width);
   padding: var(--bs-dropdown-padding-y) var(--bs-dropdown-padding-x);
@@ -4068,6 +4070,15 @@ textarea.form-control-lg {
   color: var(--bs-nav-tabs-link-active-color);
   background-color: var(--bs-nav-tabs-link-active-bg);
   border-color: var(--bs-nav-tabs-link-active-border-color);
+}
+[data-bs-theme=light] .nav-white .nav-link.active,
+[data-bs-theme=light] .nav-white .nav-item.show .nav-link {
+  color: var(--bs-white) !important;
+  border-color: var(--bs-white) !important;
+}
+[data-bs-theme=light] .nav-white .nav-link:hover {
+  color: var(--bs-white) !important;
+  border-color: var(--bs-white) !important;
 }
 .nav-tabs .dropdown-menu {
   margin-top: calc(-1 * var(--bs-nav-tabs-border-width));
@@ -12125,6 +12136,9 @@ textarea.form-control-lg {
 
 .z-index-3 {
   z-index: 3 !important;
+}
+.z-index-10 {
+  z-index: 10 !important;
 }
 
 .cursor-help {

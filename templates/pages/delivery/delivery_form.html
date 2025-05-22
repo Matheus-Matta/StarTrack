@@ -16,7 +16,7 @@
           <a href="#" class="text-dark text-hover-primary">Dashboard</a>
         </li>
         <li class="breadcrumb-item">
-          <a href="{% url 'tmsapp:scriptapp:delivery_list' %}" class="text-dark text-hover-primary">Lista de Entregas</a>
+          <a href="{% url 'tmsapp:deliveryapp:delivery_list' %}" class="text-dark text-hover-primary">Lista de Entregas</a>
         </li>
         <li class="breadcrumb-item text-muted">{% if object %}Editar{% else %}Nova{% endif %} Entrega</li>
       </ol>
@@ -24,9 +24,9 @@
         {% if object %}
         <form id="delivery-delete"
               data-message="Tem certeza que deseja excluir esta entrega?"
-              action="{% url 'tmsapp:scriptapp:delivery_cancel' object.pk %}"
+              action="{% url 'tmsapp:deliveryapp:delivery_cancel' object.pk %}"
               method="post"
-              class="d-inline">
+              class="d-inline form-confirm">
           {% csrf_token %}
           <button type="submit" class="btn btn-light-danger btn-sm shadow-md me-2">
             <i class="ki-solid ki-trash fs-4"></i> Remover
@@ -46,9 +46,9 @@
             method="post"
             autocomplete="off"
             action="{% if object %}
-                      {% url 'tmsapp:scriptapp:delivery_update' object.pk %}
+                      {% url 'tmsapp:deliveryapp:delivery_update' object.pk %}
                     {% else %}
-                      {% url 'tmsapp:scriptapp:delivery_create' %}
+                      {% url 'tmsapp:deliveryapp:delivery_create' %}
                     {% endif %}">
         {% csrf_token %}
 
@@ -73,20 +73,33 @@
           <div class="tab-pane fade show active" id="tab-details" role="tabpanel">
             <div class="row gx-7 gy-5">
               <div class="col-lg-6">
-                <div class="mb-5">
-                  <label for="id_customer_name" class="form-label fw-semibold">Nome do Cliente</label>
+               <label for="id_customer_input" class="form-label fw-semibold">Cliente</label>
+                <div id="customer-select"
+                    data-url="{% url 'djangoselect' %}"
+                    data-model="Customer"
+                    data-fields="id,full_name,email"
+                    class="mb-5 position-relative">
                   <input type="text"
-                         name="customer_name"
-                         id="id_customer_name"
-                         required
-                         class="form-control form-control-solid form-control-sm {% if form.customer_name.errors %}is-invalid{% endif %}"
-                         placeholder="Nome do cliente"
-                         value="{{ form.customer_name.value|default_if_none:'' }}">
-                  {% for err in form.customer_name.errors %}
-                  <div class="invalid-feedback">{{ err }}</div>
-                  {% endfor %}
+                        id="id_customer_input"
+                        data-djangoselect
+                        placeholder="Buscar cliente…"
+                        autocomplete="off"
+                        value="{{ form.instance.customer.full_name|default_if_none:'' }}"
+                        class="form-control form-control-solid form-control-sm text-dark pe-13">
+                  <span data-options class="position-absolute top-50 end-0 translate-middle-y pe-2 text-gray-400 cursor-pointer d-flex align-items-center">
+                    <i data-clean class="ki-solid ki-cross fs-3 text-hover-danger"></i>
+                    <i data-edit class="ki-solid ki-arrow-right fs-3 text-hover-primary"></i>
+                  </span>
+                  <input type="hidden"
+                        name="customer"
+                        id="id_customer"
+                        data-target-djangoselect
+                        value="{{ form.instance.customer.id|default_if_none:'' }}">
+                  <div class="dropdown-menu p-2 border border-gray-200 w-100"
+                      data-dropdown
+                      style="display:none; max-height:300px; overflow:auto; z-index:1000;">
+                  </div>
                 </div>
-
                 <div class="mb-5">
                   <label for="id_order_number" class="form-label fw-semibold">Número do Pedido</label>
                   <input type="text"
@@ -179,32 +192,6 @@
                   <div class="invalid-feedback">{{ err }}</div>
                   {% endfor %}
                 </div>
-
-                <div class="mb-5">
-                  <label for="id_phone" class="form-label fw-semibold">Telefone</label>
-                  <input type="tel"
-                         name="phone"
-                         id="id_phone"
-                         class="form-control form-control-solid form-control-sm {% if form.phone.errors %}is-invalid{% endif %}"
-                         placeholder="(00) 00000-0000"
-                         value="{{ form.phone.value|default_if_none:'' }}">
-                  {% for err in form.phone.errors %}
-                  <div class="invalid-feedback">{{ err }}</div>
-                  {% endfor %}
-                </div>
-
-                <div class="mb-5">
-                  <label for="id_cpf" class="form-label fw-semibold">CPF</label>
-                  <input type="text"
-                         name="cpf"
-                         id="id_cpf"
-                         class="form-control form-control-solid form-control-sm {% if form.cpf.errors %}is-invalid{% endif %}"
-                         placeholder="000.000.000-00"
-                         value="{{ form.cpf.value|default_if_none:'' }}">
-                  {% for err in form.cpf.errors %}
-                  <div class="invalid-feedback">{{ err }}</div>
-                  {% endfor %}
-                </div>
               </div>
             </div>
           </div>
@@ -251,6 +238,27 @@
     Inputmask("99999-999").mask("#id_postal_code");
     Inputmask({ mask: ["(99) 9999-9999", "(99) 99999-9999"], keepStatic: true }).mask("#id_phone");
     Inputmask("999.999.999-99").mask("#id_cpf");
-  });
+    const root = document.getElementById('customer-select');
+    const ds = new DjangoSelect({
+      root,
+      pageSize:    5,
+      orderBy:     'full_name',
+      orderDir:    'asc',
+      rowRenderer: row => `
+        <strong>#${row.id} – ${row.full_name}</strong><br>
+        <small>${row.email}</small>`,
+      valueField:  'id'
+    });
+
+    const hidden = root.querySelector('[data-target-djangoselect]');
+    const btnClean = root.querySelector('[data-clean]');
+    const btnEdit = root.querySelector('[data-edit]');
+    btnEdit.addEventListener('click', () => {
+      const id = hidden.value;
+      if (!id) return;
+      window.location.href = `/crm/customer/${id}/update/`;
+    });
+});
+ 
 </script>
 {% endblock %}

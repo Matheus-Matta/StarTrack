@@ -76,8 +76,8 @@ class VehicleDeactivateView(LoginRequiredMixin, View):
     
     def post(self, request, pk):
         vehicle = get_object_or_404(Vehicle, pk=pk)
-        vehicle.status = Vehicle.Status.DECOMMISSIONED
+        vehicle.status = 'DECOMMISSIONED'
         vehicle.is_active = False
         vehicle.save()
         messages.success(request, 'Veículo desativado com sucesso.')
-        return redirect('vehicle_list')
+        return redirect('tmsapp:fleetapp:vehicle_list')

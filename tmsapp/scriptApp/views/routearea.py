@@ -133,7 +133,8 @@ def edit_routearea(request, route_id):
 def delete_routearea(request, route_id):
     try:
         rota = get_object_or_404(RouteArea, id=route_id)
-        rota.delete()
+        rota.is_active = False
+        rota.save()
         messages.success(request, "Rota deletada com sucesso.")
         return redirect('tmsapp:scriptapp:route')  # redirecione para sua lista de rotas
     except Exception as e:

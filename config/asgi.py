@@ -8,7 +8,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 django.setup()
 
 # Importar só depois do setup
-from tmsapp import routing
+from djangonotify import routing
 
 application = ProtocolTypeRouter({
     "http": get_asgi_application(),

@@ -14,6 +14,6 @@ urlpatterns = [
   
  path('script/', include('tmsapp.scriptApp.urls')),
  path('fleet/', include('tmsapp.fleetApp.urls')),
-
+ path('', include('tmsapp.deliveryApp.urls')),
 
 ]

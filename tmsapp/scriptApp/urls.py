@@ -44,8 +44,4 @@ urlpatterns = [
   path('route/<int:route_id>/', route_view, name='route_view'),
 
 
-  path('deliverys', DeliveryListView.as_view(), name='delivery_list'),
-  path('delivery/create/', DeliveryCreateView.as_view(), name='delivery_create'),
-  path('delivery/<int:pk>/update/', DeliveryUpdateView.as_view(), name='delivery_update'),
-  path('delivery/<int:pk>/cancel/', DeliveryCancelView.as_view(), name='delivery_cancel'),
 ]

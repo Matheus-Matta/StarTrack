@@ -21,7 +21,8 @@
       </ol>
       <div class="d-flex align-items-center">
         {% if object %}
-        <form id="carrier-delete" data-message="Tem certeza que deseja desativar esta transportadora?" action="{% url 'tmsapp:fleetapp:carrier_deactivate' object.pk %}" method="delete" class="d-inline">
+        <form id="carrier-delete" data-message="Tem certeza que deseja desativar esta transportadora?" action="{% url 'tmsapp:fleetapp:carrier_deactivate' object.pk %}" 
+              method="post" class="d-inline form-confirm">
           {% csrf_token %}
           <button type="submit" class="btn btn-light-danger btn-sm shadow-md me-2">
             <i class="ki-solid ki-trash fs-4"></i> Remover
@@ -103,26 +104,25 @@
                         <div class="invalid-feedback">{{ err }}</div>
                       {% endfor %}
                     </div>
-
-                    <div class="col-12 mt-0 mb-5">
-                      <label for="des_address" class="form-label fw-semibold">Endereço</label>
-                      <input type="text" name="des_address" id="des_address"
-                             class="form-control form-control-solid form-control-sm {% if form.des_address.errors %}is-invalid{% endif %}"
+                    <!-- Agora os campos separados em duas colunas -->
+                    <div class="col-md-12 mt-0 mb-5">
+                      <label for="id_street" class="form-label fw-semibold">Endereço</label>
+                      <input type="text" name="street" id="id_street"
+                             class="form-control form-control-solid form-control-sm {% if form.street.errors %}is-invalid{% endif %}"
                              placeholder="Rua dos Bobos, n39"
-                             value="{{ form.des_address.value|default_if_none:'' }}">
-                      {% for err in form.des_address.errors %}
+                             value="{{ form.street.value|default_if_none:'' }}">
+                      {% for err in form.street.errors %}
                         <div class="invalid-feedback">{{ err }}</div>
                       {% endfor %}
                     </div>
-                  
-                    <!-- Agora os campos separados em duas colunas -->
+                        <!-- Agora os campos separados em duas colunas -->
                     <div class="col-md-6 mt-0 mb-5">
-                      <label for="id_street" class="form-label fw-semibold">Bairro</label>
-                      <input type="text" name="street" id="id_street"
-                             class="form-control form-control-solid form-control-sm {% if form.street.errors %}is-invalid{% endif %}"
-                             placeholder="Ex: Avenida Paulista"
-                             value="{{ form.street.value|default_if_none:'' }}">
-                      {% for err in form.street.errors %}
+                      <label for="id_neighborhood" class="form-label fw-semibold">Bairro</label>
+                      <input type="text" name="neighborhood" id="id_neighborhood"
+                             class="form-control form-control-solid form-control-sm {% if form.neighborhood.errors %}is-invalid{% endif %}"
+                             placeholder="icarai, alcantara, etc..."
+                             value="{{ form.neighborhood.value|default_if_none:'' }}">
+                      {% for err in form.neighborhood.errors %}
                         <div class="invalid-feedback">{{ err }}</div>
                       {% endfor %}
                     </div>
@@ -137,11 +137,11 @@
                       {% endfor %}
                     </div>
                     <div class="col-md-4 mt-0 mb-5">
-                      <label for="id_zip_code" class="form-label fw-semibold">CEP</label>
-                      <input type="text" name="zip_code" id="id_zip_code"
-                             class="form-control form-control-solid form-control-sm {% if form.zip_code.errors %}is-invalid{% endif %}"
+                      <label for="id_postal_code" class="form-label fw-semibold">CEP</label>
+                      <input type="text" name="postal_code" id="id_postal_code"
+                             class="form-control form-control-solid form-control-sm {% if form.postal_code.errors %}is-invalid{% endif %}"
                              placeholder="01234-000"
-                             value="{{ form.zip_code.value|default_if_none:'' }}">
+                             value="{{ form.postal_code.value|default_if_none:'' }}">
                       {% for err in form.zip_code.errors %}
                         <div class="invalid-feedback">{{ err }}</div>
                       {% endfor %}

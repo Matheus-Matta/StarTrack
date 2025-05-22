@@ -83,7 +83,9 @@ class Vehicle(models.Model):
         related_name='documents_vehicles',
         help_text='Documentos relacionados ao veículo'
     )
+    
     is_outsourced = models.BooleanField('Terceirizado', default=False)
+    is_active = models.BooleanField('Ativo', default=True)
 
     # capacidades e status
     capacity_volume = models.DecimalField('Capacidade (m³)', max_digits=8, decimal_places=2)

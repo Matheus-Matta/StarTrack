@@ -117,11 +117,11 @@
                 return `
                 <tr class="cursor-pointer bg-hover-light border-1 border-bottom border-gray-200">
                     <td class="ps-5"><div class="form-check form-check-sm form-check-custom"><input type="checkbox" class="form-check-input" value="${row.id}"></div></td>
-                    <td><a class="text-dark fw-bold fs-4 fw-bold" href="${url}">${row.first_name} ${row.last_name}</a></td>
-                    <td class="text-gray-700 fs-5">${row.license_number}</td>
-                    <td class="text-gray-700 fs-5">${row.license_category}</td>
-                    <td class="text-gray-700 fs-5">${row.phone}</td>
-                    <td class="text-gray-700 fs-5">${row.email}</td>
+                    <td><a class="text-dark fw-bold fw-bold" href="${url}">${row.first_name} ${row.last_name}</a></td>
+                    <td class="text-gray-700">${row.license_number}</td>
+                    <td class="text-gray-700">${row.license_category}</td>
+                    <td class="text-gray-700">${row.phone}</td>
+                    <td class="text-gray-700">${row.email}</td>
                     <td><span class="badge badge-${row.is_active ? 'success' : 'danger'} badge-outline rounded-[30px]">
                         <span class="w-5px h-5px rounded-circle bg-success me-1"></span>
                         ${row.is_active ? 'Ativo' : 'Desativado'}

@@ -28,7 +28,24 @@
                            class="form-control form-control-solid ps-10"
                            placeholder="Procurar cliente, pedido..." />
                   </div>
-                  <a href="{% url 'tmsapp:scriptapp:delivery_create' %}" class="btn btn-basic btn-sm shadow-md">
+                    <form id="import-deliveries-form"
+                        method="post"
+                        action="{% url 'tmsapp:deliveryapp:delivery_import' %}"
+                        enctype="multipart/form-data"
+                        class="d-inline">
+                    {% csrf_token %}
+                    <input type="file"
+                          name="file"
+                          id="id_import_file"
+                          accept=".xls,.xlsx"
+                          hidden>
+                    <button type="button"
+                            class="btn btn-light btn-sm shadow-md"
+                            onclick="document.getElementById('id_import_file').click()">
+                      <i class="ki-solid bi-upload me-1"></i> Importar
+                    </button>
+                  </form>
+                  <a href="{% url 'tmsapp:deliveryapp:delivery_create' %}" class="btn btn-basic btn-sm shadow-md">
                     <i class="ki-solid bi-plus-circle"></i> Adicionar
                   </a>
                 </div>
@@ -50,11 +67,12 @@
                                  data-kt-check-target="#datatable-body .form-check-input" />
                         </div>
                       </th>
-                      <th data-field="id,customer_name" class="py-2 text-hover-dark">Cliente</th>
+                      <th data-field="id,customer" class="py-2 text-hover-dark">Cliente</th>
                       <th data-field="order_number"    class="py-2 text-hover-dark">Pedido</th>
                       <th data-field="full_address"    class="py-2 text-hover-dark">Endereço</th>
                       <th data-field="postal_code"     class="py-2 text-hover-dark">CEP</th>
-                      <th data-field="status"          class="py-2 text-hover-dark">Status</th>
+                      <th data-field="created_at"     class="py-2 text-hover-dark">Criação</th>
+                      <th data-field="status,status_display" class="py-2 text-hover-dark">Status</th>
                       <th class="rounded-end-5"></th>
                     </tr>
                   </thead>
@@ -102,7 +120,9 @@ document.addEventListener('DOMContentLoaded', () => {
     orderBy:  'id',
     orderDir: 'desc',
     rowRenderer: row => {
-      const url = `/tms/script/delivery/${row.id}/update/`;
+      const url = `/tms/delivery/${row.id}/update/`;
+      const customer = row.customer?.label || '...';
+      const date = row.created_at.slice(0,10).split('-').reverse().join('/');
       return `
         <tr class="cursor-pointer bg-hover-light h-15px border-1 border-bottom border-gray-200">
           <td class="ps-5 py-1">
@@ -112,24 +132,49 @@ document.addEventListener('DOMContentLoaded', () => {
           </td>
           <td class="py-1">
             <a href="${url}" class="text-gray-800 fw-bold fs-8">
-              ${row.customer_name}
+              ${customer}
             </a>
           </td>
           <td class="text-gray-700 py-1">${row.order_number}</td>
           <td class="text-gray-700 py-1">${row.full_address}</td>
-          <td class="text-gray-700 py-1">${row.postal_code || '—'}</td>
+          <td class="text-gray-700 py-1">${row.postal_code}</td>
+          <td class="text-gray-700 py-1">${date}</td>
           <td class="py-1">
-            <span class="badge badge-${row.status === 'pending' ? 'warning' : row.status === 'delivered' ? 'success' : 'secondary'} badge-outline rounded-pill">
-              ${row.status.charAt(0).toUpperCase() + row.status.slice(1)}
+            <span class="badge badge-${row.status} badge-outline rounded-pill">
+              ${row.status_display.charAt(0).toUpperCase() + row.status_display.slice(1)}
             </span>
           </td>
-          <td class="py-1">
+          <td class="py-1 pe-2">
             <a href="${url}" class="text-hover-primary text-muted">
               <i class="fa fa-edit"></i>
             </a>
           </td>
         </tr>`;
     }
+  });
+  const fileInput = document.getElementById('id_import_file');
+  fileInput.addEventListener('click', () => {
+    fileInput.value = '';
+    fileInput.click();
+  });
+  fileInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    Swal.fire({
+      icon: 'info',
+      html: `Tem certeza que deseja importar as entregas da planilha <small class="text-primary">${file.name}</small>?`,
+      showCancelButton: true,
+      buttonsStyling: false,
+      confirmButtonText: "Sim",
+      cancelButtonText: "Cancelar",
+      customClass: {
+        confirmButton: 'btn btn-sm btn-success me-2',
+        cancelButton:  'btn btn-sm btn-secondary'
+      }
+    }).then(result => {
+      if (result.isConfirmed) {
+        fileInput.closest('form').submit();
+      }
+    });
   });
 });
 </script>

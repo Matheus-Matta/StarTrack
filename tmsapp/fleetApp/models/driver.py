@@ -35,8 +35,6 @@ class Driver(models.Model):
     phone = models.CharField('Telefone', max_length=20, blank=True, null=True, db_index=True)
     email = models.EmailField('E-mail', blank=True, null=True, db_index=True)
 
-
-
     is_active = models.BooleanField('Ativo', default=True)
     is_outsourced = models.BooleanField('Terceirizado', default=False)
 

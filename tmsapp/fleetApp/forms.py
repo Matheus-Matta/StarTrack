@@ -48,8 +48,7 @@ class DriverForm(forms.ModelForm):
         fields = [
             'user', 'first_name', 'last_name',
             'license_number', 'license_category', 'license_expiry',
-            'phone', 'email',
-            'is_active', 'is_outsourced',
+            'phone', 'email','is_outsourced',
             'document',
         ]
         widgets = {
@@ -76,8 +75,9 @@ class CarrierForm(forms.ModelForm):
         model = Carrier
         fields = [
             'name','phone','email','number',
-            'city', 'state', 'zip_code','street',
+            'city', 'state', 'postal_code','street',
             'description', 'cnpj',
+            'document', 'neighborhood',
         ]
 
     def clean(self):

@@ -32,8 +32,8 @@ DEBUG = config('DJANGO_DEBUG', cast=bool)
 
 
 # Hosts permitidos (do .env, separados por vírgula)
-ALLOWED_HOSTS = config('DJANGO_ALLOWED_HOSTS', cast=Csv())
-
+#ALLOWED_HOSTS = config('DJANGO_ALLOWED_HOSTS', cast=Csv())
+ALLOWED_HOSTS = ['*']
 # Gera os domínios de origem confiáveis para CSRF
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:8580',
@@ -44,6 +44,8 @@ CSRF_TRUSTED_ORIGINS = [
     'https://127.0.0.1:8580',
     "http://10.0.0.4:8580",
     "https://10.0.0.4:8580",
+    "http://10.0.0.253:8001",
+    "https://10.0.0.253:8001",
     "http://mxrouter.starseguro.com.br",
     "https://mxrouter.starseguro.com.br",
 ]
@@ -58,7 +60,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_celery_results',
+    'djangonotify',
     'djangotables',
+    'djangoselect',
     'compressor',     
     'channels',
     'simple_history',
@@ -66,7 +70,7 @@ INSTALLED_APPS = [
     'authapp',
     'homeapp',
     'tmsapp',
-    'ors',
+    'crmapp',
 ]
 
 MIDDLEWARE = [
@@ -93,6 +97,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'djangonotify.context_processors.notifications_and_tasks',
             ],
         },
     },

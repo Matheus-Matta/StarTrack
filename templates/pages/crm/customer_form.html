@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{% if object %}Editar Cliente{% else %}Novo Cliente{% endif %}{% endblock %}
+
+{% block content %}
+{% include 'partials/nav/nav_crm.html' %}
+
+<div class="bg-body-content m-0 border border-secondary rounded-bottom-4 border-top-0 flex-grow-1 overflow-auto" style="min-height:0">
+  <div id="scrollable_content" class="p-4">
+
+    <div class="d-flex align-items-center justify-content-between mx-5 mb-3">
+      <ol class="breadcrumb text-muted fs-6 fw-semibold">
+        <li class="breadcrumb-item">
+          <a href="#" class="text-dark text-hover-primary">Dashboard</a>
+        </li>
+        <li class="breadcrumb-item">
+          <a href="{% url 'crmapp:customer_list' %}" class="text-dark text-hover-primary">Lista de Clientes</a>
+        </li>
+        <li class="breadcrumb-item text-muted">{% if object %}Editar{% else %}Novo{% endif %} Cliente</li>
+      </ol>
+      <div class="d-flex align-items-center">
+        {% if object %}
+        <form id="customer-delete"
+              data-message="Tem certeza que deseja excluir este cliente?"
+              action="{% url 'crmapp:customer_delete' object.pk %}"
+              method="post"
+              class="d-inline form-confirm">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-light-danger btn-sm shadow-md me-2">
+            <i class="ki-solid ki-trash fs-4"></i> Remover
+          </button>
+        </form>
+        {% endif %}
+        <button type="button"
+                onclick="document.getElementById('customer-form').submit()"
+                class="btn btn-basic btn-sm shadow-md d-flex align-items-center">
+          <i class="ki-solid bi-plus-circle fs-4 me-1"></i> Salvar
+        </button>
+      </div>
+    </div>
+
+    <div class="card m-5">
+      <form id="customer-form"
+            method="post"
+            autocomplete="off"
+            action="{% if object %}
+                      {% url 'crmapp:customer_update' object.pk %}
+                    {% else %}
+                      {% url 'crmapp:customer_create' %}
+                    {% endif %}">
+        {% csrf_token %}
+        <ul class="nav nav-tabs nav-line-tabs fw-semibold fs-5 px-3" role="tablist">
+          <li class="nav-item" role="presentation">
+            <a class="nav-link active"
+               id="tab-details-tab"
+               data-bs-toggle="tab"
+               href="#tab-details"
+               role="tab">Detalhes</a>
+          </li>
+        </ul>
+
+        <div class="tab-content p-5">
+          <div class="row gx-7 gy-5" id="tab-details" role="tabpanel">
+            <div class="col-lg-6">
+              <div class="mb-5">
+                <label for="id_full_name" class="form-label fw-semibold">Nome Completo</label>
+                <input type="text"
+                       name="full_name"
+                       id="id_full_name"
+                       required
+                       class="form-control form-control-solid form-control-sm {% if form.full_name.errors %}is-invalid{% endif %}"
+                       placeholder="Nome completo"
+                       value="{{ form.full_name.value|default_if_none:'' }}">
+                {% for err in form.full_name.errors %}
+                  <div class="invalid-feedback">{{ err }}</div>
+                {% endfor %}
+              </div>
+              <div class="mb-5">
+                <label for="id_email" class="form-label fw-semibold">E-mail</label>
+                <input type="email"
+                       name="email"
+                       id="id_email"
+                       class="form-control form-control-solid form-control-sm {% if form.email.errors %}is-invalid{% endif %}"
+                       placeholder="usuario@exemplo.com"
+                       value="{{ form.email.value|default_if_none:'' }}">
+                {% for err in form.email.errors %}
+                  <div class="invalid-feedback">{{ err }}</div>
+                {% endfor %}
+              </div>
+            </div>
+
+            <div class="col-lg-6">
+              <div class="mb-5">
+                <label for="id_phone" class="form-label fw-semibold">Telefone</label>
+                <input type="tel"
+                       name="phone"
+                       id="id_phone"
+                       class="form-control form-control-solid form-control-sm {% if form.phone.errors %}is-invalid{% endif %}"
+                       placeholder="(00) 00000-0000"
+                       value="{{ form.phone.value|default_if_none:'' }}">
+                {% for err in form.phone.errors %}
+                  <div class="invalid-feedback">{{ err }}</div>
+                {% endfor %}
+              </div>
+              <div class="mb-5">
+                <label for="id_cpf" class="form-label fw-semibold">CPF</label>
+                <input type="text"
+                       name="cpf"
+                       id="id_cpf"
+                       class="form-control form-control-solid form-control-sm {% if form.cpf.errors %}is-invalid{% endif %}"
+                       placeholder="000.000.000-00"
+                       value="{{ form.cpf.value|default_if_none:'' }}">
+                {% for err in form.cpf.errors %}
+                  <div class="invalid-feedback">{{ err }}</div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  // Máscaras
+  Inputmask({ mask: "(99) 9999-9999[9]", keepStatic: true })
+    .mask('#id_phone');
+  Inputmask("999.999.999-99").mask('#id_cpf');
+});
+</script>
+{% endblock %}

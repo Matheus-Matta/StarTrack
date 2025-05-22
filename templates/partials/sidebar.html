@@ -18,10 +18,15 @@
             data-bs-toggle="tooltip" data-bs-placement="right" title="Frota">
             <i class="ki-outline ki-delivery fs-3"></i>
         </a>
-        <a href="{% url 'tmsapp:scriptapp:delivery_list' %}"
-            class="btn btn-icon btn-active-light-primary btn-sm w-40px h-40px rounded-circle mb-3 {% if '/tms/fleet' in request.path %}active border border-gray-300{% endif %}"
+        <a href="{% url 'tmsapp:deliveryapp:delivery_list' %}"
+            class="btn btn-icon btn-active-light-primary btn-sm w-40px h-40px rounded-circle mb-3 {% if '/tms/delivery' in request.path %}active border border-gray-300{% endif %}"
             data-bs-toggle="tooltip" data-bs-placement="right" title="Entregas">
             <i class="ki-outline ki-delivery-3 fs-3"></i>
+        </a>
+        <a href="{% url 'crmapp:customer_list' %}"
+            class="btn btn-icon btn-active-light-primary btn-sm w-40px h-40px rounded-circle mb-3 {% if '/crm/' in request.path %}active border border-gray-300{% endif %}"
+            data-bs-toggle="tooltip" data-bs-placement="right" title="Clientes">
+            <i class="ki-outline ki-people fs-3"></i>
         </a>
 
     </div>

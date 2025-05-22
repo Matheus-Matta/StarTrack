@@ -19,12 +19,13 @@
           <li class="breadcrumb-item">
             <a href="{% url 'tmsapp:fleetapp:driver_list' %}" class="text-dark text-hover-primary">Lista de Motoristas</a>
           </li>
-          <li class="breadcrumb-item text-muted">Novo Motorista</li>
+          <li class="breadcrumb-item text-muted">{% if object %}Editar{% else %}Novo{% endif %} Motorista</li>
         </ol>
         <div class="d-flex align-items-center">
           {% if object %}
-          <form data-message="Tem certeza que deseja excluir esse motorista?" class="d-inline" 
-            id="driver-delete" action="{% url 'tmsapp:fleetapp:driver_delete' object.pk %}" method="delete">
+          <form data-message="Tem certeza que deseja excluir esse motorista?" class="d-inline form-confirm" 
+            id="driver-delete" action="{% url 'tmsapp:fleetapp:driver_delete' object.pk %}" method="post">
+            {% csrf_token %}
             <button type="submit" class="btn btn-light-danger btn-sm shadow-md me-2">
               <i class="ki-solid ki-trash fs-4"></i> Remover
             </button>
@@ -181,19 +182,6 @@
                     value="{{ form.email.value|default_if_none:'' }}"
                   />
                   {% for err in form.email.errors %}
-                  <div class="invalid-feedback">{{ err }}</div>
-                  {% endfor %}
-                </div>
-                <div class="form-check form-check-sm mb-5">
-                  <input
-                    class="form-check-input {% if form.is_active.errors %}is-invalid{% endif %}"
-                    type="checkbox"
-                    name="is_active"
-                    id="id_is_active"
-                    {% if form.is_active.value %}checked{% endif %}
-                  />
-                  <label class="form-check-label fw-semibold" for="id_is_active">Ativo</label>
-                  {% for err in form.is_active.errors %}
                   <div class="invalid-feedback">{{ err }}</div>
                   {% endfor %}
                 </div>
