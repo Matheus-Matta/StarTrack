@@ -15,7 +15,6 @@ class CarrierListView(LoginRequiredMixin, ListView):
     template_name = 'pages/fleet/carrier_list.html'
     context_object_name = 'carriers'
     paginate_by = 20
-    login_url = 'login'
 
 
 class CarrierCreateView(LoginRequiredMixin, CreateView):
@@ -23,7 +22,6 @@ class CarrierCreateView(LoginRequiredMixin, CreateView):
     form_class = CarrierForm
     template_name = 'pages/fleet/carrier_form.html'
     success_url = reverse_lazy('tmsapp:fleetapp:carrier_list')
-    login_url = 'login'
 
     def form_valid(self, form):
         messages.success(self.request, 'Transportadora criada com sucesso.')
@@ -47,7 +45,6 @@ class CarrierUpdateView(LoginRequiredMixin, UpdateView):
     form_class = CarrierForm
     template_name = 'pages/fleet/carrier_form.html'
     success_url = reverse_lazy('tmsapp:fleetapp:carrier_list')
-    login_url = 'login'
 
     def form_valid(self, form):
         messages.success(self.request, 'Transportadora atualizada com sucesso.')
@@ -66,8 +63,6 @@ class CarrierUpdateView(LoginRequiredMixin, UpdateView):
 
 
 class CarrierDeactivateView(LoginRequiredMixin, View):
-    login_url = 'login'
-
     def post(self, request, pk):
         carrier = get_object_or_404(Carrier, pk=pk)
         carrier.is_active = False

@@ -18,15 +18,12 @@ class DriverListView(LoginRequiredMixin, ListView):
     template_name = 'pages/fleet/driver_list.html'
     context_object_name = 'drivers'
     paginate_by = 20
-    login_url = 'login'
-
 
 class DriverCreateView(LoginRequiredMixin, CreateView):
     model = Driver
     form_class = DriverForm
     template_name = 'pages/fleet/driver_form.html'
     success_url = reverse_lazy('tmsapp:fleetapp:driver_list')
-    login_url = 'login'
 
     def form_valid(self, form):
         messages.success(self.request, 'Motorista cadastrado com sucesso.')
@@ -52,7 +49,6 @@ class DriverUpdateView(LoginRequiredMixin, UpdateView):
     form_class = DriverForm
     template_name = 'pages/fleet/driver_form.html'
     success_url = reverse_lazy('tmsapp:fleetapp:driver_list')
-    login_url = 'login'
 
     def form_valid(self, form):
         messages.success(self.request, 'Motorista atualizado com sucesso.')
@@ -74,8 +70,6 @@ class DriverUpdateView(LoginRequiredMixin, UpdateView):
 
 
 class DriverDeactivateView(LoginRequiredMixin, View):
-    login_url = 'login'
-
     def post(self, request, pk):
         driver = get_object_or_404(Driver, pk=pk)
         driver.is_active = False

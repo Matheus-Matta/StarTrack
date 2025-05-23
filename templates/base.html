@@ -43,20 +43,34 @@
     {% block script %}{% endblock %}
 
     <!-- Toast container (bottom center) -->
-    <div class="position-fixed bottom-0 start-50 translate-middle-x p-3" style="z-index: 1002;">
-        {% for message in messages %}
-        <div class="d-flex align-items-center max-w-sm my-2 py-2 pe-2 ps-5 rounded shadow animate-slide-in-down  text-white
-             {% if message.tags == 'success' %}bg-success
-             {% elif message.tags == 'error'   %}bg-danger
-             {% elif message.tags == 'warning' %}bg-warning
-             {% else                           %}bg-info
-             {% endif %}" role="alert" aria-live="assertive" aria-atomic="true">
-            <div class="flex-grow-1 pe-3">{{ message }}</div>
-            <i aria-label="Close" onclick="this.parentElement.remove()"
-            class="ki-solid ki-cross fs-2 text-white text-hover-danger cursor-pointer"></i>
+    <div id="docs_toast_stack_container"
+        class="position-fixed bottom-0 start-50 translate-middle-x p-3"
+        style="z-index: 1055;"
+        data-kt-docs-toast="stack">
+        <div class="data-toast_template card w-375px d-none mt-2 animation-fade-up">
+            <div class="border-bottom border-gray-200 p-2 d-flex align-items-center">
+            <div class="me-3 d-flex align-items-center justify-content-center">
+                <i data-toast-icon class="ki-solid ki-information fs-2 text-info"></i>
+            </div>
+            <strong class="me-auto" data-toast-title>Keenthemes</strong>
+            <small class="text-muted me-2" data-toast-time>agora</small>
+            <i data-toast-close class="ki-solid ki-cross cursor-pointer fs-1 text-muted text-hover-danger"></i>
+            </div>
+            <div class="card-body text-gray-700 text-start p-4" data-toast-body>
+            Hello, world! This is a toast message.
+            </div>
         </div>
-        {% endfor %}
     </div>
+    <div id="message-django">
+    {% for message in messages %}
+       <div class="message-itens"
+            data-message="{{ message }}"
+            data-level="{{ message.tags }}"
+       >
+       </div>
+    {% endfor %}
+    </div> 
+    <audio id="alert-sound" src="{% static 'assets/media/audio/alert.mp3' %}" preload="auto"></audio>
 </body>
 
 </html>

@@ -17,7 +17,7 @@
         </a>
 
         <!-- breadcrumb/title -->
-        <h3 class="fs-5 ms-2 fw-semibold m-0 text-muted me-2">Equipe MxRouter</h3>
+        <h3 class="fs-5 ms-2 fw-semibold m-0 text-muted me-2">Equipe MxRoutes</h3>
 
     </div>
 
@@ -34,19 +34,19 @@
         <!-- botão que aciona o dropdown -->
         <div class="d-flex align-items-center">
             <!-- notifications -->
-            <a id="kt_header_notifications_toggle" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end" 
+            <a id="header_notifications_toggle" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end" 
                class="btn btn-icon btn-active-light-primary pulse pulse-danger rounded-circle btn-sm position-relative">
                 <i class="ki-duotone ki-notification-status fs-1">
-                    <span id="unhead-notifications" class="path1"></span>
+                    <span id="unhead-notifications" class="path1 {% if has_unread %} text-danger {% endif %}"></span>
                     <span class="path2"></span>
                     <span class="path3"></span>
                     <span class="path4"></span>
                 </i>
-                <span class="pulse-ring d-none"></span>
+                <span class="pulse-ring {% if not has_unread %} d-none {% endif %}"></span>
             </a>
 
             <!-- menu dropdown -->
-            <div class="bg-body-content border min-h-475px border-gray-200 menu-sub menu-sub-dropdown menu-column w-450px"
+            <div id="header_notifications_dropdown" class="bg-body-content border min-h-475px border-gray-200 menu-sub menu-sub-dropdown menu-column w-450px"
                 data-kt-menu="true" aria-labelledby="kt_header_notifications_toggle">
 
                 <!-- cabeçalho com as duas abas -->
@@ -74,18 +74,22 @@
                 </div>
 
                 <!-- conteúdo das abas -->
-                <div class="card-body tab-content">
+                <div class="card-body mt-2 tab-content">
                     <!-- Abas de Alerts -->
                     <div class="tab-pane fade show active" id="notifications_tab_alerts" role="tabpanel">
-                        <div class="mh-400px py-2" data-kt-scrollable="true" data-kt-scroll-height="300px"
+                        <div class="scrollable-notifications" data-kt-scrollable="true"
                             data-kt-scroll-dependencies="#kt_header"
                             data-kt-scroll-wrappers="#notifications_tab_alerts">
                             <!-- aqui você empurra via WS os alerts -->
                             <div id="alerts_container">
                                 {% if notifications %}
                                 {% for note in notifications %}
+                                 
                                     <!-- begin::Item -->
-                                    <div {% if note.link %}onclick="location.href='{{ note.link }}"{% endif %} class="d-flex px-4 flex-column py-2 {% if not forloop.last %}border-bottom border-gray-200{% endif %} cursor-pointer bg-hover-gray-100">
+                                    <div {% if note.link %}onclick="location.href='{{ note.link }}"{% endif %} 
+                                    class="d-flex px-4 flex-column py-2 {% if not forloop.last %}border-bottom border-gray-200{% endif %}
+                                     cursor-pointer bg-hover-gray-100 {% if note.read == False %}bg-gray-100 unread{% endif %}"
+                                     data-id="{{ note.id }}">
                                         <!-- symbol + level color -->
                                         <div class="d-flex align-items-center">
                                             <div data-symbol class="symbol symbol-35px me-4">
@@ -100,7 +104,12 @@
                                                 <div data-title class="fs-6 text-gray-800 fw-bold">{{ note.title }}</div>
                                                 <small data-created class="text-gray-500">{{ note.created_at|date:"d/m/Y H:i" }}</small>
                                             </div>
-                                            <div data-message class="fs-7 text-gray-500">{{ note.message }}</div>
+                                            <div class="min-w-375px d-flex justify-content-between">
+                                                <div data-message class="fs-7 text-gray-500">{{ note.message }}</div>
+                                                {% if note.read == False %}
+                                                <span data-new class="badge badge-light-warning fs-9">Novo</span>
+                                                {% endif %}
+                                            </div>
                                             </div>
                                         </div>
                                     </div>
@@ -115,12 +124,13 @@
 
                     <!-- Abas de Tasks -->
                     <div class="tab-pane fade" id="notifications_tab_tasks" role="tabpanel">
-                        <div class="mh-600px py-2" data-kt-scrollable="true" data-kt-scroll-height="300px"
+                        <div class="scrollable-notifications" data-kt-scrollable="true"
                             data-kt-scroll-dependencies="#kt_header" data-kt-scroll-wrappers="#notifications_tab_tasks">
                             <!-- aqui você empurra via WS o progresso das tasks -->
                             <div id="tasks_container">
                                 {% if tasks %}
                                 {% for t in tasks %}
+                  
                                 <!-- begin::Item -->
                                 <div data-task-id="{{ t.task_id }}" class="d-flex {% if not forloop.last %}border-bottom border-gray-200{% endif %} flex-column justify-content-center py-2">
                                     <!-- Section -->
@@ -171,7 +181,7 @@
                                     </div>
                                     {% if t.status == 'progress' or t.status == 'started' %}
                                     <div data-bar class="px-4 mt-2 min-w-425px">
-                                        <div class="progress w-100 h-7px">
+                                        <div class="progress w-100 h-10px">
                                             <div class="progress-bar bg-primary" style="width: {{ t.porcent }}%;">{{ t.porcent }}</div>
                                         </div>
                                     </div>

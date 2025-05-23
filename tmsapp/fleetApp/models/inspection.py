@@ -3,9 +3,6 @@ from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
 from simple_history.models import HistoricalRecords
 from auditlog.registry import auditlog
-from tmsapp.models import Delivery, Route
-from .carrier import Carrier
-from .driver import Driver
 from .vehicle import Vehicle
 from django.utils import timezone
 

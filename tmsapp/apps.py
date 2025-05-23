@@ -7,3 +7,4 @@ class TmsappConfig(AppConfig):
 
     def ready(self):
         from . import tasks  # <- Importa o pacote tasks ao iniciar
+

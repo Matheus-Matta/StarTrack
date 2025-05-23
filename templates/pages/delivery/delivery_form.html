@@ -245,7 +245,7 @@
       orderBy:     'full_name',
       orderDir:    'asc',
       rowRenderer: row => `
-        <strong>#${row.id} – ${row.full_name}</strong><br>
+        <strong>#${row.id} – ${row.full_name.toLowerCase()}</strong><br>
         <small>${row.email}</small>`,
       valueField:  'id'
     });

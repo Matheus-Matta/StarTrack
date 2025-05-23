@@ -29,7 +29,7 @@ urlpatterns = [
   # pegar todas as localizações da empresa
   path('scripting/get_company_locations', get_company_locations_api, name='get_company_locations'), 
   # criar rotas
-  path('scripting/create_routes', create_routes, name='create_routes'),
+  path('scripting/create_routes', create_scripting, name='create_routes'),
   # pegar todas as rotas e composiçoes
   path('scripting/route_compositions_data/', route_compositions_data, name='route_compositions_data'),
 

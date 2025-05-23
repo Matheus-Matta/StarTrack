@@ -176,3 +176,4 @@ def geocode_endereco(
         return result
 
     return None, None
+

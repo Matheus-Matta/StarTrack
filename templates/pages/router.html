@@ -18,8 +18,8 @@
               <h3 class="card-title">Gerencie seus dados</h3>
             </div>
             <div class="card-body p-0">
-              <form method="post" action="{% url 'tmsapp:scriptapp:create_routes' %}" enctype="multipart/form-data"
-                class="p-5 d-flex gap-5">
+              <form id="form_script" method="post" action="{% url 'tmsapp:scriptapp:create_routes' %}" data-icon="info"
+                class="p-5 d-flex gap-5 form-confirm" data-message="Deseja inciar o processo de roterização?" data-color="success" >
                 {% csrf_token %}
 
                 <!-- Left side of form -->
@@ -29,10 +29,12 @@
                     <div class="d-flex justify-content-between align-items-center mb-2">
                       <label class="form-check-label" for="routeSingle">
                         <span class="fw-semibold text-gray-800">Rota Personalizadas</span><br />
-                        <small class="text-muted">Separar as rotas com base na areas de rotas criadas <a href="{% url 'tmsapp:scriptapp:route' %}">aqui</a></small>
+                        <small class="text-muted">Separar as rotas com base na areas de rotas criadas <a
+                            href="{% url 'tmsapp:scriptapp:route' %}">aqui</a></small>
                       </label>
                       <div class="form-check form-switch">
-                        <input class="form-check-input h-20px w-30px" type="radio" name="sp_router" id="routeSingle" value="route_perso" checked/>
+                        <input class="form-check-input h-20px w-30px" type="radio" name="sp_router" id="routeSingle"
+                          value="route_perso" checked />
                       </div>
                     </div>
                     <div class="d-flex justify-content-between align-items-center mb-2">
@@ -41,14 +43,15 @@
                         <small class="text-muted">Agrupa automaticamente entregas por município.</small>
                       </label>
                       <div class="form-check form-switch">
-                        <input class="form-check-input h-20px w-30px" type="radio" name="sp_router" id="routeByCity" value="route_city" />
+                        <input class="form-check-input h-20px w-30px" type="radio" name="sp_router" id="routeByCity"
+                          value="route_city" />
                       </div>
                     </div>
                   </div>
 
                   <div class="d-flex justify-content-between align-items-center mb-5">
                     <div>
-                      <span class="fw-semibold">Prioridade de Entrega</span><br />
+                      <span class="fw-semibold">Prioridade de Entrega</span><br/>
                       <small class="text-muted">Permite priorizar entregas mais críticas</small>
                     </div>
                     <div class="form-check form-switch form-check-success form-check-solid">
@@ -58,21 +61,12 @@
                   </div>
 
                   <div>
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                      <div>
-                        <span class="fw-semibold">Importar</span><br />
-                        <small class="text-muted">Importar planilha de entregas</small>
-                      </div>
-                      <div class="d-flex align-items-center gap-2">
-                        <input type="file" id="upload_file" name="upload_file" accept=".xlsx,.xls,.csv"
-                          class="visually-hidden" required onchange="handleFileSelect(event)" />
-                        <button type="button" class="btn btn-basic btn-sm"
-                          onclick="document.getElementById('upload_file').click()">
-                          <i class="ki-solid ki-file-up fs-3"></i> Importar
-                        </button>
-                      </div>
+                    <div class="mb-5">
+                       <span class="fw-semibold">Período</span><br/>
+                      <small class="text-muted">Selecione a data de criação dos pedidos que vão entrar no roteiro</small>
+                      <input type="text" class="form-control form-control-solid form-control-sm w-175px"
+                        placeholder="Pick date range" id="kt_daterangepicker_4" name="date_range" readonly />
                     </div>
-                    <div id="file-name" class="fs-7 text-primary d-none mt-2"></div>
                   </div>
                 </div>
 
@@ -88,7 +82,7 @@
                     para comunicação, organização de paradas e acompanhamento de
                     entregas, tudo em um só lugar.
                   </p>
-                  <button type="submit" class="btn btn-basic btn-sm shadow-md d-flex align-items-center">
+                  <button type="submit" class="cursor-pointer btn btn-basic btn-sm shadow-md d-flex align-items-center ">
                     <i class="ki-solid bi-plus-circle"></i> Criar Rota
                   </button>
                 </div>
@@ -234,14 +228,14 @@
   });
 </script>
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-  new DjangoDataTable({
-    root: document.getElementById('my-compositions-table'),
-    pageSize: 10,
-    cellClassName: 'px-2 py-1 text-sm',
-    rowRenderer: row => {
-      const url = `/tms/scriptapp/routecomposition/${row.id}/`;  // ajuste à sua URL real
-      return `
+  document.addEventListener('DOMContentLoaded', () => {
+    new DjangoDataTable({
+      root: document.getElementById('my-compositions-table'),
+      pageSize: 10,
+      cellClassName: 'px-2 py-1 text-sm',
+      rowRenderer: row => {
+        const url = `/tms/scriptapp/routecomposition/${row.id}/`;  // ajuste à sua URL real
+        return `
         <tr class="cursor-pointer bg-hover-light border-bottom border-gray-200"
             onclick="window.location='${url}'">
           <td class="ps-5"><div class="form-check form-check-sm form-check-custom">
@@ -254,9 +248,40 @@ document.addEventListener('DOMContentLoaded', () => {
           <td class="text-gray-700">${row.total_time}</td>
           <td></td>
         </tr>`;
-    }
+      }
+    });
   });
-});
+</script>
+<script>
+  // define start e end como hoje
+  var start = moment();
+  var end = moment();
+
+  function cb(start, end) {
+    // formata no padrão pt-BR ou MM/DD/YYYY, como preferir:
+    var label = start.format("DD/MM/YYYY") + " - " + end.format("DD/MM/YYYY");
+    // preenche o input
+    $("#kt_daterangepicker_4").val(label);
+  }
+
+  // define start e end como hoje
+  $("#kt_daterangepicker_4").daterangepicker({
+    startDate: start,
+    endDate:   end,
+    locale: {
+      format:           "DD/MM/YYYY",      // formatação do texto
+      applyLabel:       "Selecionar",      // texto do botão de confirmação
+      cancelLabel:      "Limpar",          // texto do botão de cancelamento
+      customRangeLabel: "Personalizado",   // rótulo do range customizado
+      daysOfWeek:       ["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"],
+      monthNames:       [
+        "Janeiro","Fevereiro","Março","Abril","Maio","Junho",
+        "Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"
+      ]
+    }
+  }, cb);
+  // chama uma vez para inicializar o value
+  cb(start, end);
 </script>
 <!-- aqui você pode adicionar outros scripts se necessário -->
 {% endblock %}

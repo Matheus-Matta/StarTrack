@@ -7,8 +7,6 @@ from tmsapp.fleetApp.models import Driver, Vehicle, Carrier, Route  # importe se
 
 class FleetDashboardView(LoginRequiredMixin, View):
     template_name = 'pages/fleet/dashboard.html'
-    login_url = 'login'
-
     def get(self, request, *args, **kwargs):
         # 1) Veículos em trânsito (por ora fixo)
         in_transit = 0

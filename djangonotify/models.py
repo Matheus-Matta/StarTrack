@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth import get_user_model
+from django.conf import settings
 
-User = get_user_model()
 
 class TaskRecord(models.Model):
     """
@@ -9,9 +9,9 @@ class TaskRecord(models.Model):
     além de status e resultado/erro para visualização.
     """
     task_id    = models.CharField(max_length=255, null=True, blank=True)
-    user       = models.ForeignKey(User, on_delete=models.CASCADE, related_name='tasks')
+    user       = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='tasks')
     name       = models.CharField(max_length=255, blank=True)  # opcional: nome legível da task
-    porcent    = models.IntegerField(max_length=100, null=True, blank=True, default=0)
+    porcent    = models.IntegerField(null=True, blank=True, default=0)
     status     = models.CharField(
         max_length=20,
         choices=[
@@ -43,7 +43,7 @@ class Notification(models.Model):
         ('success','Success'),
     ]
 
-    user       = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
+    user       = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='notifications')
     title      = models.CharField(max_length=255)
     message    = models.TextField()
     level      = models.CharField(max_length=10, choices=LEVEL_CHOICES, default='info')
@@ -60,5 +60,5 @@ class Notification(models.Model):
             'danger': 'ki-solid ki-cross-circle',
             'success': 'ki-solid ki-verify',
         }
-        return level_icons.get(self.level, 'ℹ️')
+        return level_icons.get(self.level, '')
     

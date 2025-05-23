@@ -11,7 +11,6 @@ from django.forms.forms import NON_FIELD_ERRORS
 
 class VehicleListView(LoginRequiredMixin, ListView):
     """Exibe lista de veículos, somente para usuários autenticados"""
-    login_url = 'login'
     model = Vehicle
     template_name = 'pages/fleet/vehicle_list.html'
     context_object_name = 'vehicles'
@@ -19,7 +18,6 @@ class VehicleListView(LoginRequiredMixin, ListView):
 
 class VehicleCreateView(LoginRequiredMixin, CreateView):
     """Cria novo veículo, acesso restrito a usuários autenticados"""
-    login_url = 'login'
     model = Vehicle
     form_class = VehicleForm
     template_name = 'pages/fleet/vehicle_form.html'
@@ -46,7 +44,6 @@ class VehicleCreateView(LoginRequiredMixin, CreateView):
 
 class VehicleUpdateView(LoginRequiredMixin, UpdateView):
     """Edita veículo existente, acesso restrito"""
-    login_url = 'login'
     model = Vehicle
     form_class = VehicleForm
     template_name = 'pages/fleet/vehicle_form.html'
@@ -72,7 +69,6 @@ class VehicleUpdateView(LoginRequiredMixin, UpdateView):
 
 class VehicleDeactivateView(LoginRequiredMixin, View):
     """Soft-delete: desativa veículo (acesso restrito)"""
-    login_url = 'login'
     
     def post(self, request, pk):
         vehicle = get_object_or_404(Vehicle, pk=pk)

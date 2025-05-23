@@ -1,3 +1,4 @@
+# Route.py (mantido conforme solicitado, com melhorias de performance)
 from django.db import models
 from django.contrib.auth.models import User
 from simple_history.models import HistoricalRecords
@@ -8,7 +9,7 @@ class Route(models.Model):
     """
     Representa rota de entregas, com distância, tempo e geometrias.
     """
-    name = models.CharField('Nome', max_length=100, blank=True, null=True)
+    name = models.CharField('Nome', max_length=100, blank=True, null=True, db_index=True)
     color = models.CharField('Cor', max_length=7, default='#3498db')
     stops = models.PositiveIntegerField('Paradas')
     distance_km = models.FloatField('Distância (km)')
@@ -16,13 +17,26 @@ class Route(models.Model):
     geojson = models.JSONField('GeoJSON')
     points = models.JSONField('Points')
 
-    deliveries = models.ManyToManyField(
-        Delivery, through='RouteDelivery', related_name='routes', verbose_name='Entregas'
+    route_area = models.ForeignKey(
+        'RouteArea',
+        verbose_name='Área de Rota',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='routes',
+        db_index=True
     )
 
-    is_active = models.BooleanField('Ativo', default=True)
+    deliveries = models.ManyToManyField(
+        Delivery, 
+        through='RouteDelivery', 
+        related_name='routes', 
+        verbose_name='Entregas'
+    )
 
-    created_at = models.DateTimeField('Criado em', auto_now_add=True)
+    is_active = models.BooleanField('Ativo', default=True, db_index=True)
+
+    created_at = models.DateTimeField('Criado em', auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField('Atualizado em', auto_now=True)
     created_by = models.ForeignKey(
         User, verbose_name='Criado por',
@@ -34,12 +48,14 @@ class Route(models.Model):
     class Meta:
         verbose_name = 'Rota'
         verbose_name_plural = 'Rotas'
+        indexes = [
+            models.Index(fields=['-created_at', 'is_active']),
+            models.Index(fields=['route_area', 'is_active']),
+            models.Index(fields=['distance_km', 'time_min']),
+        ]
 
     def __str__(self) -> str:
         return self.name or 'Rota sem nome'
-
-
-auditlog.register(Route)
 
 
 class RouteDelivery(models.Model):
@@ -58,9 +74,14 @@ class RouteDelivery(models.Model):
         ordering = ['position']
         verbose_name = 'Parada de Rota'
         verbose_name_plural = 'Paradas de Rota'
+        indexes = [
+            models.Index(fields=['route', 'position']),
+            models.Index(fields=['delivery', 'route']),
+        ]
 
     def __str__(self) -> str:
         return f"{self.route} - {self.delivery} (Pos {self.position})"
 
 
+auditlog.register(Route)
 auditlog.register(RouteDelivery)

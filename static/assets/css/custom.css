@@ -437,3 +437,16 @@ thead{
   background-color: transparent;
   color: var(--bs-secondary);
 }
+
+/* 1) Container scrollável */
+.scrollable-notifications {
+  max-height: calc(100vh - 200px);   /* ajusta 200px para a altura do header + margem */
+  overflow-y: auto;
+  /* 2) Esconder track da scrollbar */
+  scrollbar-width: none;             /* Firefox */
+  -ms-overflow-style: none;          /* IE 10+ */
+}
+.scrollable-notifications::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}

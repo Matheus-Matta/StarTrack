@@ -18,7 +18,7 @@
 
               {# Cabeçalho com busca e ação #}
               <div class="card-header p-0 d-flex align-items-center justify-content-between border-bottom mb-3">
-                <h3 class="card-title m-0">Entregas</h3>
+                <h3 class="card-title m-0">Lista de entregas</h3>
                 <div class="d-flex align-items-center gap-5">
                   <div class="input-group-sm position-relative w-300px">
                     <i class="ki-solid ki-magnifier fs-3 position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
@@ -67,7 +67,7 @@
                                  data-kt-check-target="#datatable-body .form-check-input" />
                         </div>
                       </th>
-                      <th data-field="id,customer" class="py-2 text-hover-dark">Cliente</th>
+                      <th data-field="id,customer_name" class="py-2 text-hover-dark">Cliente</th>
                       <th data-field="order_number"    class="py-2 text-hover-dark">Pedido</th>
                       <th data-field="full_address"    class="py-2 text-hover-dark">Endereço</th>
                       <th data-field="postal_code"     class="py-2 text-hover-dark">CEP</th>
@@ -121,7 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
     orderDir: 'desc',
     rowRenderer: row => {
       const url = `/tms/delivery/${row.id}/update/`;
-      const customer = row.customer?.label || '...';
+      const customer = row?.customer_name || '...';
       const date = row.created_at.slice(0,10).split('-').reverse().join('/');
       return `
         <tr class="cursor-pointer bg-hover-light h-15px border-1 border-bottom border-gray-200">

@@ -3,7 +3,6 @@ from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
 from simple_history.models import HistoricalRecords
 from auditlog.registry import auditlog
-from tmsapp.models import RouteArea
 from .carrier import Carrier
 from .driver import Driver
 from .document import Document
@@ -59,7 +58,7 @@ class Vehicle(models.Model):
 
     # A ligação com a área de rota:
     route_area = models.ForeignKey(
-        RouteArea,
+        'RouteArea',
         verbose_name='Área de Rota',
         on_delete=models.SET_NULL,
         null=True,
@@ -88,8 +87,8 @@ class Vehicle(models.Model):
     is_active = models.BooleanField('Ativo', default=True)
 
     # capacidades e status
-    capacity_volume = models.DecimalField('Capacidade (m³)', max_digits=8, decimal_places=2)
-    capacity_weight = models.DecimalField('Capacidade (kg)', max_digits=8, decimal_places=2)
+    capacity_volume = models.DecimalField('Capacidade (m³)', max_digits=8, decimal_places=2, default=0)
+    capacity_weight = models.DecimalField('Capacidade (kg)', max_digits=8, decimal_places=2, default=0)
     status = models.CharField(
         'Status', max_length=20,
         choices=VehicleStatus.choices,
@@ -115,9 +114,6 @@ class Vehicle(models.Model):
             raise ValidationError('Defina a transportadora para veículo terceirizado.')
         if not self.is_outsourced and not self.driver:
             raise ValidationError('Defina um motorista interno para veículo não terceirizado.')
-
-    def get_absolute_url(self):
-        return reverse('vehicle_detail', args=[self.pk])
 
     def __str__(self):
         if self.is_outsourced:

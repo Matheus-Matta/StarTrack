@@ -15,7 +15,6 @@ class CustomerListView(LoginRequiredMixin, ListView):
     template_name = 'pages/crm/customer_list.html'
     context_object_name = 'customers'
     paginate_by = 20
-    login_url = 'login'
 
 
 class CustomerCreateView(LoginRequiredMixin, CreateView):
@@ -23,7 +22,6 @@ class CustomerCreateView(LoginRequiredMixin, CreateView):
     form_class = CustomerForm
     template_name = 'pages/crm/customer_form.html'
     success_url = reverse_lazy('crmapp:customer_list')
-    login_url = 'login'
 
     def form_valid(self, form):
         messages.success(self.request, 'Cliente criado com sucesso.')
@@ -46,7 +44,6 @@ class CustomerUpdateView(LoginRequiredMixin, UpdateView):
     form_class = CustomerForm
     template_name = 'pages/crm/customer_form.html'
     success_url = reverse_lazy('crmapp:customer_list')
-    login_url = 'login'
 
     def form_valid(self, form):
         messages.success(self.request, 'Cliente atualizado com sucesso.')
@@ -68,7 +65,6 @@ class CustomerDeleteView(LoginRequiredMixin, DeleteView):
     model = Customer
     template_name = 'pages/crm/customer_confirm_delete.html'
     success_url = reverse_lazy('crmapp:customer_list')
-    login_url = 'login'
 
     def delete(self, request, *args, **kwargs):
         messages.success(self.request, 'Cliente excluído com sucesso.')

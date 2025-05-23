@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from django.db.models import Q
+from django.db.models import Q, CharField, TextField, EmailField
 from django.apps import apps
 from django.db import models
 from django.core.exceptions import FieldDoesNotExist , FieldError
@@ -64,21 +64,10 @@ def djangotables(request):
         qs = qs.filter(**{lookup: val})
 
 
-    # Filtro search
-    search = request.GET.get('search', '').strip()
-    search_fields = [f.strip() for f in request.GET.get('search_fields','').split(',') if f.strip()]
-    if search and search_fields:
-        q = Q()
-        for fld in search_fields:
-            try:
-                fobj = model_class._meta.get_field(fld)
-            except FieldDoesNotExist:
-                continue
-            if fobj.is_relation:
-                continue
-            if isinstance(fobj, (models.CharField, models.TextField, models.EmailField)):
-                q |= Q(**{f"{fld}__icontains": search})
-        qs = qs.filter(q)
+    search   = request.GET.get('search','').strip()
+    search_fields   = [f.strip() for f in request.GET.get('search_fields','').split(',') if f.strip()]
+
+    qs = apply_search_filter(qs, model_class, search, search_fields)
 
     # Ordenação com fallback para @property
     order_by  = request.GET.get('order_by', 'id').strip()
@@ -156,3 +145,76 @@ def djangotables(request):
         'total_count': paginator.count, # 
         'page_size':   page_size, # 
     })
+
+
+def apply_search_filter(qs, model_class, search, search_fields):
+    """
+    Busca em três etapas:
+      1) campos diretos (__icontains)
+      2) propriedades Python
+      3) relações FK/M2M (prefere related.full_name, senão primeiro texto)
+    """
+    term = search.strip()
+    if not term or not search_fields:
+        return qs
+
+    # ─── 1) campos diretos ─────────────────────────
+    q1 = Q()
+    for fld in search_fields:
+        # ignora “dotted” e relações aqui
+        if "__" in fld:
+            continue
+        try:
+            fobj = model_class._meta.get_field(fld)
+        except FieldDoesNotExist:
+            continue
+        if isinstance(fobj, (CharField, TextField, EmailField)):
+            q1 |= Q(**{f"{fld}__icontains": term})
+    qs1 = qs.filter(q1).distinct() if q1 else qs.none()
+    if qs1.exists():
+        return qs1
+
+    # ─── 2) propriedades Python ─────────────────────
+    prop_fields = [
+        fld for fld in search_fields
+        if isinstance(getattr(model_class, fld, None), property)
+    ]
+    if prop_fields:
+        matches = []
+        for obj in qs:
+            for prop in prop_fields:
+                val = getattr(obj, prop, "")
+                if isinstance(val, str) and term.lower() in val.lower():
+                    matches.append(obj.pk)
+                    break
+        if matches:
+            return model_class.objects.filter(pk__in=matches)
+
+    # ─── 3) relações FK/M2M ─────────────────────────
+    q3 = Q()
+    for fld in search_fields:
+        # pula dotteds (já buscados na 1) e propriedades
+        if "__" in fld or fld in prop_fields:
+            continue
+        try:
+            fobj = model_class._meta.get_field(fld)
+        except FieldDoesNotExist:
+            continue
+
+        if fobj.is_relation:
+            rel = fobj.related_model
+            # prefere full_name
+            if 'full_name' in {f.name for f in rel._meta.fields}:
+                q3 |= Q(**{f"{fld}__full_name__icontains": term})
+            else:
+                # fallback para primeiro campo de texto da relação
+                rel_text = next(
+                    (f.name for f in rel._meta.fields
+                     if isinstance(f, (CharField, TextField, EmailField))),
+                    None
+                )
+                if rel_text:
+                    q3 |= Q(**{f"{fld}__{rel_text}__icontains": term})
+
+    qs3 = qs.filter(q3).distinct() if q3 else qs.none()
+    return qs3

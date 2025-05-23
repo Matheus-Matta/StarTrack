@@ -1,7 +1,11 @@
 # notifications/consumers.py
 
 from channels.generic.websocket import AsyncWebsocketConsumer
+from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from django.contrib.auth.models import AnonymousUser
+from channels.db import database_sync_to_async
+from .models import Notification
+import json
 
 class TaskProgressConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -40,3 +44,15 @@ class AlertsConsumer(AsyncWebsocketConsumer):
 
     async def send_alert(self, event):
         await self.send(text_data=event['text'])
+
+    async def receive(self, text_data=None, bytes_data=None):
+        if text_data is None:
+            return
+        content = json.loads(text_data)
+        action = content.get("action")
+        if action == "mark_read":
+            notif_id = content.get("notification_id")
+            if notif_id:
+                await database_sync_to_async(
+                    Notification.objects.filter(pk=notif_id).update
+                )(read=True)

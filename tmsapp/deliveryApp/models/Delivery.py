@@ -4,6 +4,7 @@ from auditlog.registry import auditlog
 from django.contrib.auth.models import User
 from tmsapp.action import geocode_endereco
 from crmapp.models import Customer
+from django.utils import timezone
 
 class DeliveryStatus(models.TextChoices):
     PENDING     = 'pending',     'pendente'
@@ -28,6 +29,8 @@ class Delivery(models.Model):
     observation = models.TextField('Observação', blank=True, null=True)
     reference = models.CharField('Ponto de Referência', max_length=255, blank=True, null=True)
     filial = models.CharField('Filial', max_length=10, blank=True, null=True)
+    capacity_volume = models.DecimalField('Capacidade (m³)', max_digits=8, decimal_places=2, default=0)
+    capacity_weight = models.DecimalField('Capacidade (kg)', max_digits=8, decimal_places=2, default=0)
 
     latitude = models.DecimalField('Latitude', max_digits=9, decimal_places=6, blank=True, null=True)
     longitude = models.DecimalField('Longitude', max_digits=9, decimal_places=6, blank=True, null=True)
@@ -71,6 +74,12 @@ class Delivery(models.Model):
         parts = [self.street, self.number, self.neighborhood, self.city, self.state, self.postal_code, 'Brasil']
         return ', '.join(filter(None, parts))
     
+    @property
+    def customer_name(self) -> str:
+        if self.customer:
+            return self.customer.full_name
+        return None
+
     @property
     def status_display(self) -> str:
         # chama o método gerado pelo Django

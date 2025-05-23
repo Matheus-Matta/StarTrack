@@ -4,7 +4,7 @@ from simple_history.models import HistoricalRecords
 from auditlog.registry import auditlog
 from .document import Document
 from django.utils import timezone
-
+from django.core.exceptions import ValidationError
 
 User = get_user_model()
 
@@ -48,7 +48,6 @@ class Driver(models.Model):
         Document,
         verbose_name='Documentos',
         blank=True,
-        null=True,
         related_name='documents_drive',
         help_text='Documentos relacionados ao motorista'
     )
@@ -65,9 +64,6 @@ class Driver(models.Model):
         if self.license_expiry:
             if self.license_expiry < timezone.localdate():
                 raise ValidationError('CNH expirada.')
-
-    def get_absolute_url(self):
-        return reverse('driver_detail', args=[self.pk])
 
     @property
     def is_license_valid(self) -> bool:

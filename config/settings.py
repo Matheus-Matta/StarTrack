@@ -98,6 +98,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'djangonotify.context_processors.notifications_and_tasks',
+                'django.template.context_processors.i18n'
             ],
         },
     },
@@ -144,9 +145,14 @@ TIME_ZONE = 'America/Sao_Paulo'
 
 USE_I18N = True
 
-USE_TZ = True
+USE_TZ = False
 
 USE_L10N = True 
+
+DATE_FORMAT      = 'd/m/Y'
+SHORT_DATE_FORMAT = 'd/m/Y'
+DATETIME_FORMAT  = 'd/m/Y H:i:s'
+TIME_FORMAT      = 'H:i:s'
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/

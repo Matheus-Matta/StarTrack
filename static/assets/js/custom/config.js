@@ -35,6 +35,8 @@
   };
 })(window);
 
+
+
 document.addEventListener('DOMContentLoaded', function () {
   // Seleciona todos os forms cujo action contenha "driver_delete"
   document.querySelectorAll('.form-confirm').forEach(form => {
@@ -50,7 +52,7 @@ document.addEventListener('DOMContentLoaded', function () {
         confirmButtonText: "Sim",
         cancelButtonText: "Cancelar",
         customClass: {
-          confirmButton:  btn,
+          confirmButton: btn,
           cancelButton: "btn btn-secondary ms-2"
         }
       }).then((result) => {
