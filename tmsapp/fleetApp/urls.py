@@ -14,7 +14,7 @@ from .views import (
     DriverUpdateView, DriverDeactivateView,
     CarrierListView, CarrierCreateView,
     CarrierUpdateView, CarrierDeactivateView,
-    FleetDashboardView
+    FleetDashboardView, loadplan_drawer
     
 )
 
@@ -39,6 +39,7 @@ urlpatterns = [
     path('carrier/<int:pk>/update/', CarrierUpdateView.as_view(), name='carrier_update'),
     path('carrier/<int:pk>/deactivate/', CarrierDeactivateView.as_view(), name='carrier_deactivate'),
 
-
+    path('loadplan/details/<int:plan_id>/', loadplan_drawer, name='planload_drawer'),
+  
     
 ]

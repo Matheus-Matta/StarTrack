@@ -1,0 +1,372 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Explorar Rotas{% endblock %}
+{% block css %}
+<style>
+    .marker-checked {
+        opacity: 0.8 !important;
+    }
+</style>
+{% endblock %}
+{% block content %}
+
+{% include 'partials/nav/nav_route.html' %}
+
+<div class="bg-body-content m-0 border border-secondary rounded-bottom-4 border-top-0 flex-grow-1 overflow-auto"
+    style="min-height: 0;">
+    <div id="scrollable_content" class="p-4">
+        <main role="content" class="row g-5">
+            <div class="container-fluid mt-4">
+                <div class="d-flex align-items-center justify-content-between mx-5 mb-3">
+                    <ol class="breadcrumb text-muted fs-6 fw-semibold">
+                        <li class="breadcrumb-item">
+                            <a href="{% url 'tmsapp:scriptapp:create_scripting' %}"
+                                class="text-dark text-hover-primary">Roteirização</a>
+                        </li>
+                        <li class="breadcrumb-item text-muted">{{ scripting.code }}</li>
+                    </ol>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 mb-2">
+                        <div class="card card-flush h-100">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="card-body py-3">
+                                    <div class="d-flex flex-wrap align-items-center gap-3">
+                                        <!-- Totais de carga -->
+                                        <span class="badge badge-light-primary p-2 px-4 rounded-pill fw-semibold">
+                                            Entregas em Carga
+                                            <span class="badge badge-primary p-2 rounded-pill ms-1">{{ scripting.deliveries_with_loadplan }}</span>
+                                        </span>
+                                        <span class="badge badge-light-warning p-2  px-4 rounded-pill fw-semibold">
+                                            Entregas fora de Carga
+                                            <span class="badge badge-warning p-2 rounded-pill ms-1">{{ scripting.deliveries_without_loadplan }}</span>
+                                        </span>
+                                        <span class="badge badge-light-success p-2  px-4 rounded-pill fw-semibold">
+                                            Valor Total
+                                            <span class="badge badge-success p-2 rounded-pill ms-1">R$ {{ scripting.total_value }}</span>
+                                        </span>
+                                        <span class="badge badge-light-info p-2 px-4 rounded-pill fw-semibold">
+                                            Peso
+                                            <span class="badge badge-info p-2 rounded-pill ms-1">{{ scripting.total_weight }} (kg)</span>
+                                        </span>
+                                        <span class="badge badge-light-info p-2 px-4 rounded-pill fw-semibold">
+                                            Volume
+                                            <span class="badge badge-info p-2 rounded-pill ms-1">{{ scripting.total_volume }} (m³)</span>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="card-body py-3">
+                                    <div class="d-flex justify-content-end flex-wrap align-items-center gap-3">
+                                        <button class="btn btn-sm btn-light togleAllRoutes">
+                                            <i class="ki-outline ki-map">
+                                            </i> Ver mapa
+                                        </button>
+                                        <button class="btn btn-sm btn-basic pe-1">
+                                            Ações <i class="ki-outline ki-burger-menu-6 fs-3"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-12 plans-list">
+                        <div class="card card-flush h-100">
+                            <div class="card-body px-0 py-0 pt-0">
+                                <div style="height:470px;" class="table-responsive scrollable">
+                                    <table
+                                        class="table table-hover table-row-dashed table-row-gray-200 align-middle gs-0 gy-3">
+                                        <thead class="sticky-top bg-gray-100">
+                                            <tr class="fw-bold text-gray-800">
+                                                <th class="ps-8">Carga</th>
+                                                <th class="text-center">Entregas</th>
+                                                <th class="text-center">Veiculo</th>
+                                                <th class="text-center">Motorista</th>
+                                                <th class="text-center">Rota</th>
+                                                <th class="text-center">Peso (kg)</th>
+                                                <th class="text-center">Volume (m³)</th>
+                                                <th class="text-center">Valor (R$)</th>
+                                                <th class="text-center pe-8">Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for plan in scripting.load_plans %}
+                                            <tr class="cursor-pointer"
+                                                data-id="{{ plan.id }}">
+                                                <td class="ps-8 w-150px px-0">
+                                                    <span class="fw-semibold">{{ plan.code }}</span>
+                                                    <small class="text-muted truncate d-block w-150px">{{ plan.name }}</small>
+                                                </td>
+                                                <td class="text-center">
+                                                    <span class="badge badge-light-primary text-nowrap">{{ plan.total_deliveries }}</span>
+                                                    <small class="text-muted">/ {{ plan.total_area_deliveries }}</small>
+                                                </td>
+                                                <td class="text-center text-gray-800">
+                                                    <span class="text-hover-primary cursor-pointer"
+                                                        onclick="location.href='/tms/fleet/vehicle/{{ plan.vehicle.id }}/update'">
+                                                        {{ plan.vehicle.license_plate|upper }}
+                                                    </span>
+
+                                                    <br>
+                                                    <small class="text-muted">{{ plan.vehicle.get_vehicle_type }}</small>
+                                                </td>
+                                                <td class="text-center text-gray-800">
+                                                    <span class="text-hover-primary cursor-pointer"
+                                                        onclick="location.href='/tms/fleet/driver/{{ plan.vehicle.driver.id }}/update'">
+                                                        {{ plan.vehicle.driver|title }}
+                                                    </span>
+                                                    <br>
+                                                    <small class="text-muted">{{ plan.vehicle.driver.phone|default_if_none:'-' }}</small>
+                                                </td>
+                                                <td class="text-center text-gray-800">
+                                                    <span
+                                                        style="background-color: {{ plan.route.route_area.hex_color }};"
+                                                        class="bullet bullet-dot w-10px h-10px"></span>
+                                                    {{ plan.route.route_area.name|title }}
+                                                    <br>
+                                                    <small class="text-muted">{{ plan.total_area_deliveries }} entregas
+                                                        nessa rota</small>
+                                                </td>
+                                                <td class="text-center text-nowrap">
+                                                    <i class="fa-solid fa-weight-hanging text-muted me-1"></i>
+                                                    {% if plan.total_weight_kg > plan.max_weight_kg %}
+                                                    <span class="text-danger">{{ plan.formatted_total_weight_kg }}</span>
+                                                    {% else %}
+                                                    <span class="text-gray-800">{{ plan.formatted_total_weight_kg }}</span>
+                                                    {% endif %}
+                                                    <small class="text-muted">/ {{ plan.formatted_max_weight_kg }}</small>
+                                                </td>
+                                                <td class="text-center text-nowrap">
+                                                    <i class="fa-solid fa-cube text-muted me-1"></i>
+                                                    {% if plan.total_volume_m3 > plan.max_volume_m3 %}
+                                                    <span class="text-danger">{{ plan.formatted_total_volume_m3}}</span>
+                                                    {% else %}
+                                                    <span class="text-gray-800">{{ plan.formatted_total_volume_m3 }}</span>
+                                                    {% endif %}
+                                                    <small class="text-muted">/ {{ plan.formatted_max_volume_m3 }}</small>
+                                                </td>
+                                                <td class="text-center text-nowrap">
+
+                                                    <span class="badge badge-light-success">R$ {{ plan.formatted_total_value }}</span>
+                                                </td>
+                                                <td class="text-center pe-8 text-nowrap">
+                                                    {% if plan.status == 'draft' %}
+                                                    <span class="badge badge-light-warning">Rascunho</span>
+                                                    {% elif plan.status == 'planned' %}
+                                                    <span class="badge badge-light-primary">Planejado</span>
+                                                    {% elif plan.status == 'loading' %}
+                                                    <span class="badge badge-light-info">Carregando</span>
+                                                    {% elif plan.status == 'departed' %}
+                                                    <span class="badge badge-light-secondary">Saiu</span>
+                                                    {% elif plan.status == 'completed' %}
+                                                    <span class="badge badge-light-success">Concluído</span>
+                                                    {% elif plan.status == 'cancelled' %}
+                                                    <span class="badge badge-light-danger">Cancelado</span>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+
+                                            {% empty %}
+                                            <tr>
+                                                <td colspan="6" class="text-center text-gray-500 px-5">Nenhum plano de
+                                                    carga encontrado.</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-12 mt-2 plans-list">
+                        <div id="my-deliveries-table" class="card h-100 px-4 pb-4" data-url="{% url 'djangotables' %}"
+                            data-model="delivery">
+
+                            {# Cabeçalho com busca e ação #}
+                            <div
+                                class="h-50px p-0 d-flex align-items-center justify-content-between border-bottom mb-3">
+                                <h3 class="card-title m-0 ms-2">Entregas</h3>
+                                <div class="d-flex align-items-center gap-5">
+                                    <div class="input-group-sm position-relative w-300px">
+                                        <i
+                                            class="ki-solid ki-magnifier fs-3 position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+                                        <input type="text" id="datatable_search" data-search
+                                            class="form-control form-control-solid ps-10"
+                                            placeholder="Procurar cliente, pedido..." />
+                                    </div>
+                                </div>
+                            </div>
+
+                            {# Tabela responsiva #}
+                            <div class="table-responsive hover-scroll-y mb-3"
+                                style="min-height: 440px; max-height: 440px; overflow:auto;">
+                                <table class="table table-rounded border-separate p-0 m-0 align-middle"
+                                    data-datatable-table="true">
+                                    <thead class="fw-bolder sticky-top bg-gray-100 pb-2">
+                                        <tr class="fw-semibold text-muted">
+                                            <th class="w-10px py-2 ps-5 rounded-start-5">
+                                                <div class="form-check form-check-sm form-check-custom">
+                                                    <!-- “select all” checkbox -->
+                                                    <input class="form-check-input h-15px w-15px" type="checkbox"
+                                                        data-kt-check="true"
+                                                        data-kt-check-target="#datatable-body .form-check-input" />
+                                                </div>
+                                            </th>
+                                            <th data-field="id,customer_name" class="py-2 text-hover-dark text-nowarp">
+                                                Cliente</th>
+                                            <th data-field="order_number" class="py-2 text-hover-dark text-nowarp">
+                                                Pedido</th>
+                                            <th data-field="full_address" class="py-2 text-hover-dark text-nowarp">
+                                                Endereço</th>
+                                            <th data-field="total_weight_kg" class="py-2 text-hover-dark text-nowarp">
+                                                Peso(kg)</th>
+                                            <th data-field="total_volume_m3" class="py-2 text-hover-dark text-nowarp">
+                                                volume(m3)</th>
+                                            <th data-field="load_plan_code"
+                                                class="py-2 text-hover-dark min-w-75px text-nowarp">Carga</th>
+                                            <th class="rounded-end-5"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="datatable-body"></tbody>
+                                </table>
+                            </div>
+
+                            {# Footer com page size e paginação #}
+                            <div class="d-flex justify-content-between pt-2 align-items-center">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="fs-7">Mostrar</span>
+                                    <select data-page-size class="form-select form-select-sm w-75px">
+                                        <option value="10" selected>15</option>
+                                        <option value="20">25</option>
+                                        <option value="50">50</option>
+                                        <option value="100">100</option>
+                                    </select>
+                                    <span class="fs-7">por página</span>
+                                </div>
+                                <nav>
+                                    <ul id="datatable-pagination" data-pagination
+                                        class="pagination pagination-sm pagination-rounded mb-0"></ul>
+                                </nav>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="col-md-12 d-none" id="plan-details" >
+                        <div class="card" id="plan-details-card">
+                            <!-- aqui entra o HTML retornado por render_to_string -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+</div>
+</div>
+
+<div class="modal fade show d-block" id="allRoutesModal" tabindex="-1" aria-labelledby="allRoutesModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog  modal-xl modal-dialog-centered" role="document">
+        <div class="modal-content border-1 border-gray-200 bg-body-content">
+            <div class="modal-header p-3">
+                <h5 class="modal-title ms-2" id="allRoutesModalLabel ">Mapa das Rotas</h5>
+                <div class="d-flex align-items-center">
+                    <select name="route" class="form-select form-select-sm w-200px me-2 py-1" id="routesSelect">
+                        <option value="0" selected>Todas Rotas</option>
+                        {% for plan in scripting.load_plans %}
+                        <option style="color: {{ plan.route.route_area.hex_color }};" value="{{ plan.route.id }}">
+                            {{ plan.code }} - {{ plan.route.route_area.name|title }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                    <button type="button" class="btn btn-sm py-1 btn-light-danger togleAllRoutes"
+                        data-bs-dismiss="modal">
+                        Fechar
+                    </button>
+                </div>
+            </div>
+            <div class="modal-body p-0">
+                <div id="allRoutesMap" class="w-100 h-100"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="loadplan-drawer-root"></div>
+{% endblock %}
+
+{% block script %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        new DjangoDataTable({
+            root: document.getElementById('my-deliveries-table'),
+            pageSize: 15,
+            cellClassName: 'px-2 py-1 text-sm',
+            orderBy: 'load_plan_code',
+            orderDir: 'asc',
+            filters: {
+                composition_id: { value: parseInt('{{ scripting.id }}', 0), method: 'exact' }
+            },
+            rowRenderer: row => {
+                const url = `/tms/delivery/${row.id}/update/`;
+                const customer = row?.customer_name || '...';
+                return `
+            <tr class="cursor-pointer bg-hover-light h-15px border-1 border-bottom border-gray-200">
+            <td class="ps-5 py-1">
+                <div class="form-check form-check-sm form-check-custom">
+                <input type="checkbox" class="form-check-input h-15px w-15px" value="${row.id}">
+                </div>
+            </td>
+            <td class="w-175px py-1 text-nowrap">
+                <a href="${url}" class="text-gray-800 fw-bold fs-8">
+                ${customer}
+                </a>
+            </td>
+            <td class="w-75px text-gray-700 text-nowrap py-1">${row.order_number}</td>
+            <td class="text-gray-700 text-nowrap py-1 w-100">
+                <span class="d-block truncate w-100">${row.full_address}</span>
+            </td>
+            <td class="w-75px text-center text-gray-700 text-nowrap py-1">
+                <i class="fa-solid fa-weight-hanging text-muted me-1"></i>
+                ${row.total_weight_kg}
+                </td>
+            <td class="w-75px text-center text-gray-700 text-nowrap py-1">
+                <i class="fa-solid fa-cube text-muted me-1"></i>
+                ${row.total_volume_m3}
+            </td>
+            <td class="w-75px text-center text-dark text-nowrap py-1">${row.load_plan_code}</td>
+            <td class="w-15px py-1 pe-5 text-nowrap">
+                <a href="${url}" class="text-hover-primary text-muted">
+                <i class="fa fa-edit"></i>
+                </a>
+            </td>
+            </tr>`;
+            }
+        });
+    });
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+        const mapa = new RouteMap({
+            mapId: "allRoutesMap",
+            selectId: "routesSelect",
+            dataUrl: "{% url 'tmsapp:scriptapp:get_routes_scripting' scripting.id %}"
+        });
+        mapa.init();
+        document.querySelectorAll(".togleAllRoutes").forEach(e => {
+            e.addEventListener("click", () => {
+                togleAllRoutes()
+            })
+        });
+        function togleAllRoutes() {
+            const modal = document.getElementById("allRoutesModal")
+            if (modal.classList.contains("scale-1")) {
+                modal.classList.remove("scale-1")
+                return
+            }
+            modal.classList.add("scale-1")
+        }
+});
+</script>
+<script src="{% static 'assets/js/custom/loadplan_details.js' %}"></script>
+
+{% endblock %}

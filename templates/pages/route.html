@@ -60,12 +60,18 @@
                     </div>
                   </div>
 
-                  <div>
-                    <div class="mb-5">
-                       <span class="fw-semibold">Período</span><br/>
-                      <small class="text-muted">Selecione a data de criação dos pedidos que vão entrar no roteiro</small>
-                      <input type="text" class="form-control form-control-solid form-control-sm w-175px"
-                        placeholder="Pick date range" id="kt_daterangepicker_4" name="date_range" readonly />
+                  <div class="d-flex justify-content-between align-items-center mb-5">
+                    <div>
+                      <span class="fw-semibold">Período</span><br/>
+                      <small class="text-muted">Data de criação das entregas</small>
+                    </div>
+                    <div class="me-4 p-0 position-relative form-check form-switch form-check-success form-check-solid d-flex align-items-center">
+                        <i class="ki-duotone ms-2 position-absolute ki-calendar fs-1 me-2">
+                          <span class="path1"></span>
+                          <span class="path2"></span>
+                        </i>
+                        <input type="text" class="ps-10 form-control form-control-solid form-control-sm w-200px me-2"
+                          placeholder="Pick date range" id="kt_daterangepicker_4" name="date_range" readonly />
                     </div>
                   </div>
                 </div>
@@ -100,7 +106,7 @@
                 <div class="card-header">
                   <h3 class="card-title">Veículos vinculados em rotas</h3>
                 </div>
-                <div class="card-body table-responsive mb-3" style="min-height:280px; max-height:280px; overflow:auto;">
+                <div class="card-body table-responsive mb-3" style="min-height:280px; max-height:320px; overflow:auto;">
                   <table class="table table-rounded border-separate p-0 m-0 align-middle" data-datatable-table="true">
                     <thead class="fw-bolder sticky-top bg-gray-100 pb-2">
                       <tr class="fw-semibold text-muted">
@@ -134,12 +140,21 @@
                 <div id="my-compositions-table" class="px-5" data-url="{% url 'djangotables' %}"
                   data-model="routecomposition">
                   {# Cabeçalho com busca e botão “Criar” #}
-                  <div class="card-header p-0 d-flex align-items-center justify-content-between border-bottom mb-3">
-                    <h3 class="card-title m-0">Roterização de Rota</h3>
-                  </div>
-
+                    <div class="card-header p-0 d-flex align-items-center justify-content-between border-bottom mb-3">
+                      <h3 class="card-title m-0">Lista de Roteiros</h3>
+                      <div class="d-flex align-items-center gap-5">
+                        <div class="input-group-sm position-relative w-300px">
+                          <i class="ki-solid ki-magnifier fs-3 position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+                          <input type="text"
+                                id="datatable_search"
+                                data-search
+                                class="form-control form-control-solid ps-10"
+                                placeholder="Procurar..." />
+                        </div>
+                      </div>
+                    </div>
                   {# Tabela responsiva #}
-                  <div class="table-responsive mb-3" style="min-height: 400px; max-height: 400px; overflow:auto;">
+                  <div class="table-responsive mb-3" style="min-height: 460px; max-height: 460px; overflow:auto;">
                     <table class="table table-rounded border-separate p-0 m-0 align-middle" data-datatable-table="true">
                       <thead class="fw-bolder sticky-top bg-gray-100 pb-2">
                         <tr class="fw-semibold text-muted">
@@ -149,12 +164,16 @@
                                 data-kt-check-target="#datatable-body .form-check-input" />
                             </div>
                           </th>
-                          <th data-field="name" class="py-2 text-hover-dark">Nome</th>
-                          <th data-field="type" class="py-2 text-hover-dark">Tipo</th>
+                          <th data-field="id,name" class="py-2 text-hover-dark">Nome</th>
+                          <th data-field="created_at" class="py-2 text-hover-dark">Criado em</th>
                           <th data-field="total_deliveries" class="py-2 text-hover-dark">Entregas</th>
-                          <th data-field="total_distance" class="py-2 text-hover-dark">Distância (km)</th>
-                          <th data-field="total_time" class="py-2 text-hover-dark">Tempo Máx.</th>
-                          <th class="rounded-end-5"></th>
+                          <th data-field="max_distance_km" class="py-2 text-hover-dark">Distância (km)</th>
+                          <th data-field="max_duration_min" class="py-2 text-hover-dark">Tempo Máx.</th>
+                          <th data-field="total_load_plans" class="py-2 text-hover-dark">Cargas criadas</th>
+                          <th data-field="total_vehicles" class="py-2 text-hover-dark">Veículos usados</th>
+                          <th data-field="status_label" class="py-2 text-hover-dark rounded-end-5">Status</th>
+
+
                         </tr>
                       </thead>
                       <tbody id="datatable-body"></tbody>
@@ -214,6 +233,7 @@
         route_area: { value: false, method: 'isnull' }
       },
       rowRenderer: row => {
+        console.log(row);
         // Exemplo de linha customizada:
         const url = `/tms/fleet/vehicle/${row.id}/update/`;
         return `
@@ -222,19 +242,38 @@
                     <td class="text-gray-800 ps-5">${row.license_plate}</td>
                     <td class="text-gray-700">${row.driver.label}</td>
                     <td class="text-gray-700">${row.route_area.label}</td>
+
                 </tr>`;
       }
     });
   });
 </script>
 <script>
+  function formatDecimalMinutes(decimalMinutes) {
+    const total = parseFloat(decimalMinutes);
+    if (isNaN(total)) return '';
+    const minutes = Math.floor(total);
+    const seconds = Math.round((total - minutes) * 100);
+    return `${minutes} minutos ${seconds} segundos`;
+  }
   document.addEventListener('DOMContentLoaded', () => {
     new DjangoDataTable({
       root: document.getElementById('my-compositions-table'),
       pageSize: 10,
       cellClassName: 'px-2 py-1 text-sm',
+      orderBy:  'id',
+      orderDir: 'desc',
       rowRenderer: row => {
-        const url = `/tms/scriptapp/routecomposition/${row.id}/`;  // ajuste à sua URL real
+        const url = `/tms/script/scripting/${row.id}/`;
+        const dt = row.created_at.slice(0, 16);    // ex: "2025-05-23T19:20"
+        const [datePart, timePart] = dt.split('T'); // ["2025-05-23", "19:20"]
+        const [year, month, day] = datePart.split('-');
+        const formatted = `${day}/${month}/${year} ${timePart}`;
+        const stt_obj = {
+          rascunho: '<span class="badge badge-light-warning">Rascunho</span>',
+          completa: '<span class="badge badge-light-success">Completa</span>',
+          cancelada: '<span class="badge badge-light-danger">Cancelada</span>',
+        }         
         return `
         <tr class="cursor-pointer bg-hover-light border-bottom border-gray-200"
             onclick="window.location='${url}'">
@@ -242,11 +281,14 @@
                 <input class="form-check-input" type="checkbox"/>
               </div></td>
           <td class="ps-5 text-gray-900">${row.name}</td>
-          <td class="text-gray-700">${row.type}</td>
+          <td class="text-gray-700">${ formatted}</td>
           <td class="text-gray-700">${row.total_deliveries}</td>
-          <td class="text-gray-700">${row.total_distance}</td>
-          <td class="text-gray-700">${row.total_time}</td>
-          <td></td>
+          <td class="text-gray-700">${row.max_distance_km.toFixed(2)} kilometros</td>
+          <td class="text-gray-700">${formatDecimalMinutes(row.max_duration_min)}</td>
+          <td class="text-gray-700">${row.total_load_plans}</td>
+          <td class="text-gray-700">${row.total_vehicles}</td>
+          <td class="text-gray-700">${stt_obj[row.status_label]}</td>
+
         </tr>`;
       }
     });

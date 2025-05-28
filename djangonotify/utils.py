@@ -18,6 +18,7 @@ def send_progress(task_id: str, user_id: int, message: str, percent: int, status
 
     # 2) Prepara payload
     payload = {
+        'id': tr.id,
         'name': tr.name,
         'task_id': task_id,
         'message': message,

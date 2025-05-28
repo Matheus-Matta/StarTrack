@@ -1,5 +1,16 @@
 from celery import Celery
 import os
+from celery.signals import task_prerun, task_postrun
+from django.utils import timezone
+import pytz
+
+@task_prerun.connect
+def activate_sao_paulo_timezone(sender=None, **kwargs):
+    timezone.activate(pytz.timezone('America/Sao_Paulo'))
+
+@task_postrun.connect
+def deactivate_timezone(sender=None, **kwargs):
+    timezone.deactivate()
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 

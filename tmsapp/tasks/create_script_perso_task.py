@@ -28,53 +28,39 @@ User = get_user_model()
 
 def can_fit_delivery(vehicle, current_weight, current_volume, delivery):
     """
-    Verifica se uma entrega cabe no veículo
+    Verifica se uma entrega (com total_weight_m3/total_volume_m3)
+    cabe no veículo (com max_volume_kg/max_volume_m3).
     """
-    delivery_weight = delivery.total_weight_kg or Decimal('0.000')
-    delivery_volume = delivery.total_volume_m3 or Decimal('0.000')
-    
+    delivery_weight = delivery.total_weight_kg or Decimal('0')
+    delivery_volume = delivery.total_volume_m3 or Decimal('0')
     return (
         current_weight + delivery_weight <= vehicle.max_weight_kg and
         current_volume + delivery_volume <= vehicle.max_volume_m3
     )
 
-
 def distribute_deliveries_to_vehicles(deliveries, vehicles):
     """
-    Distribui entregas entre veículos otimizando capacidade
-    
-    Returns:
-        dict: {vehicle_id: [deliveries]}
+    Retorna um dict {veículo_id: [entregas]} e uma lista de entregas não alocadas.
     """
-    # Ordena entregas por peso/volume (maiores primeiro)
+    # Ordena entregas e veículos (maiores primeiro)
     sorted_deliveries = sorted(
         deliveries,
         key=lambda d: (d.total_weight_kg or Decimal('0')) + (d.total_volume_m3 or Decimal('0')),
         reverse=True
     )
-    
-    # Ordena veículos por capacidade (maiores primeiro)
     sorted_vehicles = sorted(
         vehicles,
-        key=lambda v: v.max_weight_kg + v.max_volume_m3,
+        key=lambda v: (v.max_weight_kg or Decimal('0')) + (v.max_volume_m3 or Decimal('0')),
         reverse=True
     )
-    
-    vehicle_loads = {}
-    vehicle_weights = {}
-    vehicle_volumes = {}
-    
-    # Inicializa tracking de capacidades
-    for vehicle in sorted_vehicles:
-        vehicle_loads[vehicle.id] = []
-        vehicle_weights[vehicle.id] = Decimal('0.000')
-        vehicle_volumes[vehicle.id] = Decimal('0.000')
-    
-    # Distribui entregas
+
+    vehicle_loads = {v.id: [] for v in sorted_vehicles}
+    vehicle_weights = {v.id: Decimal('0') for v in sorted_vehicles}
+    vehicle_volumes = {v.id: Decimal('0') for v in sorted_vehicles}
+    unassigned = []
+
     for delivery in sorted_deliveries:
         placed = False
-        
-        # Tenta colocar no primeiro veículo que couber
         for vehicle in sorted_vehicles:
             if can_fit_delivery(
                 vehicle,
@@ -83,20 +69,15 @@ def distribute_deliveries_to_vehicles(deliveries, vehicles):
                 delivery
             ):
                 vehicle_loads[vehicle.id].append(delivery)
-                vehicle_weights[vehicle.id] += delivery.total_weight_kg or Decimal('0.000')
-                vehicle_volumes[vehicle.id] += delivery.total_volume_m3 or Decimal('0.000')
+                vehicle_weights[vehicle.id] += delivery.total_weight_kg or Decimal('0')
+                vehicle_volumes[vehicle.id] += delivery.total_volume_m3 or Decimal('0')
                 placed = True
                 break
-        
         if not placed:
-            # Se não couber em nenhum veículo, coloca no primeiro (sobrecarga)
-            first_vehicle = sorted_vehicles[0]
-            vehicle_loads[first_vehicle.id].append(delivery)
-            vehicle_weights[first_vehicle.id] += delivery.total_weight_kg or Decimal('0.000')
-            vehicle_volumes[first_vehicle.id] += delivery.total_volume_m3 or Decimal('0.000')
-    
-    return vehicle_loads
+            # Se não coube em nenhum veículo, adiciona à lista de não alocadas
+            unassigned.append(delivery)
 
+    return vehicle_loads, unassigned
 
 @shared_task(bind=True)
 def create_script_perso_task(self, user_id, tkrecord_id, start_date, end_date):
@@ -105,28 +86,29 @@ def create_script_perso_task(self, user_id, tkrecord_id, start_date, end_date):
         tk = TaskRecord.objects.get(pk=tkrecord_id)
         tk.task_id = task_id
         tk.save(update_fields=['task_id'])
-        
+        time_module.sleep(5)
         user = User.objects.get(pk=user_id)
-        
+
         send_progress(task_id, user_id, "Iniciando roteirização completa...", 1, status='progress')
         
-        # 1. FILTRAR ENTREGAS
-        send_progress(task_id, user_id, f"Carregando entregas entre {start_date} e {end_date}...", 5, status='progress')
-        
         if start_date == end_date:
+            total_sem_filtro = Delivery.objects.filter(created_at__date=start_date).count()
             deliveries = Delivery.objects.filter(
                 created_at__date=start_date
             ).exclude(latitude__isnull=True, longitude__isnull=True)
         else:
+            total_sem_filtro = Delivery.objects.filter(
+                created_at__date__range=[start_date, end_date]
+            ).count()
             deliveries = Delivery.objects.filter(
                 created_at__date__range=[start_date, end_date]
             ).exclude(latitude__isnull=True, longitude__isnull=True)
         
-        if not deliveries.exists():
+        if total_sem_filtro == 0:
             send_notification(
                 user_id,
                 title="Roteirização",
-                message=f"Nenhuma entrega encontrada de {start_date} a {end_date}.",
+                message=f"{total_sem_filtro} entrega encontrada de {start_date} a {end_date}.",
                 level="warning"
             )
             send_progress(task_id, user_id, "Nenhuma entrega encontrada.", 100, status='success')
@@ -134,7 +116,7 @@ def create_script_perso_task(self, user_id, tkrecord_id, start_date, end_date):
         
         # 2. CARREGAR ÁREAS E AGRUPAR ENTREGAS
         send_progress(task_id, user_id, "Agrupando entregas por área...", 10, status='progress')
-        
+
         areas = []
         for area in RouteArea.objects.filter(is_active=True):
             try:
@@ -171,11 +153,16 @@ def create_script_perso_task(self, user_id, tkrecord_id, start_date, end_date):
             if areas:  # Verifica se há áreas disponíveis
                 nearest_area, _ = min(areas, key=lambda ap: ap[1].distance(pt))
                 area_groups[nearest_area].append(d)
+                print(f"📍 Entrega {d.id} atribuída por distância à área {nearest_area.name}")
 
-        if not area_groups:
+        if len(area_groups) == 0:
+            send_progress(task_id, user_id,
+                f"Nenhuma área de rota válida encontrada. areas: {len(area_groups)}",
+                100,
+                status='failure')
             send_notification(user_id,
                 title="Roteirização",
-                message="Nenhuma área de rota válida encontrada.",
+                message=f"Nenhuma área de rota válida encontrada. areas: {len(area_groups)}",
                 level="warning"
             )
             return {"status": "no_areas", "count": 0}
@@ -201,7 +188,7 @@ def create_script_perso_task(self, user_id, tkrecord_id, start_date, end_date):
 
         with transaction.atomic():
             # Cria RouteComposition
-            composition_name = f"Rota {area.name} - {vehicle.name} - {start_date}"
+            composition_name = f"Roteirização - {start_date}"
             route_composition = RouteComposition.objects.create(
                 name=composition_name,
                 created_by=user,
@@ -209,6 +196,7 @@ def create_script_perso_task(self, user_id, tkrecord_id, start_date, end_date):
             )
             route_composition.save()
             for area, area_deliveries in area_groups.items():
+
                 processed_areas += 1
                 progress = 20 + (processed_areas / total_areas) * 60
                 
@@ -220,8 +208,8 @@ def create_script_perso_task(self, user_id, tkrecord_id, start_date, end_date):
                 vehicles = Vehicle.objects.filter(
                     route_area=area, 
                     is_active=True
-                ).order_by('-capacity_weight', '-capacity_volume')
-                
+                ).order_by('-max_weight_kg', '-max_volume_m3')
+
                 if not vehicles.exists():
                     send_notification(user_id,
                         title=f"Área {area.name}",
@@ -231,19 +219,18 @@ def create_script_perso_task(self, user_id, tkrecord_id, start_date, end_date):
                     continue
                 
                 # Distribui entregas entre veículos
-                vehicle_distributions = distribute_deliveries_to_vehicles(
+                vehicle_distributions, extras_sem_carga = distribute_deliveries_to_vehicles(
                     area_deliveries, vehicles
                 )
-                
-                # Cria LoadPlans e Rotas para cada veículo com entregas
+                                # Cria LoadPlans e Rotas para cada veículo com entregas
                 for vehicle_id, vehicle_deliveries in vehicle_distributions.items():
                     if not vehicle_deliveries:
                         continue
-                    
+
                     vehicle = Vehicle.objects.get(id=vehicle_id)
                     
                     # Cria LoadPlan
-                    load_plan_name = f"Carga {area.name} - {vehicle.name} - {start_date}"
+                    load_plan_name = f"Carga {area.name}"
                     
                     # Cria rota temporária (será atualizada depois)
                     temp_route = Route.objects.create(
@@ -262,18 +249,26 @@ def create_script_perso_task(self, user_id, tkrecord_id, start_date, end_date):
                         route=temp_route,
                         vehicle=vehicle,
                         planned_date=start_date,
-                        status='planned',
+                        status='draft',
                         created_by=user
                     )
                     
                     # Adiciona entregas à composição
                     for idx, delivery in enumerate(vehicle_deliveries):
-                        RouteCompositionDelivery.objects.create(
-                            route_composition=route_composition,
+
+                        rcd, created = RouteCompositionDelivery.objects.get_or_create(
                             delivery=delivery,
-                            load_plan=load_plan,
-                            sequence=idx + 1
+                            defaults={
+                                'route_composition': route_composition,
+                                'load_plan':         load_plan,
+                                'sequence':          idx + 1
+                            }
                         )
+                        if not created:
+                            rcd.route_composition = route_composition
+                            rcd.load_plan         = load_plan
+                            rcd.sequence          = idx + 1
+                            rcd.save(update_fields=['route_composition','load_plan','sequence'])
                     
                     # Prepara coordenadas para otimização
                     coordinates = []
@@ -289,7 +284,7 @@ def create_script_perso_task(self, user_id, tkrecord_id, start_date, end_date):
                         geojson, duration, distance, ordered_deliveries = get_geojson_by_ors(
                             coordinates, departure_location
                         )
-                        
+
                         # Atualiza rota com dados otimizados
                         temp_route.name = f"Rota {area.name} - {vehicle.name} - {start_date}"
                         temp_route.distance_km = distance / 1000  # converte metros para km
@@ -343,7 +338,23 @@ def create_script_perso_task(self, user_id, tkrecord_id, start_date, end_date):
                             'overloaded': load_plan.is_overloaded(),
                             'error': 'Otimização falhou'
                         })
-        
+
+                if extras_sem_carga:
+                    for d in extras_sem_carga:
+                        rcd, created = RouteCompositionDelivery.objects.get_or_create(
+                            delivery=d,
+                            defaults={
+                                'route_composition': route_composition,
+                                'load_plan':         None,
+                                'sequence':          0
+                            }
+                        )
+                        if not created:
+                            rcd.route_composition = route_composition
+                            rcd.load_plan         = None
+                            rcd.sequence          = 0
+                            rcd.save(update_fields=['route_composition','load_plan','sequence'])
+
         # 4. FINALIZAÇÃO
         send_progress(task_id, user_id, "Roteirização concluída!", 100, status='success')
         
@@ -357,7 +368,8 @@ def create_script_perso_task(self, user_id, tkrecord_id, start_date, end_date):
         • {sum(p['deliveries'] for p in created_plans)} entregas processadas
         • {overloaded_plans} veículos com sobrecarga
         """
-        
+        print(summary_message)
+
         send_notification(user_id,
             title="Roteirização Concluída",
             message=summary_message,

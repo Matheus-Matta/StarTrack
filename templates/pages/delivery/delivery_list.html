@@ -9,7 +9,6 @@
 <div class="bg-body-content m-0 border border-secondary rounded-bottom-4 border-top-0 flex-grow-1 overflow-auto" style="min-height: 0;">
   <div id="scrollable_content" class="p-4">
     <div class="row">
-
       <div class="col-12 mb-4">
         <div id="my-deliveries-table"
              class="card h-100 px-4 pb-4"
@@ -37,7 +36,7 @@
                     <input type="file"
                           name="file"
                           id="id_import_file"
-                          accept=".xls,.xlsx"
+                          accept=".xls,.xlsx,.csv"
                           hidden>
                     <button type="button"
                             class="btn btn-light btn-sm shadow-md"
@@ -99,13 +98,9 @@
                 </nav>
               </div>
 
-            </div>
-          </div>
-
         </div>
       </div>
-
-    </main>
+    </div>
   </div>
 </div>
 {% endblock %}
@@ -123,6 +118,14 @@ document.addEventListener('DOMContentLoaded', () => {
       const url = `/tms/delivery/${row.id}/update/`;
       const customer = row?.customer_name || '...';
       const date = row.created_at.slice(0,10).split('-').reverse().join('/');
+      const stt_obj = {
+        pending: "<span class='badge badge-light-warning'>Pendente</span>",
+        scheduled: "<span class='badge badge-light-success'>agendada</span>",
+        in_transit: "<span class='badge badge-light-info'>em trânsito</span>",
+        delivered: "<span class='badge badge-light-success'>entregue</span>",
+        failed: "<span class='badge badge-light-danger'>falha na entrega</span>",
+        cancelled: "<span class='badge badge-light-danger'>cancelada</span>",
+      }
       return `
         <tr class="cursor-pointer bg-hover-light h-15px border-1 border-bottom border-gray-200">
           <td class="ps-5 py-1">
@@ -140,11 +143,9 @@ document.addEventListener('DOMContentLoaded', () => {
           <td class="text-gray-700 py-1">${row.postal_code}</td>
           <td class="text-gray-700 py-1">${date}</td>
           <td class="py-1">
-            <span class="badge badge-${row.status} badge-outline rounded-pill">
-              ${row.status_display.charAt(0).toUpperCase() + row.status_display.slice(1)}
-            </span>
+            ${stt_obj[row.status]}
           </td>
-          <td class="py-1 pe-2">
+          <td class="py-1 pe-5">
             <a href="${url}" class="text-hover-primary text-muted">
               <i class="fa fa-edit"></i>
             </a>

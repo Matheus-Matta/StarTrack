@@ -53,9 +53,9 @@
                                             <th data-field="brand" class="py-2 text-hover-dark">Marca</th>
                                             <th data-field="model" class="py-2 text-hover-dark">Modelo</th>
                                             <th data-field="year" class="py-2 text-hover-dark">Ano</th>
-                                            <th data-field="capacity_volume" class="py-2 text-hover-dark">capacidade
+                                            <th data-field="max_volume_m3" class="py-2 text-hover-dark">capacidade
                                                 (m3)</th>
-                                            <th data-field="capacity_weight" class="py-2 text-hover-dark">capacidade
+                                            <th data-field="max_weight_kg" class="py-2 text-hover-dark">capacidade
                                                 (kg)</th>
                                             <th data-field="driver" class="py-2 text-hover-dark">Motorista</th>
                                             <th data-field="is_outsourced" class="py-2 text-hover-dark">Terceirizado
@@ -107,7 +107,7 @@
             rowRenderer: row => {
                 // Exemplo de linha customizada:
                 const url = `/tms/fleet/vehicle/${row.id}/update/`;
-                const driverUrl = `/tms/fleet/driver/${row.driver.id}/update/`;	
+                
                 const statusClass =
                     row.status === 'active' ? 'success' :
                         row.status === 'maintenance' ? 'warning' :
@@ -118,16 +118,18 @@
                     row.status === 'active' ? 'Ativo' :
                         row.status === 'maintenance' ? 'Em manutenção' :
                             'Baixado';
+                const driver = row.driver?.label || 'nenhum motorista';
+                const driverUrl = row.driver ? `/tms/fleet/driver/${row.driver.id}/update/` : '#';
                 return `
                 <tr class="cursor-pointer bg-hover-light border-1 border-bottom border-gray-200">
                     <td class="ps-5"><div class="form-check form-check-sm form-check-custom"><input type="checkbox" class="form-check-input" value="${row.id}"></div></td>
-                    <td class="text-dark fw-bold">${row.license_plate}</td>
+                    <td onclick="location.href='${url}'" class="text-dark text-hover-primary fw-bold">${row.license_plate}</td>
                     <td class="text-gray-700">${row.brand}</td>
                     <td class="text-gray-700">${row.model}</td>
                     <td class="text-gray-700">${row.year}</td>
-                    <td class="text-gray-700">${row.capacity_volume} (m3)</td>
-                    <td class="text-gray-700">${row.capacity_weight} (kg)</td>
-                    <td><a class="text-hover-primary text-gray-700 fs-5" href="${url}">${row.driver.label}</a></td>
+                    <td class="text-gray-700">${row.max_volume_m3} (m3)</td>
+                    <td class="text-gray-700">${row.max_weight_kg} (kg)</td>
+                    <td><a class="text-hover-primary text-gray-700" href="${driverUrl}">${driver}</a></td>
                     <td class="text-gray-700">${row.is_outsourced ? 'Sim' : 'Não'}</td>
                     <td>
                         <span class="badge badge-${statusClass} badge-outline rounded-[30px]">
@@ -136,7 +138,7 @@
                         </span>
                     </td>
                     <td>
-                        <a class="text-hover-primary text-muted" href="${url}"><i class="fa fa-edit fs-2"></i></a>
+                        <a class="text-hover-primary text-muted" href="${url}"><i class="fa fa-edit"></i></a>
                     </td>
                 </tr>`;
             }

@@ -60,5 +60,5 @@ class Notification(models.Model):
             'danger': 'ki-solid ki-cross-circle',
             'success': 'ki-solid ki-verify',
         }
-        return level_icons.get(self.level, '')
+        return level_icons.get(self.level, 'ki-solid ki-information-4')
     

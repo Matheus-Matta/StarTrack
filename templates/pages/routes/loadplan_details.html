@@ -1,0 +1,149 @@
+{# templates/page/routes/loadplan_drawer.html #}
+<div class="card card-flush h-100">
+  <!-- HEADER -->
+  <div class="card-header d-flex justify-content-between align-items-center py-5">
+    <div class="d-flex align-items-center">
+      <h3 class="fw-bold text-gray-800 me-4">Carga {{ plan.code }}</h3>
+      <span class="
+            badge
+            {% if plan.status == 'cancelled' %}
+              badge-light-danger
+            {% else %}
+              badge-light-success
+            {% endif %}
+          ">
+        {{ plan.status|title }}
+      </span>
+    </div>
+    <div class="card-toolbar">
+      <button type="button" class="btn btn-icon btn-sm btn-active-light-primary" data-action="close-details">
+        <i class="ki-outline ki-cross fs-1"></i>
+      </button>
+    </div>
+  </div>
+  
+  <!-- BODY -->
+  <div class="card-body pt-0">
+    {# —— Resumo de Totais —— #}
+    <div class="d-flex flex-wrap mb-8">
+      <div class="d-flex align-items-center me-10 mb-5">
+        <i class="ki-outline ki-dollar fs-1 text-primary me-3"></i>
+        <div class="d-flex flex-column">
+          <span class="fw-bold fs-3">${{ plan.totals.value }}</span>
+          <span class="fs-7 text-gray-600">Valor Total</span>
+        </div>
+      </div>
+      <div class="d-flex align-items-center me-10 mb-5">
+        <i class="ki-outline ki-list-check fs-1 text-info me-3"></i>
+        <div class="d-flex flex-column">
+          <span class="fw-bold fs-3">{{ plan.totals.deliveries }}</span>
+          <span class="fs-7 text-gray-600">Entregas</span>
+        </div>
+      </div>
+      <div class="d-flex align-items-center me-10 mb-5">
+        <i class="fa-solid fa-weight-hanging fs-1 text-warning me-3"></i>
+        <div class="d-flex flex-column">
+          <span class="fw-bold fs-3">
+            {{ plan.totals.weight_kg }} / {{ plan.totals.max_weight_kg }}
+          </span>
+          <span class="fs-7 text-gray-600">Peso (kg)</span>
+        </div>
+      </div>
+      <div class="d-flex align-items-center me-10 mb-5">
+        <i class="fa-solid fa-cube fs-1 text-success me-3"></i>
+        <div class="d-flex flex-column">
+          <span class="fw-bold fs-3">
+            {{ plan.totals.volume_m3 }} / {{ plan.totals.max_volume_m3 }}
+          </span>
+          <span class="fs-7 text-gray-600">Volume (m³)</span>
+        </div>
+      </div>
+      <div class="d-flex align-items-center me-10 mb-5">
+        <i class="fa-solid fa-truck fs-1 text-dark me-3"></i>
+        <div class="d-flex flex-column">
+          <span class="fw-bold fs-3">{{ plan.vehicle.license_plate }}</span>
+          <span class="fs-7 text-gray-600">Veículo</span>
+        </div>
+      </div>
+      <div class="d-flex align-items-center mb-5">
+        <i class="fa-solid fa-user fs-1 text-dark me-3"></i>
+        <div class="d-flex flex-column">
+          <span class="fw-bold fs-3">{{ plan.vehicle.driver }}</span>
+          <span class="fs-7 text-gray-600">Motorista</span>
+        </div>
+      </div>
+    </div>
+
+    {# —— Abas —— #}
+    <ul class="nav nav-tabs nav-line-tabs mb-5 fs-6 fw-bold">
+      <li class="nav-item">
+        <a class="nav-link active" data-bs-toggle="tab" href="#tab-stops">
+          Load Stops <span class="badge badge-light ms-1">{{ stops|length }}</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" data-bs-toggle="tab" href="#tab-docs">
+          Documents <span class="badge badge-light ms-1">{{ docs_count }}</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" data-bs-toggle="tab" href="#tab-financials">
+          Financials <span class="badge badge-light ms-1">{{ financials_count }}</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" data-bs-toggle="tab" href="#tab-vehicles">
+          Vehicles <span class="badge badge-light ms-1">{{ vehicles_count }}</span>
+        </a>
+      </li>
+    </ul>
+
+    <div class="tab-content">
+      {# —— Load Stops —— #}
+      <div class="tab-pane fade show active" id="tab-stops">
+        <div class="timeline timeline-3">
+          {% for stop in stops %}
+          <div class="timeline-item align-items-start">
+            <div class="timeline-label fw-semibold text-gray-800 me-3">{{ stop.position }}.</div>
+            <div class="timeline-badge">
+              <i class="fa fa-circle fs-1 text-primary"></i>
+            </div>
+            <div class="fw-normal timeline-content text-gray-600 ps-3">
+              <strong>Pedido:</strong> {{ stop.order_number }}<br>
+              <strong>Cliente:</strong> {{ stop.client }}<br>
+              <strong>Endereço:</strong> {{ stop.address }}
+            </div>
+          </div>
+          {% endfor %}
+
+          {% if extras %}
+          <div class="timeline-item mt-8">
+            <h6 class="text-warning mb-3">Entregas sem Carga</h6>
+          </div>
+          {% for extra in extras %}
+          <div class="timeline-item align-items-start">
+            <div class="timeline-label fw-semibold text-gray-800 me-3">{{ extra.sequence }}.</div>
+            <div class="timeline-badge">
+              <i class="fa fa-exclamation-triangle fs-1 text-warning"></i>
+            </div>
+            <div class="fw-normal timeline-content text-gray-600 ps-3">
+              <strong>Pedido:</strong> {{ extra.order_number }}<br>
+              <strong>Cliente:</strong> {{ extra.client }}<br>
+              <strong>Endereço:</strong> {{ extra.address }}
+            </div>
+          </div>
+          {% endfor %}
+          {% endif %}
+        </div>
+      </div>
+
+      {# abas vazias para futuramente preencher #}
+      <div class="tab-pane fade" id="tab-docs"></div>
+      <div class="tab-pane fade" id="tab-financials"></div>
+      <div class="tab-pane fade" id="tab-vehicles"></div>
+    </div>
+
+    {# —— Mapa —— #}
+    <div id="load-plan-map" class="min-h-250px rounded mb-5"></div>
+  </div>
+</div>

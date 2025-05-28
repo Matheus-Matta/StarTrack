@@ -36,7 +36,6 @@ class VehicleAssignment(models.Model):
     def __str__(self):
         return f"{self.driver} -> {self.vehicle} ({self.start_date} até {self.end_date or 'presente'})"
 
-
 auditlog.register(VehicleAssignment)
 
 class Vehicle(models.Model):
@@ -45,9 +44,9 @@ class Vehicle(models.Model):
         'Placa', max_length=10, unique=True,
         db_index=True
     )
-    brand = models.CharField('Marca', max_length=50)
-    model = models.CharField('Modelo', max_length=50)
-    year = models.PositiveSmallIntegerField('Ano de Fabricação')
+    brand = models.CharField('Marca', max_length=50, null=True, blank=True)
+    model = models.CharField('Modelo', max_length=50, null=True, blank=True)
+    year = models.PositiveSmallIntegerField('Ano de Fabricação',null=True, blank=True)
 
     # tipo 
     vehicle_type = models.CharField(
@@ -87,8 +86,9 @@ class Vehicle(models.Model):
     is_active = models.BooleanField('Ativo', default=True)
 
     # capacidades e status
-    capacity_volume = models.DecimalField('Capacidade (m³)', max_digits=8, decimal_places=2, default=0)
-    capacity_weight = models.DecimalField('Capacidade (kg)', max_digits=8, decimal_places=2, default=0)
+    max_volume_m3 = models.DecimalField('Capacidade (m³)', max_digits=8, decimal_places=2)
+    max_weight_kg = models.DecimalField('Capacidade (kg)', max_digits=8, decimal_places=2)
+    
     status = models.CharField(
         'Status', max_length=20,
         choices=VehicleStatus.choices,
@@ -112,13 +112,18 @@ class Vehicle(models.Model):
     def clean(self):
         if self.is_outsourced and not self.carrier:
             raise ValidationError('Defina a transportadora para veículo terceirizado.')
-        if not self.is_outsourced and not self.driver:
-            raise ValidationError('Defina um motorista interno para veículo não terceirizado.')
 
     def __str__(self):
         if self.is_outsourced:
             return f"{self.license_plate} - {self.brand} ({self.carrier})"
         return f"{self.license_plate} - {self.brand} ({self.driver})"
+    
+    @property
+    def name(self):
+        return self.license_plate
+    
+    def get_vehicle_type(self):
+        return self.get_vehicle_type_display()
 
 auditlog.register(Vehicle)
 

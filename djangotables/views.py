@@ -40,13 +40,13 @@ def djangotables(request):
         except json.JSONDecodeError:
             filtro_dict = {}
 
-    # itera sobre cada filtro
+
     for field, raw_val in filtro_dict.items():
-        # descarta valores vazios
-        if raw_val is None or (isinstance(raw_val,str) and not raw_val.strip()):
+        # descarta vazio
+        if raw_val is None or (isinstance(raw_val, str) and not raw_val.strip()):
             continue
 
-        # decide “valor” e “lookup” padrão
+        # extrai valor e método
         if isinstance(raw_val, dict) and 'value' in raw_val:
             val    = raw_val['value']
             method = raw_val.get('method','icontains')
@@ -54,7 +54,17 @@ def djangotables(request):
             val    = raw_val
             method = 'icontains'
 
-        # verifica se o campo existe no modelo
+        # —— se for property em Python, filtra na lista —— 
+        if hasattr(model_class, field) and isinstance(getattr(model_class, field), property):
+            # converte qs em lista só na primeira iteração
+            objs = list(qs) if not isinstance(qs, list) else qs
+            if method == 'exact':
+                qs = [o for o in objs if getattr(o, field) == val]
+            else:
+                qs = [o for o in objs if val.lower() in str(getattr(o, field, '')).lower()]
+            continue
+
+        # —— senão tenta filtrar no banco —— 
         try:
             model_class._meta.get_field(field)
         except FieldDoesNotExist:

@@ -110,19 +110,19 @@
                                   </div>
                                     <div class="mb-5">
                                         <label for="id_capacity_volume" class="form-label fw-semibold">Volume (m³)</label>
-                                        <input type="text" inputmode="decimal" step="0.01" name="capacity_volume" id="id_capacity_volume" placeholder="0.0 digite a capacidade em metros cubicos da carga"
-                                            class="form-control form-control-solid form-control-sm {% if form.capacity_volume.errors %}is-invalid{% endif %}"
-                                            value="{{ form.capacity_volume.value|default_if_none:'' }}">
-                                        {% for err in form.capacity_volume.errors %}
+                                        <input type="text" inputmode="decimal" step="0.01" name="max_volume_m3" id="id_capacity_volume" placeholder="0.0 digite a capacidade em metros cubicos da carga"
+                                            class="form-control form-control-solid form-control-sm {% if form.max_volume_m3.errors %}is-invalid{% endif %}"
+                                            value="{{ form.max_volume_m3.value|default_if_none:'' }}">
+                                        {% for err in form.max_volume_m3.errors %}
                                         <div class="invalid-feedback">{{ err }}</div>
                                         {% endfor %}
                                     </div>
                                     <div class="mb-5">
                                         <label for="id_capacity_weight" class="form-label fw-semibold">Peso (kg)</label>
-                                        <input type="text" inputmode="decimal" step="0.01" name="capacity_weight" id="id_capacity_weight" placeholder="0.0 digite a capacidade em kilos da carga"
-                                            class="form-control form-control-solid form-control-sm {% if form.capacity_weight.errors %}is-invalid{% endif %}"
-                                            value="{{ form.capacity_weight.value|default_if_none:'' }}">
-                                        {% for err in form.capacity_weight.errors %}
+                                        <input type="text" inputmode="decimal" step="0.01" name="max_weight_kg" id="id_capacity_weight" placeholder="0.0 digite a capacidade em kilos da carga"
+                                            class="form-control form-control-solid form-control-sm {% if form.max_weight_kg.errors %}is-invalid{% endif %}"
+                                            value="{{ form.max_weight_kg.value|default_if_none:'' }}">
+                                        {% for err in form.max_weight_kg.errors %}
                                         <div class="invalid-feedback">{{ err }}</div>
                                         {% endfor %}
                                     </div>
@@ -180,6 +180,7 @@
                                       name="driver"
                                       id="id_driver"
                                       class="form-select form-select-solid form-select-sm {% if form.driver.errors %}is-invalid{% endif %}">
+                                      <option value="">---</option>
                                       {% for obj in form.fields.driver.queryset %}
                                         <option value="{{ obj.pk }}"
                                           {% if form.driver.value|stringformat:"s" == obj.pk|stringformat:"s" %}selected{% endif %}>

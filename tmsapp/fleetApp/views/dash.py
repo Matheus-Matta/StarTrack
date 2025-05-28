@@ -30,8 +30,8 @@ class FleetDashboardView(LoginRequiredMixin, View):
             # dados para o gráfico de capacidade
             'chart': {
                 'labels': [v.license_plate for v in vehicles],
-                'volume_data': [float(v.capacity_volume) for v in vehicles],
-                'weight_data': [float(v.capacity_weight) for v in vehicles],
+                'volume_data': [float(v.max_volume_m3) for v in vehicles],
+                'weight_data': [float(v.max_weight_kg) for v in vehicles],
                 'title':  'Top 5 Veículos por Capacidade (m³)',
             }
         }

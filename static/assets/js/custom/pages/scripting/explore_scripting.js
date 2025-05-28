@@ -7,9 +7,9 @@ document.addEventListener("DOMContentLoaded", function () {
         shadowUrl: 'https://unpkg.com/leaflet@1.9.3/dist/images/marker-shadow.png',
     });
 
-    const mapdata = document.getElementById("map");
+    const mapdata = document.getElementById("allRoutesMap");
     const rotas = JSON.parse(mapdata.dataset.routes); // válido!
-    const mapa = L.map('map').setView([-22.85, -43.0], 11);
+    const mapa = L.map('allRoutesMap').setView([-22.85, -43.0], 11);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}{r}.png', {
         attribution: '&copy; OpenStreetMap',

@@ -54,7 +54,8 @@
                     class="px-4 pt-4 rounded-top">
                     <div class="w-100 d-flex justify-content-between mb-2">
                         <p class="fs-4 fw-bold text-white m-0 px-4">Notificações</p>
-                        <i class="ki-solid ki-cross fs-1 cursor-pointer text-white text-hover-danger"
+                        <i onclick="document.getElementById('header_notifications_dropdown').classList.remove('show')" 
+                        class="ki-solid ki-cross fs-1 cursor-pointer text-white text-hover-danger"
                             data-kt-menu-dismiss="true"></i>
                     </div>
                     <ul class="px-4 nav nav-tabs nav-white border-0 nav-line-tabs" role="tablist">
@@ -77,7 +78,7 @@
                 <div class="card-body mt-2 tab-content">
                     <!-- Abas de Alerts -->
                     <div class="tab-pane fade show active" id="notifications_tab_alerts" role="tabpanel">
-                        <div class="scrollable-notifications" data-kt-scrollable="true"
+                        <div class="scrollable" data-kt-scrollable="true"
                             data-kt-scroll-dependencies="#kt_header"
                             data-kt-scroll-wrappers="#notifications_tab_alerts">
                             <!-- aqui você empurra via WS os alerts -->
@@ -107,7 +108,7 @@
                                             <div class="min-w-375px d-flex justify-content-between">
                                                 <div data-message class="fs-7 text-gray-500">{{ note.message }}</div>
                                                 {% if note.read == False %}
-                                                <span data-new class="badge badge-light-warning fs-9">Novo</span>
+                                                <span data-new class="mh-15px badge badge-light-warning fs-9">Novo</span>
                                                 {% endif %}
                                             </div>
                                             </div>
@@ -124,7 +125,7 @@
 
                     <!-- Abas de Tasks -->
                     <div class="tab-pane fade" id="notifications_tab_tasks" role="tabpanel">
-                        <div class="scrollable-notifications" data-kt-scrollable="true"
+                        <div class="scrollable" data-kt-scrollable="true"
                             data-kt-scroll-dependencies="#kt_header" data-kt-scroll-wrappers="#notifications_tab_tasks">
                             <!-- aqui você empurra via WS o progresso das tasks -->
                             <div id="tasks_container">
@@ -132,7 +133,7 @@
                                 {% for t in tasks %}
                   
                                 <!-- begin::Item -->
-                                <div data-task-id="{{ t.task_id }}" class="d-flex {% if not forloop.last %}border-bottom border-gray-200{% endif %} flex-column justify-content-center py-2">
+                                <div data-id="{{ t.id }}" data-task-id="{{ t.task_id }}" class="d-flex {% if not forloop.last %}border-bottom border-gray-200{% endif %} flex-column justify-content-center py-2">
                                     <!-- Section -->
                                     <div class="d-flex ps-5 w-425px align-items-center">
                                         <!-- Symbol -->
@@ -166,7 +167,7 @@
                                                         {{ t.name|default:'Tarefa sem nome' }}
                                                     </a>
                                                     <div data-message class="text-gray-500 fs-7">
-                                                        {{ t.message|default:"message não definido" }}
+                                                        {{ t.message|default:"..." }}
                                                     </div>
                                                 </div>
                                                 {% if t.status == 'success' %}

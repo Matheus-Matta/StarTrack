@@ -14,7 +14,6 @@ from djangonotify.models import TaskRecord
 from tmsapp.tasks import import_deliveries_from_sheet
 import os
 import tempfile
-
 class DeliveryListView(LoginRequiredMixin, ListView):
     model = Delivery
     template_name = 'pages/delivery/delivery_list.html'
@@ -86,20 +85,18 @@ def import_deliveries_view(request):
             # Cria arquivo temporário com a mesma extensão
             _, ext = os.path.splitext(upload.name)
             fd, path = tempfile.mkstemp(suffix=ext)
-            try:
-                with os.fdopen(fd, 'wb') as tmp:
-                    for chunk in upload.chunks():
-                        tmp.write(chunk)
-                # dispara a task
-                tkrecord = TaskRecord.objects.create(user=request.user, name='Importar entregas', status='started')
-                import_deliveries_from_sheet.delay(request.user.id, tkrecord.id, path)
-                messages.success(request, "Importação iniciada com sucesso!")
-            except Exception as e:
-                messages.error(request, f"Erro ao processar arquivo: {e}")
-                # limpa o temp se algo deu errado
-                if os.path.exists(path):
-                    os.remove(path)
+            with os.fdopen(fd, 'wb') as tmp:
+                for chunk in upload.chunks():
+                    tmp.write(chunk)
+            tkrecord = TaskRecord.objects.create(user=request.user, name='Importar entregas', status='started')
+            import_deliveries_from_sheet.delay(request.user.id, tkrecord.id, path)
+            messages.success(request, "Importação iniciada com sucesso!")
+
     except Exception as e:
+        tkrecord.status = 'failure'
+        tkrecord.save()
         messages.error(request, f"Erro ao processar arquivo: {e}")    
+        if os.path.exists(path):
+            os.remove(path)
         
     return redirect(reverse_lazy('tmsapp:deliveryapp:delivery_list'))

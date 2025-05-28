@@ -11,7 +11,7 @@ class VehicleForm(forms.ModelForm):
         fields = [
             'license_plate', 'brand', 'model', 'year',
             'driver', 'carrier', 'is_outsourced',
-            'capacity_volume', 'capacity_weight', 'status',
+            'max_volume_m3', 'max_weight_kg', 'status',
             'vehicle_type', 'route_area', 
         ]
     def clean(self):

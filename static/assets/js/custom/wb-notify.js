@@ -67,7 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>
           <div class="min-w-375px d-flex justify-content-between">
             <div data-message class="fs-7 text-gray-500">${note.message}</div>
-            <span data-new class="badge badge-light-warning fs-9">Novo</span>
+            <span data-new class="mh-15px badge badge-light-warning fs-9">Novo</span>
           </div
         </div>
       </div>
@@ -78,15 +78,17 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function renderOrUpdateTask(task) {
+    console.log("renderOrUpdateTask", task);
     // task = { task_id, name, message, percent, status }
     const container = document.getElementById('tasks_container');
-    let item = container.querySelector(`[data-task-id="${task.task_id}"]`);
+    let item = container.querySelector(`[data-id="${task.id}"]`);
 
     if (!item) {
       // cria novo
       item = document.createElement('div');
       item.className = 'd-flex border-bottom border-gray-200 flex-column justify-content-center py-2';
       item.setAttribute('data-task-id', task.task_id);
+      item.setAttribute('data-id', task.id);
       item.innerHTML = `
         <div class="d-flex ps-5 w-425px align-items-center">
           <div class="symbol symbol-35px me-4" data-symbol></div>

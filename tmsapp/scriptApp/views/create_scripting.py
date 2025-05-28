@@ -24,9 +24,7 @@ def create_scripting(request):
             # 2) formata como ISO string (YYYY-MM-DD)
             start = start_date.strftime("%Y-%m-%d")
             end  = end_date.  strftime("%Y-%m-%d")
-            tk = TaskRecord.objects.get(task_id='2715a4d1-9ad7-471c-ad55-7eb6a73ebf64')
-            tk.status = 'failure'
-            tk.save()
+
             if sp_router == "route_perso":
                 tkrecord = TaskRecord.objects.create(user=request.user, name='Criando roterização', status='started')
                 create_script_perso_task.delay(request.user.id, tkrecord.id, start, end)
@@ -37,6 +35,8 @@ def create_scripting(request):
             return redirect("tmsapp:scriptapp:create_scripting")
 
         except Exception as e:
+            tkrecord.status = 'failure'
+            tkrecord.save()
             messages.error(request, f"Erro ao iniciar o processo: {e}")
             return redirect("tmsapp:scriptapp:create_scripting")
 

@@ -137,89 +137,100 @@
 {% block script %}
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const labels     = {{ chart.labels|safe }};
-      const volumeData = {{ chart.volume_data|safe }};
-      const weightData = {{ chart.weight_data|safe }};
-      
-      // calcula as médias
-      const meanVol = volumeData.reduce((sum, v) => sum + v, 0) / volumeData.length;
-      const meanWgt = weightData.reduce((sum, v) => sum + v, 0) / weightData.length;
+document.addEventListener('DOMContentLoaded', () => {
+  const labels     = {{ chart.labels|safe }};
+  const volumeData = {{ chart.volume_data|safe }};
+  const weightData = {{ chart.weight_data|safe }};
   
-      const ctx = document.getElementById('frotaChart').getContext('2d');
-      new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels,
-          datasets: [
-            {
-              label: 'Volume (m³)',
-              data: volumeData,
-              backgroundColor: '#198754',
-              borderWidth: 1
-            },
-            {
-              label: 'Peso (kg)',
-              data: weightData,
-              backgroundColor: '#0dcaf0',
-              borderWidth: 1
-            }
-          ]
-        },
-        options: {
-          indexAxis: 'y',    // barras horizontais
-          scales: {
-            x: {
-              beginAtZero: true,
-              max: 100,
-              title: { display: true, text: 'Capacidade' }
-            },
-            y: {
-              title: { display: true, text: 'Veículos' }
-            }
-          },
-          plugins: {
-            legend: { position: 'top' },
-            annotation: {
-              annotations: {
-                // linha média de volume
-                meanVolLine: {
-                  type: 'line',
-                  xMin: meanVol,
-                  xMax: meanVol,
-                  borderColor: '#198754',
-                  borderWidth: 2,
-                  borderDash: [4, 4],
-                  label: {
-                    enabled: true,
-                    position: 'start',
-                    backgroundColor: '#198754',
-                    color: '#fff'
-                  }
-                },
-                // linha média de peso
-                meanWgtLine: {
-                  type: 'line',
-                  xMin: meanWgt,
-                  xMax: meanWgt,
-                  borderColor: '#0dcaf0',
-                  borderWidth: 2,
-                  borderDash: [4, 4],
-                  label: {
-                    enabled: true,
-                    position: 'start',
+  // calcula as médias
+  const meanVol = volumeData.reduce((sum, v) => sum + v, 0) / volumeData.length;
+  const meanWgt = weightData.reduce((sum, v) => sum + v, 0) / weightData.length;
 
-                    backgroundColor: '#0dcaf0',
-                    color: '#fff'
-                  }
-                }
+  const ctx = document.getElementById('frotaChart').getContext('2d');
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Volume (m³)',
+          data: volumeData,
+          xAxisID: 'xVolume',               // usa a escala xVolume
+          backgroundColor: '#198754',
+          borderWidth: 1
+        },
+        {
+          label: 'Peso (kg)',
+          data: weightData,
+          xAxisID: 'xWeight',               // usa a escala xWeight
+          backgroundColor: '#0dcaf0',
+          borderWidth: 1
+        }
+      ]
+    },
+    options: {
+      indexAxis: 'y',
+      scales: {
+        // escala do volume
+        xVolume: {
+          position: 'bottom',
+          beginAtZero: true,
+          max: 100,
+          title: { display: true, text: 'Volume (m³)' }
+        },
+        // escala do peso
+        xWeight: {
+          position: 'top',
+          beginAtZero: true,
+          max: 5000,
+          title: { display: true, text: 'Peso (kg)' },
+          grid: { drawOnChartArea: false } // evita riscar grid duplicado
+        },
+        y: {
+          title: { display: true, text: 'Veículos' }
+        }
+      },
+      plugins: {
+        legend: { position: 'top' },
+        annotation: {
+          annotations: {
+            // linha média de volume na escala xVolume
+            meanVolLine: {
+              type: 'line',
+              scaleID: 'xVolume',
+              value: meanVol,
+              borderColor: '#198754',
+              borderWidth: 2,
+              borderDash: [4, 4],
+              label: {
+                enabled: true,
+                position: 'start',
+                backgroundColor: '#198754',
+                color: '#fff',
+              }
+            },
+            // linha média de peso na escala xWeight
+            meanWgtLine: {
+              type: 'line',
+              scaleID: 'xWeight',
+              value: meanWgt,
+              borderColor: '#0dcaf0',
+              borderWidth: 2,
+              borderDash: [4, 4],
+              label: {
+                enabled: true,
+                position: 'start',
+                backgroundColor: '#0dcaf0',
+                color: '#fff',
               }
             }
           }
         }
-      });
-    });
-  </script>
+      }
+    }
+  });
+});
+</script>
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         const wrapper = document.getElementById('my-drivers-table');
@@ -248,19 +259,19 @@
     document.addEventListener('DOMContentLoaded', () => {
         window.DT = new DjangoDataTable({
             root: document.getElementById('my-vehicles-table'),
-            pageSize: 2,
+            pageSize: 5,
             cellClassName: 'px-2 py-1 text-sm',
             rowRenderer: row => {
                 // Exemplo de linha customizada:
                 const url = `/tms/fleet/vehicle/${row.id}/update/`;
-                const driverUrl = `/tms/fleet/driver/${row.driver.id}/update/`;
+                const driver = row.driver?.label || 'nenhum motorista';
                 const type = row.vehicle_type === 'driving-car' ? 'Carro' : 'Caminhão/Veículo pesado';
                 return `
                 <tr onclick="window.location='${url}'" 
                     class="cursor-pointer bg-hover-light border-1 border-bottom border-gray-200">
                     <td class="text-gray-900 ps-5">${row.license_plate}</td>
                     <td class="text-gray-700">${type}</td>
-                    <td class="text-gray-700">${row.driver.label}</td>
+                    <td class="text-gray-700">${driver}</td>
                     <td class="text-gray-700">${row.is_outsourced ? 'Sim' : 'Não'}</td>
                 </tr>`;
             }

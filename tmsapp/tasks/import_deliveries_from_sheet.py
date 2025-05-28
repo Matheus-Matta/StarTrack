@@ -3,6 +3,8 @@
 import os
 import pandas as pd
 import time 
+import re
+from decimal import Decimal, InvalidOperation
 
 from celery import shared_task
 from django.contrib.auth import get_user_model
@@ -18,12 +20,63 @@ User = get_user_model()
 
 
 def sanitize(value) -> str:
-    """Converte NaN ou vazios para string vazia e floats inteiros em inteiros."""
+    """
+    Converte NaN ou vazios para string vazia,
+    floats inteiros para inteiros, e sempre retorna str.
+    """
     if pd.isna(value) or str(value).strip().lower() == 'nan':
         return ''
     if isinstance(value, float) and value.is_integer():
         return str(int(value))
     return str(value).strip()
+
+def parse_decimal(value_str: str, field_name: str = "") -> Decimal:
+    """
+    Recebe uma string tipo "1.234,56" ou "430,00" e devolve Decimal("1234.56") ou Decimal("430.00").
+    Se não conseguir parsear, lança ValueError com mensagem clara.
+    """
+    s = value_str.strip()
+    if not s:
+        return Decimal('0')
+    # remove separador de milhares e normaliza vírgula decimal
+    s = re.sub(r'\.(?=\d{3}(?:[,\s]|$))', '', s)
+    s = s.replace(',', '.')
+    try:
+        return Decimal(s)
+    except InvalidOperation:
+        raise ValueError(f'O valor “{value_str}” não é um decimal válido para o campo {field_name}.')
+
+def geocode_deliveries_if_needed(deliveries: list, existing_map: dict) -> list:
+    """
+    Executa geocodificação somente se:
+    - Latitude/longitude estiverem vazias
+    - Algum campo de endereço tiver sido alterado (comparado com o existente)
+    """
+    for d in deliveries:
+        should_geocode = False
+        if not (d.latitude and d.longitude):
+            should_geocode = True
+        else:
+            old = existing_map.get(d.order_number)
+            if old:
+                for field in ('street', 'number', 'postal_code', 'neighborhood', 'city', 'state'):
+                    if getattr(old, field) != getattr(d, field):
+                        should_geocode = True
+                        break
+
+        if should_geocode:
+            lat, lon = geocode_endereco(
+                d.street,
+                d.number,
+                d.postal_code,
+                d.neighborhood,
+                d.city,
+                d.state
+            )
+            if lat and lon:
+                d.latitude = lat
+                d.longitude = lon
+    return deliveries
 
 @shared_task(bind=True)
 def import_deliveries_from_sheet(self, user_id: int, tkrecord_id: int, temp_file_path: str):
@@ -43,6 +96,9 @@ def import_deliveries_from_sheet(self, user_id: int, tkrecord_id: int, temp_file
         # 2) coleta e sanitiza todas as linhas
         rows, cpfs = [], set()
         for i, row in enumerate(df.itertuples(index=False), start=1):
+            vol_str   = sanitize(getattr(row, 'cubagemm3', ''))
+            wgt_str   = sanitize(getattr(row, 'peso', ''))
+            price_str = sanitize(getattr(row, 'valtotnota', ''))
             data = {
                 'cpf': sanitize(getattr(row, 'doctocliente', '')),
                 'full_name': sanitize(getattr(row, 'nomecliente', '')),
@@ -58,6 +114,9 @@ def import_deliveries_from_sheet(self, user_id: int, tkrecord_id: int, temp_file
                 'postal_code': sanitize(getattr(row, 'cepentrega', '')),
                 'observation': sanitize(getattr(row, 'observacao', '')),
                 'reference': sanitize(getattr(row, 'pontoreferenciaentrega', '')),
+                'total_volume_m3':   parse_decimal(vol_str,   'total_volume_m3'),
+                'total_weight_kg':   parse_decimal(wgt_str,   'total_weight_kg'),
+                'price':             parse_decimal(price_str, 'price'),
             }
             if data['cpf']:
                 cpfs.add(data['cpf'])
@@ -134,6 +193,9 @@ def import_deliveries_from_sheet(self, user_id: int, tkrecord_id: int, temp_file
                     d.postal_code  = data['postal_code']
                     d.observation  = data['observation']
                     d.reference    = data['reference']
+                    d.total_volume_m3 = data['total_volume_m3']
+                    d.total_weight_kg = data['total_weight_kg'] 
+                    d.price = data['price']                   
                     to_update_del.append(d)
                 else:
                     # novo delivery
@@ -149,6 +211,9 @@ def import_deliveries_from_sheet(self, user_id: int, tkrecord_id: int, temp_file
                         postal_code  = data['postal_code'],
                         observation  = data['observation'],
                         reference    = data['reference'],
+                        total_volume_m3 = data['total_volume_m3'],
+                        total_weight_kg = data['total_weight_kg'],
+                        price        = data['price'],
                         created_by   = user
                     ))
 
@@ -159,15 +224,26 @@ def import_deliveries_from_sheet(self, user_id: int, tkrecord_id: int, temp_file
                 if idx % 10 == 0:
                     send_progress(task_id, user_id, f"Preparando entregas: {idx}", pct, status='progress')
 
+                # junta todas para verificar se precisa geocodificar
+                to_geocode = to_create_del + to_update_del
+
+                # passa para função condicional
+                geocode_deliveries_if_needed(to_geocode, delivery_map)
+
+                # salva os updates
             if to_update_del:
                 Delivery.objects.bulk_update(
                     to_update_del,
                     [
-                        'customer','street','number','neighborhood','city','state',
-                        'postal_code','observation','reference','filial'
+                        'customer', 'street', 'number', 'neighborhood', 'city', 'state',
+                        'postal_code', 'observation', 'reference', 'filial',
+                        'latitude', 'longitude', 'total_volume_m3', 'total_weight_kg',
+                        'price'
                     ],
                     batch_size=500
                 )
+
+                # salva os novos
             if to_create_del:
                 Delivery.objects.bulk_create(to_create_del, batch_size=500)
 
@@ -202,6 +278,7 @@ def import_deliveries_from_sheet(self, user_id: int, tkrecord_id: int, temp_file
             'deliveries_updated': len(to_update_del),
         }
     except Exception as e:
+        send_notification(user_id, "Importação de entregas falhou", str(e), level='danger')
         send_progress(task_id, user_id, "Script personalizado falhou", 100, status='failure')
         return {
             "status": "error",

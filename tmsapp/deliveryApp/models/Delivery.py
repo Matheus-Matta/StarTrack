@@ -8,7 +8,7 @@ from django.utils import timezone
 
 class DeliveryStatus(models.TextChoices):
     PENDING     = 'pending',     'pendente'
-    SCHEDULED   = 'scheduled',   'agendada'
+    IN_LOAD     = 'in-load',     'em carga'
     IN_TRANSIT  = 'in-transit',  'em Trânsito'
     DELIVERED   = 'delivered',   'entregue'
     FAILED      = 'failed',      'falha na Entrega'
@@ -29,9 +29,11 @@ class Delivery(models.Model):
     observation = models.TextField('Observação', blank=True, null=True)
     reference = models.CharField('Ponto de Referência', max_length=255, blank=True, null=True)
     filial = models.CharField('Filial', max_length=10, blank=True, null=True)
-    capacity_volume = models.DecimalField('Capacidade (m³)', max_digits=8, decimal_places=2, default=0)
-    capacity_weight = models.DecimalField('Capacidade (kg)', max_digits=8, decimal_places=2, default=0)
-
+    price = models.DecimalField('Valor da nota', max_digits=8, decimal_places=2, default=0)
+    
+    total_volume_m3 = models.DecimalField('Capacidade (m³)', max_digits=8, decimal_places=2, default=0)
+    total_weight_kg = models.DecimalField('Capacidade (kg)', max_digits=8, decimal_places=2, default=0)
+    
     latitude = models.DecimalField('Latitude', max_digits=9, decimal_places=6, blank=True, null=True)
     longitude = models.DecimalField('Longitude', max_digits=9, decimal_places=6, blank=True, null=True)
 
@@ -71,7 +73,7 @@ class Delivery(models.Model):
         """
         Monta endereço completo para geocodificação.
         """
-        parts = [self.street, self.number, self.neighborhood, self.city, self.state, self.postal_code, 'Brasil']
+        parts = [self.street, self.number, self.neighborhood, self.city, self.state, 'Brasil']
         return ', '.join(filter(None, parts))
     
     @property
@@ -85,7 +87,35 @@ class Delivery(models.Model):
         # chama o método gerado pelo Django
         return self.get_status_display()
     
+    @property
+    def load_plan_code(self) -> str | None:
+        """
+        Se estiver vinculado a um LoadPlan via RouteCompositionDelivery, retorna
+        o código desse LoadPlan. Se houver vínculo mas load_plan for None,
+        retorna 'fora de carga'. Caso não exista vínculo, retorna None.
+        """
+        # related_name em RouteCompositionDelivery: 'composition_assignments'
+        qs = self.composition_assignments.all()
+        if not qs.exists():
+            return None
 
+        # 1) primeiro busca uma composição com load_plan
+        rcd = qs.filter(load_plan__isnull=False).select_related('load_plan').first()
+        if rcd:
+            return rcd.load_plan.code
+
+        # 2) se houver composição mas sem load_plan
+        return 'fora de carga'
+    
+    @property
+    def composition_id(self) -> int | None:
+        """
+        Retorna o ID da primeira RouteComposition à qual esta entrega está vinculada,
+        ou None se não houver vínculo.
+        """
+        assignment = self.composition_assignments.first()
+        return assignment.route_composition_id if assignment else None
+       
     def save(self, *args, **kwargs):
         # decidir se deve geocodificar
         should_geocode = False
@@ -123,6 +153,6 @@ class Delivery(models.Model):
 
     def __str__(self) -> str:
         return f"Pedido {self.order_number}"
-
+        
 
 auditlog.register(Delivery)

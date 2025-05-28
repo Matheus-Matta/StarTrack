@@ -15,23 +15,19 @@ urlpatterns = [
   ####### SCRIPTING PATH 
   path(
         'scripting/create/',
-        login_required(lambda request: render(request, 'pages/router.html')),
+        login_required(lambda request: render(request, 'pages/route.html')),
         name='create_scripting'
   ),
   # pagina de loading rotas
-  path(
-    'scripting/loading/<uuid:task_id>/',
-    route_loading_view,
-    name='route_loading'
-  ),
-  # pagina de visualizar rotas
-  path('scripting/explore/<int:composition_id>/', explore_route , name='explore_routes'),
+  path('scripting/loading/<uuid:task_id>/', route_loading_view, name='route_loading'),
+  # pagina de visualizar roteiro
+  path('scripting/<int:scripting_id>/', scripting_view, name='scripting_view'),
   # pegar todas as localizações da empresa
   path('scripting/get_company_locations', get_company_locations_api, name='get_company_locations'), 
   # criar rotas
   path('scripting/create_routes', create_scripting, name='create_routes'),
   # pegar todas as rotas e composiçoes
-  path('scripting/route_compositions_data/', route_compositions_data, name='route_compositions_data'),
+  path('scripting/<int:scripting_id>/routes/', get_routes_scripting, name='get_routes_scripting'),
 
 
  
