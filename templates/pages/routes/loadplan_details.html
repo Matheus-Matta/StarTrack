@@ -1,29 +1,28 @@
 {# templates/page/routes/loadplan_drawer.html #}
 <div class="card card-flush h-100">
   <!-- HEADER -->
-  <div class="card-header d-flex justify-content-between align-items-center py-5">
+  <div class="card-header d-flex justify-content-between align-items-center px-6">
     <div class="d-flex align-items-center">
-      <h3 class="fw-bold text-gray-800 me-4">Carga {{ plan.code }}</h3>
-      <span class="
-            badge
-            {% if plan.status == 'cancelled' %}
-              badge-light-danger
-            {% else %}
-              badge-light-success
-            {% endif %}
-          ">
-        {{ plan.status|title }}
-      </span>
-    </div>
-    <div class="card-toolbar">
-      <button type="button" class="btn btn-icon btn-sm btn-active-light-primary" data-action="close-details">
-        <i class="ki-outline ki-cross fs-1"></i>
-      </button>
+      <i data-action="close-details" class="ki-outline bg-hover-light ki-left fs-1 rounded me-4 cursor-pointer"></i>
+      <h3 class="fw-bold text-dark p-0 m-0 me-4">{{ plan.code }}</h3>
+      {% if plan.status == 'draft' %}
+      <span class="fs-6 badge badge-light-warning"><span class="bullet bullet-dot bg-warning me-2"></span>Rascunho</span>
+      {% elif plan.status == 'planned' %}
+      <span class="fs-6 badge badge-light-primary"><span class="bullet bullet-dot bg-primary me-2"></span>Planejado</span>
+      {% elif plan.status == 'loading' %}
+      <span class="fs-6 badge badge-light-info"><span class="bullet bullet-dot bg-info me-2"></span>Carregando</span>
+      {% elif plan.status == 'departed' %}
+      <span class="fs-6 badge badge-light-secondary"><span class="bullet bullet-dot bg-secondary me-2"></span>Saiu</span>
+      {% elif plan.status == 'completed' %}
+      <span class="fs-6 badge badge-light-success"><span class="bullet bullet-dot bg-success me-2"></span>Concluído</span>
+      {% elif plan.status == 'cancelled' %}
+      <span class="fs-6 badge badge-light-danger"><span class="bullet bullet-dot bg-danger me-2"></span>Cancelado</span>
+      {% endif %}
     </div>
   </div>
-  
+
   <!-- BODY -->
-  <div class="card-body pt-0">
+  <div class="card-body pt-0 px-6">
     {# —— Resumo de Totais —— #}
     <div class="d-flex flex-wrap mb-8">
       <div class="d-flex align-items-center me-10 mb-5">
