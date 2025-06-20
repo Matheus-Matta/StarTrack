@@ -38,7 +38,10 @@
 
 
 document.addEventListener('DOMContentLoaded', function () {
-  // Seleciona todos os forms cujo action contenha "driver_delete"
+  confirmForm();
+});
+
+function confirmForm(){
   document.querySelectorAll('.form-confirm').forEach(form => {
     form.addEventListener('submit', function (e) {
       e.preventDefault();
@@ -62,4 +65,5 @@ document.addEventListener('DOMContentLoaded', function () {
       });
     });
   });
-});
+}
+window.confirmSubmitForm = confirmForm;

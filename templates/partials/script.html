@@ -1,9 +1,9 @@
 {% load static %}
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-<!-- 
-<script src="{% static 'assets/js/core.bundle.js' %}"></script>
-<script src="{% static 'assets/js/widgets/general.js' %}"></script> -->
+<!-- reconnecting-websocket -->
+<script src="https://unpkg.com/reconnecting-websocket/dist/reconnecting-websocket-iife.min.js"></script>
+
 
 <script src="{% static 'assets/js/custom/config.js' %}"></script>
 <script src="{% static 'assets/js/custom/wb-notify.js' %}"></script>
@@ -12,6 +12,8 @@
 <script src="{% static 'assets/js/custom/djangotables.js' %}"></script>
 <script src="{% static 'assets/js/custom/djangoselect.js' %}"></script>
 <script src="{% static 'assets/js/custom/routemap.js' %}"></script>
+<script src="{% static 'assets/js/custom/copyboard.js' %}"></script>
+
 
 <!-- Flatpickr -->
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
@@ -35,10 +37,11 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 
-<script src="{% static 'assets/plugins/global/plugins.bundle.js' %}"></script>
-<script src="{% static 'assets/js/scripts.bundle.js' %}"></script>
 <!--end::Global Javascript Bundle-->
 <!--begin::Vendors Javascript(used for this page only)-->
+<script src="{% static 'assets/js/scripts.bundle.js' %}"></script>
+<script src="{% static 'assets/plugins/global/plugins.bundle.js' %}"></script>
+
 <script src="{% static 'assets/plugins/custom/fullcalendar/fullcalendar.bundle.js' %}"></script>
 <script src="https://cdn.amcharts.com/lib/5/index.js"></script>
 <script src="https://cdn.amcharts.com/lib/5/xy.js"></script>

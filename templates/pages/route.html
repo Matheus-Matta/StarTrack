@@ -171,7 +171,7 @@
                           <th data-field="max_duration_min" class="py-2 text-hover-dark">Tempo Máx.</th>
                           <th data-field="total_load_plans" class="py-2 text-hover-dark">Cargas criadas</th>
                           <th data-field="total_vehicles" class="py-2 text-hover-dark">Veículos usados</th>
-                          <th data-field="status_label" class="py-2 text-hover-dark rounded-end-5">Status</th>
+                          <th data-field="status" class="py-2 text-hover-dark rounded-end-5">Status</th>
 
 
                         </tr>
@@ -233,8 +233,6 @@
         route_area: { value: false, method: 'isnull' }
       },
       rowRenderer: row => {
-        console.log(row);
-        // Exemplo de linha customizada:
         const url = `/tms/fleet/vehicle/${row.id}/update/`;
         return `
                 <tr onclick="window.location='${url}'" 
@@ -270,10 +268,14 @@
         const [year, month, day] = datePart.split('-');
         const formatted = `${day}/${month}/${year} ${timePart}`;
         const stt_obj = {
-          rascunho: '<span class="badge badge-light-warning">Rascunho</span>',
-          completa: '<span class="badge badge-light-success">Completa</span>',
-          cancelada: '<span class="badge badge-light-danger">Cancelada</span>',
-        }         
+          draft: `<span class="badge badge-light-warning">Rascunho</span>`,
+          planned: `<span class="badge badge-light-primary">Planejada</span>`,
+          awaiting_loading: `<span class="badge badge-light-info">Aguardando Carregamento</span>`,
+          loading: `<span class="badge badge-light-info">Em Carregamento</span>`,
+          in_transit: `<span class="badge badge-light-info">Em Trânsito</span>`,
+          completed: `<span class="badge badge-light-success">Concluída</span>`,
+          cancelled: `<span class="badge badge-light-danger">Cancelada</span>`
+        }
         return `
         <tr class="cursor-pointer bg-hover-light border-bottom border-gray-200"
             onclick="window.location='${url}'">
@@ -287,7 +289,7 @@
           <td class="text-gray-700">${formatDecimalMinutes(row.max_duration_min)}</td>
           <td class="text-gray-700">${row.total_load_plans}</td>
           <td class="text-gray-700">${row.total_vehicles}</td>
-          <td class="text-gray-700">${stt_obj[row.status_label]}</td>
+          <td class="text-gray-700">${stt_obj[row.status]}</td>
 
         </tr>`;
       }

@@ -1,10 +1,10 @@
-thead{
+thead {
   z-index: 1 !important;
 }
 .truncate {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .hidden {
@@ -16,19 +16,19 @@ thead{
 }
 
 [data-bs-theme="dark"] .bg-body-content {
-  background-color: #0D0E12 !important;
+  background-color: #0d0e12 !important;
 }
 
 .btn-basic,
 .btn-basic i {
-  background-color: #0D0E12 !important;
+  background-color: #0d0e12 !important;
   color: #e6e6e6 !important;
 }
 
 [data-bs-theme="dark"] .btn-basic,
 [data-bs-theme="dark"] .btn-basic i {
   background-color: #f1f1f1 !important;
-  color: #0D0E12 !important;
+  color: #0d0e12 !important;
 }
 
 .btn-basic:active,
@@ -40,7 +40,7 @@ thead{
 [data-bs-theme="dark"] .btn-basic:active,
 [data-bs-theme="dark"] .btn-basic:active i {
   background-color: #ccc !important;
-  color: #0D0E12 !important;
+  color: #0d0e12 !important;
 }
 
 [data-bs-theme="light"] .logo-light {
@@ -108,7 +108,6 @@ thead{
   background-color: var(--bs-dark-light) !important;
 }
 
-
 /* 2) TEXT HOVERS */
 .text-hover-primary:hover {
   color: var(--bs-primary) !important;
@@ -158,7 +157,6 @@ thead{
   color: var(--bs-danger-light) !important;
 }
 
-
 .text-hover-dark:hover {
   color: var(--bs-dark) !important;
 }
@@ -167,11 +165,10 @@ thead{
   color: var(--bs-dark-light) !important;
 }
 
-
 /* 3) TRANSIÇÕES SUAVES */
 [class*="bg-hover-"],
 [class*="text-hover-"] {
-  transition: background-color .1s, color .1s;
+  transition: background-color 0.1s, color 0.1s;
 }
 
 .nav-tabs .nav-link.active {
@@ -279,11 +276,13 @@ thead{
 
 /* 1) Container scrollável */
 .scrollable {
-  max-height: calc(100vh - 200px);   /* ajusta 200px para a altura do header + margem */
+  max-height: calc(
+    100vh - 200px
+  ); /* ajusta 200px para a altura do header + margem */
   overflow-y: auto;
   /* 2) Esconder track da scrollbar */
-  scrollbar-width: none;             /* Firefox */
-  -ms-overflow-style: none;          /* IE 10+ */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE 10+ */
 }
 .scrollable::-webkit-scrollbar {
   width: 0;
@@ -294,12 +293,11 @@ thead{
 }
 /* coloca no seu CSS global ou num <style> no template */
 #allRoutesModal .modal-dialog {
-  max-width: 80vw;      /* largura = 80% da viewport */
-  
+  max-width: 90vw; /* largura = 80% da viewport */
 }
 
 #allRoutesModal .modal-content {
-  height: 80vh;         /* altura = 80% da viewport */
+  height: 85vh;
 }
 
 #allRoutesModal .modal-body {
@@ -312,7 +310,7 @@ thead{
   height: 100%;
 }
 
-.scale-1{
+.scale-1 {
   animation: fade-in 0.3s ease-out forwards;
 }
 @keyframes fade-in {
@@ -324,32 +322,34 @@ thead{
     opacity: 1;
     transform: scale(1);
   }
-  
 }
 
 /* overlay por trás do painel */
 .plan-drawer-overlay {
   position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: rgba(0,0,0,0.5);
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
   opacity: 0;
   pointer-events: none;
-  transition: opacity .3s ease;
-  z-index: 999;  /* abaixo do painel */
+  transition: opacity 0.3s ease;
+  z-index: 999; /* abaixo do painel */
 }
 
 /* painel em si */
 .plan-drawer-panel {
   position: fixed;
-  top: 0; right: -400px;
+  top: 0;
+  right: -400px;
   width: 350px;
   max-width: 80vw;
   height: 100%;
   background: #fff;
-  box-shadow: -2px 0 8px rgba(0,0,0,0.2);
-  transition: right .3s ease;
-  z-index:1000; /* acima do overlay */
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.2);
+  transition: right 0.3s ease;
+  z-index: 1000; /* acima do overlay */
   display: flex;
   flex-direction: column;
 }
@@ -369,4 +369,109 @@ thead{
   flex: 1;
   padding: 1rem;
   border-top: 1px solid #eee;
+}
+
+.custom-circle-marker {
+  color: white; /* cor do número */
+  width: 28px; /* diâmetro do círculo */
+  height: 28px;
+  border-radius: 50%; /* faz virar círculo */
+  text-align: center; /* centraliza o texto horizontalmente */
+  line-height: 28px; /* centraliza o texto verticalmente */
+  font-size: 14px; /* tamanho do número */
+  font-weight: semibold; /* negrito */
+  box-shadow: 2px 5px 5px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.5); /* borda branca ao redor, opcional */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.leaflet-container .leaflet-pane,
+.leaflet-container .leaflet-top,
+.leaflet-container .leaflet-bottom,
+.leaflet-container .leaflet-control {
+  z-index: 5000 !important;
+}
+
+/* Estilos para os botões de controle do mapa */
+.leaflet-control-buttons {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 5000 !important;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.leaflet-control-button {
+  width: 30px;
+  height: 30px;
+  background: white;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  color: #333;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+}
+
+.leaflet-control-button:hover {
+  background: #f5f5f5;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.leaflet-control-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Estados dos botões quando estão "ocultando" */
+.leaflet-control-button.hidden-state {
+  background: #ff6b6b;
+  color: white;
+  border-color: #ff5252;
+}
+
+.leaflet-control-button.hidden-state:hover {
+  background: #ff5252;
+}
+
+/* Estilos específicos para cada tipo de botão */
+.delivery-button {
+}
+
+.company-button {
+}
+
+/* Responsividade para telas menores */
+@media (max-width: 768px) {
+  .leaflet-control-buttons {
+    top: 5px;
+    right: 5px;
+    gap: 3px;
+  }
+  
+  .leaflet-control-button {
+    width: 25px;
+    height: 25px;
+    font-size: 12px;
+    border-radius: 50%;
+  }
+}
+
+/* Animação suave para mudanças de estado */
+.leaflet-control-button {
+  transition: background-color 0.2s ease, 
+              color 0.2s ease, 
+              border-color 0.2s ease,
+              transform 0.1s ease,
+              box-shadow 0.2s ease;
+}
+
+#map{
+  z-index: 800 !important;
 }

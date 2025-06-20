@@ -28,10 +28,15 @@ urlpatterns = [
   path('scripting/create_routes', create_scripting, name='create_routes'),
   # pegar todas as rotas e composiçoes
   path('scripting/<int:scripting_id>/routes/', get_routes_scripting, name='get_routes_scripting'),
+  # altera status do roteiro
+  path('scripting/<int:scripting_id>/change_status/<str:new_status>/', update_composition_status, name='update_scripting_status'),
+  # adiciona carga no roteiro
+  path('scripting/<int:scripting_id>/add_load/', add_load_to_composition, name='add_load_to_composition'),
+  # recalcular roteiro e suas rotas
+  path('scripting/<int:scripting_id>/recalculate/', redistribute_composition, name='redistribute_composition'),
 
-
- 
-
+  
+  
   ####### ROUTE PATH 
   path('route/create/',  create_routearea, name='create_routearea'),
   path('route/edit/<int:route_id>/', edit_routearea, name='edit_routearea'),

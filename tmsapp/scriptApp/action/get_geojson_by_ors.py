@@ -54,6 +54,7 @@ def get_geojson_by_ors(
             {
                 "id": 1,
                 "start": start_coord,
+                "end": start_coord,
                 "profile": "driving-car"
             }
         ]

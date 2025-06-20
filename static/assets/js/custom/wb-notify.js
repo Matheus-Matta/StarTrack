@@ -3,23 +3,18 @@ document.addEventListener('DOMContentLoaded', () => {
   const host = window.location.host;
 
   // ─── TASKS SOCKET ───────────────────────────────
-  const taskSocket = new WebSocket(`${wsScheme}://${host}/ws/tasks/`);
-  taskSocket.onopen = () => console.log("Tasks socket conectado");
+  const taskSocket = new ReconnectingWebSocket(`${wsScheme}://${host}/ws/tasks/`);
   taskSocket.onmessage = e => {
     if (Date.now() < window._wsIgnoreTasksUntil) {
-      console.log("Tasks socket ignorando...");
       return;
     }
     const payload = JSON.parse(e.data);
     renderOrUpdateTask(payload);
     markUnreadNotifications();
   };
-  taskSocket.onerror = e => console.error("Tasks socket erro", e);
-  taskSocket.onclose = e => console.log("Tasks socket desconectado", e);
 
   // ─── ALERTS SOCKET ──────────────────────────────
-  const alertsSocket = new WebSocket(`${wsScheme}://${host}/ws/alerts/`);
-  alertsSocket.onopen = () => console.log("Alerts socket conectado");
+  const alertsSocket = new ReconnectingWebSocket(`${wsScheme}://${host}/ws/alerts/`);
   alertsSocket.onmessage = e => {
     if (Date.now() < window._wsIgnoreTasksUntil) {
       return;
@@ -34,8 +29,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     playAlertSound();
   };
-  alertsSocket.onerror = e => console.error("Alerts socket erro", e);
-  alertsSocket.onclose = () => console.log("Alerts socket desconectado");
 
 
 
@@ -78,7 +71,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function renderOrUpdateTask(task) {
-    console.log("renderOrUpdateTask", task);
     // task = { task_id, name, message, percent, status }
     const container = document.getElementById('tasks_container');
     let item = container.querySelector(`[data-id="${task.id}"]`);

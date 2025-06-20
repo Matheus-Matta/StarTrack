@@ -7,16 +7,7 @@ from .views import *
 from django.shortcuts import redirect, render
 from django.contrib.auth.decorators import login_required
 
-from .views import (
-    VehicleListView, VehicleCreateView,
-    VehicleUpdateView, VehicleDeactivateView,
-    DriverListView, DriverCreateView,
-    DriverUpdateView, DriverDeactivateView,
-    CarrierListView, CarrierCreateView,
-    CarrierUpdateView, CarrierDeactivateView,
-    FleetDashboardView, loadplan_drawer
-    
-)
+from .views import *
 
 app_name = 'fleetapp'
 
@@ -39,7 +30,7 @@ urlpatterns = [
     path('carrier/<int:pk>/update/', CarrierUpdateView.as_view(), name='carrier_update'),
     path('carrier/<int:pk>/deactivate/', CarrierDeactivateView.as_view(), name='carrier_deactivate'),
 
-    path('loadplan/details/<int:plan_id>/', loadplan_drawer, name='planload_drawer'),
-  
-    
+    path('loadplan/details/<int:scripting_id>/<int:plan_id>/', loadplan_details, name='planload_drawer'),
+    path('loadplan/update/', update_loadplan_delivery, name='update_loadplan_delivery'),
+    path('loadplan/delete/<int:scripting_id>/<int:plan_id>/', delete_loadplan, name='delete_loadplan'),
 ]

@@ -3623,7 +3623,7 @@ textarea.form-control-lg {
   --bs-dropdown-box-shadow: 0px 0px 50px 0px rgba(82, 63, 105, 0.15);
   --bs-dropdown-link-color: var(--bs-gray-900);
   --bs-dropdown-link-hover-color: var(--bs-gray-900);
-  --bs-dropdown-link-hover-bg: var(--bs-tertiary-bg);
+  --bs-dropdown-link-hover-bg: var(--bs-gray-100);
   --bs-dropdown-link-active-color: var(--bs-component-hover-color);
   --bs-dropdown-link-active-bg: var(--bs-component-hover-bg);
   --bs-dropdown-link-disabled-color: var(--bs-gray-500);

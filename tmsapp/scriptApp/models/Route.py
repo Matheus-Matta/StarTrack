@@ -11,11 +11,11 @@ class Route(models.Model):
     """
     name = models.CharField('Nome', max_length=100, blank=True, null=True, db_index=True)
     color = models.CharField('Cor', max_length=7, default='#3498db')
-    stops = models.PositiveIntegerField('Paradas')
-    distance_km = models.FloatField('Distância (km)')
-    time_min = models.FloatField('Tempo (minutos)')
-    geojson = models.JSONField('GeoJSON')
-    points = models.JSONField('Points')
+    stops = models.PositiveIntegerField('Paradas', blank=True, null=True)
+    distance_km = models.FloatField('Distância (km)', blank=True, null=True)
+    time_min = models.FloatField('Tempo (minutos)', blank=True, null=True)
+    geojson = models.JSONField('GeoJSON', blank=True, null=True)
+    points = models.JSONField('Points', blank=True, null=True)
 
     route_area = models.ForeignKey(
         'RouteArea',

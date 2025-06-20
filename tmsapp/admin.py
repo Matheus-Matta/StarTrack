@@ -8,15 +8,15 @@ from .models import CompanyLocation
 class CompanyLocationAdmin(SimpleHistoryAdmin):
     list_display = (
         "name", "type", "city", "state", "neighborhood", "number",
-        "is_principal", "is_active"
+        "is_principal", "is_active", "postal_code"
     )
     list_filter = ("type", "is_active", "is_principal", "state")
-    search_fields = ("name", "address", "city", "zip_code", "neighborhood")
+    search_fields = ("name", "address", "city", "postal_code", "neighborhood")
     list_editable = ("is_active", "is_principal")
 
     fields = (
         "name", "type", "address", "number", "neighborhood", "city", "state",
-        "zip_code", "country", "latitude", "longitude", "is_principal", "is_active"
+        "postal_code", "country", "latitude", "longitude", "is_principal", "is_active"
     )
 
 @admin.register(RouteArea)

@@ -36,11 +36,11 @@
                                         <!-- Totais de carga -->
                                         <span class="badge badge-light-primary p-2 px-4 rounded-pill fw-semibold">
                                             Entregas em Carga
-                                            <span class="badge badge-primary p-2 rounded-pill ms-1">{{ scripting.deliveries_with_loadplan }}</span>
+                                            <span data-total-deliveries-scripting class="badge badge-primary p-2 rounded-pill ms-1">{{ scripting.deliveries_with_loadplan }}</span>
                                         </span>
                                         <span class="badge badge-light-warning p-2  px-4 rounded-pill fw-semibold">
                                             Entregas fora de Carga
-                                            <span class="badge badge-warning p-2 rounded-pill ms-1">{{ scripting.deliveries_without_loadplan }}</span>
+                                            <span data-total-not-deliveries-scripting class="badge badge-warning p-2 rounded-pill ms-1">{{ scripting.deliveries_without_loadplan }}</span>
                                         </span>
                                         <span class="badge badge-light-success p-2  px-4 rounded-pill fw-semibold">
                                             Valor Total
@@ -58,13 +58,94 @@
                                 </div>
                                 <div class="card-body py-3">
                                     <div class="d-flex justify-content-end flex-wrap align-items-center gap-3">
+                                        {% if scripting.status != 'cancelled' %}
                                         <button class="btn btn-sm btn-light togleAllRoutes">
                                             <i class="ki-outline ki-map">
                                             </i> Ver mapa
                                         </button>
-                                        <button class="btn btn-sm btn-basic pe-1">
-                                            Ações <i class="ki-outline ki-burger-menu-6 fs-3"></i>
+                                        {% endif %}
+                                        <div class="dropdown">
+                                        <button
+                                            class="btn btn-sm btn-basic dropdown-toggle"
+                                            type="button"
+                                            id="acoesDropdown"
+                                            data-bs-toggle="dropdown"
+                                            aria-expanded="false"
+                                        >
+                                            Ações
                                         </button>
+                                        <ul class="dropdown-menu bg-body-content px-2 border border-gray-100 dropdown-menu-end" aria-labelledby="acoesDropdown">
+                                            <!-- Iniciar carga no roteiro selecionado -->
+                                            {% if scripting.status == 'draft' %}
+                                            <li>
+                                                <form method="post" class="form form-confirm" data-icon="question" data-message="tem certeza que deseja iniciar esse roteiro?" data-color="primary" action="{% url 'tmsapp:scriptapp:update_scripting_status' scripting.id 'planned' %}">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="dropdown-item" id="action-start-loading">
+                                                        <i class="fa-solid text-primary fa-play me-2"></i>
+                                                        Iniciar Roteiro
+                                                    </button>
+                                                </form>
+                                            </li>
+                                            {% endif %}
+
+                                            <!-- Cancelar plano de carga -->
+                                            {% if scripting.status != 'cancelled' %}
+                                            <li>
+                                                <form class="form form-confirm" data-message="tem certeza que deseja cancelar esse roteiro?" method="post" action="{% url 'tmsapp:scriptapp:update_scripting_status' scripting.id 'cancelled' %}">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="dropdown-item" id="action-start-loading">
+                                                        <i class="fa-solid text-danger fa-ban me-2"></i>
+                                                        Cancelar Roteiro
+                                                    </button>
+                                                </form>
+                                            </li>
+                                            {% endif %}
+
+                                            {% if scripting.status == 'cancelled' %}
+                                            <li>
+                                                <form method="post" action="{% url 'tmsapp:scriptapp:update_scripting_status' scripting.id 'draft' %}">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="dropdown-item" id="action-start-loading">
+                                                        <i class="fa-solid fa-undo text-success me-2"></i>
+                                                        Reiniciar Roteiro
+                                                    </button>
+                                                </form>
+                                            </li>
+                                            {% endif %}
+
+                                            {%  if scripting.status == 'draft' %}
+                                            <li><hr class="dropdown-divider" /></li>
+                                            <li>
+                                                <a
+                                                    class="dropdown-item"
+                                                    href="#"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#addLoadModal"
+                                                    data-bs-dismiss="dropdown"
+                                                >
+                                                    <i class="fa-solid fa-truck me-2"></i>Adicionar Carga
+                                                </a>
+                                            </li>
+                                            {% endif %}
+                                            
+                                            <li><hr class="dropdown-divider" /></li>
+
+                                            <!-- Exportar roteiro (por exemplo, PDF ou Excel) -->
+                                            <li>
+                                            <a class="dropdown-item disabled" href="#" id="action-export-route">
+                                                <i class="fa-solid fa-file-export me-2"></i>Exportar Roteiro
+                                            </a>
+                                            </li>
+
+                                            <!-- Imprimir roteiro -->
+                                            <li>
+                                            <a class="dropdown-item disabled" href="#" id="action-print-route">
+                                                <i class="fa-solid fa-print me-2"></i>Imprimir Roteiro
+                                            </a>
+                                            </li>
+                  
+                                        </ul>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -73,8 +154,9 @@
                     <div class="col-md-12 plans-list">
                         <div class="card card-flush h-100">
                             <div class="card-body px-0 py-0 pt-0">
-                                <div style="height:470px;" class="table-responsive scrollable">
-                                    <table
+                                <div style="max-height:470px; min-height: 70px;" class="table-responsive scrollable">
+                                    {% if scripting.load_plans %}
+                                    <table id="load_plans_table"
                                         class="table table-hover table-row-dashed table-row-gray-200 align-middle gs-0 gy-3">
                                         <thead class="sticky-top bg-gray-100">
                                             <tr class="fw-bold text-gray-800">
@@ -91,73 +173,76 @@
                                         </thead>
                                         <tbody>
                                             {% for plan in scripting.load_plans %}
-                                            <tr class="cursor-pointer"
+                                            <tr class="cursor-pointer planload_item"
                                                 data-id="{{ plan.id }}">
                                                 <td class="ps-8 w-150px px-0">
-                                                    <span class="fw-semibold">{{ plan.code }}</span>
-                                                    <small class="text-muted truncate d-block w-150px">{{ plan.name }}</small>
+                                                    <span data-code class="fw-semibold">{{ plan.code }}</span>
+                                                    <small data-name class="text-muted truncate d-block w-150px">{{ plan.name }} / </small>
                                                 </td>
                                                 <td class="text-center">
-                                                    <span class="badge badge-light-primary text-nowrap">{{ plan.total_deliveries }}</span>
-                                                    <small class="text-muted">/ {{ plan.total_area_deliveries }}</small>
+                                                    <span data-total-deliveries class="badge badge-light-primary text-nowrap">{{ plan.total_deliveries }}</span>
+                                                    <small class="text-muted">/ <span data-total-area-deliveries>{{ plan.total_area_deliveries }}</span></small>
                                                 </td>
                                                 <td class="text-center text-gray-800">
-                                                    <span class="text-hover-primary cursor-pointer"
+                                                    <span data-license-plate class="text-hover-primary cursor-pointer"
                                                         onclick="location.href='/tms/fleet/vehicle/{{ plan.vehicle.id }}/update'">
                                                         {{ plan.vehicle.license_plate|upper }}
                                                     </span>
 
                                                     <br>
-                                                    <small class="text-muted">{{ plan.vehicle.get_vehicle_type }}</small>
+                                                    <small data-vehicle-type class="text-muted">{{ plan.vehicle.get_vehicle_type }}</small>
                                                 </td>
                                                 <td class="text-center text-gray-800">
-                                                    <span class="text-hover-primary cursor-pointer"
+                                                    <span data-driver-name class="text-hover-primary cursor-pointer"
                                                         onclick="location.href='/tms/fleet/driver/{{ plan.vehicle.driver.id }}/update'">
                                                         {{ plan.vehicle.driver|title }}
                                                     </span>
                                                     <br>
-                                                    <small class="text-muted">{{ plan.vehicle.driver.phone|default_if_none:'-' }}</small>
+                                                    <small data-driver-phone class="text-muted">{{ plan.vehicle.driver.phone|default_if_none:'-' }}</small>
                                                 </td>
                                                 <td class="text-center text-gray-800">
                                                     <span
                                                         style="background-color: {{ plan.route.route_area.hex_color }};"
                                                         class="bullet bullet-dot w-10px h-10px"></span>
-                                                    {{ plan.route.route_area.name|title }}
+                                                    {{ plan.route.route_area.name|default:'Sem rota definida'|title }}
                                                     <br>
-                                                    <small class="text-muted">{{ plan.total_area_deliveries }} entregas
+                                                    <small class="text-muted"><span data-total-area-deliveries>{{ plan.total_area_deliveries }}</span> entregas
                                                         nessa rota</small>
                                                 </td>
                                                 <td class="text-center text-nowrap">
                                                     <i class="fa-solid fa-weight-hanging text-muted me-1"></i>
-                                                    {% if plan.total_weight_kg > plan.max_weight_kg %}
-                                                    <span class="text-danger">{{ plan.formatted_total_weight_kg }}</span>
+                                                    {% if plan.is_weight_overloaded %}
+                                                    <span data-total-weight class="text-danger">{{ plan.formatted_total_weight_kg }}</span>
                                                     {% else %}
-                                                    <span class="text-gray-800">{{ plan.formatted_total_weight_kg }}</span>
+                                                    <span data-total-weight class="text-gray-800">{{ plan.formatted_total_weight_kg }}</span>
                                                     {% endif %}
-                                                    <small class="text-muted">/ {{ plan.formatted_max_weight_kg }}</small>
+                                                    <small data-max-weight class="text-muted">/ {{ plan.formatted_max_weight_kg }}</small>
                                                 </td>
                                                 <td class="text-center text-nowrap">
                                                     <i class="fa-solid fa-cube text-muted me-1"></i>
-                                                    {% if plan.total_volume_m3 > plan.max_volume_m3 %}
-                                                    <span class="text-danger">{{ plan.formatted_total_volume_m3}}</span>
+                                                    {% if plan.is_volume_overloaded %}
+                                                    <span data-total-volume class="text-danger">{{ plan.formatted_total_volume_m3}}</span>
                                                     {% else %}
-                                                    <span class="text-gray-800">{{ plan.formatted_total_volume_m3 }}</span>
+                                                    <span data-total-volume class="text-gray-800">{{ plan.formatted_total_volume_m3 }}</span>
                                                     {% endif %}
-                                                    <small class="text-muted">/ {{ plan.formatted_max_volume_m3 }}</small>
+                                                    <small data-max-volume class="text-muted">/ {{ plan.formatted_max_volume_m3 }}</small>
                                                 </td>
                                                 <td class="text-center text-nowrap">
-
-                                                    <span class="badge badge-light-success">R$ {{ plan.formatted_total_value }}</span>
+                                                    <span data-total-value class="badge badge-light-success">R$ {{ plan.formatted_total_value }}</span>
                                                 </td>
-                                                <td class="text-center pe-8 text-nowrap">
+                                                <td data-status class="text-center pe-8 text-nowrap">
                                                     {% if plan.status == 'draft' %}
                                                     <span class="badge badge-light-warning">Rascunho</span>
-                                                    {% elif plan.status == 'planned' %}
-                                                    <span class="badge badge-light-primary">Planejado</span>
+                                                    {% elif plan.status == 'route_started' %}
+                                                    <span class="badge badge-light-info">Roteiro Iniciado</span>
+                                                    {% elif plan.status == 'awaiting_loading' %}
+                                                    <span class="badge badge-light-info">Aguardando Carregamento</span>
                                                     {% elif plan.status == 'loading' %}
-                                                    <span class="badge badge-light-info">Carregando</span>
-                                                    {% elif plan.status == 'departed' %}
-                                                    <span class="badge badge-light-secondary">Saiu</span>
+                                                    <span class="badge badge-light-info">Em Carregamento</span>
+                                                    {% elif plan.status == 'loaded' %}
+                                                    <span class="badge badge-light-info">Carregado</span>
+                                                    {% elif plan.status == 'in_transit' %}
+                                                    <span class="badge badge-light-info">Em Trânsito</span>
                                                     {% elif plan.status == 'completed' %}
                                                     <span class="badge badge-light-success">Concluído</span>
                                                     {% elif plan.status == 'cancelled' %}
@@ -165,13 +250,29 @@
                                                     {% endif %}
                                                 </td>
                                             </tr>
-
-                                            {% empty %}
-                                            <tr>
-                                                <td colspan="6" class="text-center text-gray-500 px-5">Nenhum plano de
-                                                    carga encontrado.</td>
-                                            </tr>
                                             {% endfor %}
+
+                                            {% else %}
+                                                {%  if scripting.status != 'cancelled'%}
+                                                <p colspan="6" class="text-center mt-4 text-gray-500 px-5">Nenhum plano de
+                                                    carga encontrado. <span class="fw-bold">Clique no botão</span> <span class="fw-bold text-primary">"Novo Plano de Carga"</span> <span class="fw-bold">para criar um novo plano de carga"</span>
+                                                </p>
+                                                <div class="text-center pb-4">
+                                                    <a
+                                                        class="btn btn-basic btn-sm shadow-md"
+                                                        href="#"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#addLoadModal"
+                                                        data-bs-dismiss="dropdown"
+                                                        >
+                                                        <i class="fa-solid fa-truck me-2"></i>Novo Plano de Carga
+                                                    </a>
+                                                </div>
+                                                {% else %}
+                                                <p colspan="6" class="text-center mt-4 text-gray-500 px-5">Nenhum plano de
+                                                    carga encontrado.</p>
+                                                {% endif %}
+                                            {% endif %}
                                         </tbody>
                                     </table>
                                 </div>
@@ -252,7 +353,7 @@
                         </div>
                     </div>
                     <div class="col-md-12 d-none" id="plan-details" >
-                        <div class="card" id="plan-details-card">
+                        <div id="plan-details-card">
                             <!-- aqui entra o HTML retornado por render_to_string -->
                         </div>
                     </div>
@@ -264,7 +365,7 @@
 </div>
 </div>
 
-<div class="modal fade show d-block" id="allRoutesModal" tabindex="-1" aria-labelledby="allRoutesModalLabel"
+<div class="modal fade d-block" id="allRoutesModal" tabindex="-1" aria-labelledby="allRoutesModalLabel"
     aria-hidden="true">
     <div class="modal-dialog  modal-xl modal-dialog-centered" role="document">
         <div class="modal-content border-1 border-gray-200 bg-body-content">
@@ -286,15 +387,65 @@
                 </div>
             </div>
             <div class="modal-body p-0">
-                <div id="allRoutesMap" class="w-100 h-100"></div>
+                <div data-scripting-id="{{ scripting.id }}" id="allRoutesMap" class="w-100 h-100"></div>
             </div>
         </div>
     </div>
 </div>
-<div id="loadplan-drawer-root"></div>
+<div class="modal fade" id="addLoadModal" tabindex="-2" aria-labelledby="addLoadModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content bg-body-content">
+      <form method="post" action="{% url 'tmsapp:scriptapp:add_load_to_composition' scripting.id %}">
+        {% csrf_token %}
+        <div class="modal-header ps-4 py-2 bg-gray-100">
+          <h5 class="modal-title" id="addLoadModalLabel">Adicionar Carga à Composição</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+        <div class="modal-body py-4 px-4 scrollable scroll-y mh-500px">
+         {% if available_vehicles %}
+          <p class="text-info text-center">Selecione um ou mais veículos para criar a(s) nova(s) carga(s):</p>
+          <div class="form-group">
+            <div class="row">
+              {% for vehicle in available_vehicles %}
+                <div class="col-12 mb-2 border-bottom border-top py-2">
+                  <div class="form-check">
+                    <input 
+                      class="form-check-input" 
+                      type="checkbox" 
+                      name="vehicle_ids" 
+                      id="vehicleCheckbox{{ vehicle.id }}" 
+                      value="{{ vehicle.id }}"
+                    >
+                    <label class="form-check-label" for="vehicleCheckbox{{ vehicle.id }}">
+                      {{ vehicle.license_plate|upper }} — {{ vehicle.get_vehicle_type }} 
+                      {% if vehicle.driver %} ({{ vehicle.driver|title }}) {% endif %}
+                    </label>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        {% else %}
+        <p class="text-warning p-0 m-0 text-center">Todos os veículos ativos já estão vinculados a esta composição.</p>
+        {% endif %}
+        </div>
+        <div class="modal-footer py-1 bg-gray-100">
+          <button type="button" class="btn btn-sm py-2 btn-light-danger" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-sm py-2 btn-primary">Criar Carga(s)</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+
+
+
 {% endblock %}
 
 {% block script %}
+<script src="{% static 'assets/js/custom/loadplan_details.js' %}"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         new DjangoDataTable({
@@ -367,6 +518,23 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 });
 </script>
-<script src="{% static 'assets/js/custom/loadplan_details.js' %}"></script>
+<script>
+    const loadPlanDrawer = new LoadPlanDrawer();
+    // Auto-inicialização quando DOM estiver pronto
+    document.addEventListener('DOMContentLoaded', () => {
+    try {
+        loadPlanDrawer.init({
+        endpoint: '/tms/fleet/loadplan/details/',
+        endpoint_add: '/tms/fleet/loadplan/update/',
+        scripting_id: "{{ scripting.id }}",
+        listSelector: '.plans-list',
+        detailsId: 'plan-details'
+        });
+    } catch (error) {
+        console.error('Falha ao inicializar LoadPlanDrawer:', error);
+    }
+    });
+</script>
+
 
 {% endblock %}

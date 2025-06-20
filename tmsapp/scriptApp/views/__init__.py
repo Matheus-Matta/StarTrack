@@ -4,4 +4,6 @@ from .scripting_view import *
 from .route_compositions_data import *
 from .routearea import *
 from .get_routes_scripting import *
-
+from .update_composition_status import *
+from .add_load_to_composition import *
+from .redistribute_composition import *

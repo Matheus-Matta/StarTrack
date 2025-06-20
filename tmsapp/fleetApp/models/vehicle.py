@@ -125,5 +125,28 @@ class Vehicle(models.Model):
     def get_vehicle_type(self):
         return self.get_vehicle_type_display()
 
+
+    @property
+    def formatted_max_weight_kg(self) -> str:
+        """
+        Exibe max_weight_kg no formato “1.234,56”.
+        """
+        w = float(self.max_weight_kg or 0)
+        # formata com separador de milhar “,” e ponto decimal “.”
+        s = f"{w:,.2f}"
+        # troca para formato brasileiro: ponto → separador de milhar, vírgula → decimal
+        s = s.replace(",", "X").replace(".", ",").replace("X", ".")
+        return s
+
+    @property
+    def formatted_max_volume_m3(self) -> str:
+        """
+        Exibe max_volume_m3 no formato “1.234,56”.
+        """
+        v = float(self.max_volume_m3 or 0)
+        s = f"{v:,.2f}"
+        s = s.replace(",", "X").replace(".", ",").replace("X", ".")
+        return s
+    
 auditlog.register(Vehicle)
 

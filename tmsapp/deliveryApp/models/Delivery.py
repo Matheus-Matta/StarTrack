@@ -7,12 +7,15 @@ from crmapp.models import Customer
 from django.utils import timezone
 
 class DeliveryStatus(models.TextChoices):
-    PENDING     = 'pending',     'pendente'
-    IN_LOAD     = 'in-load',     'em carga'
-    IN_TRANSIT  = 'in-transit',  'em Trânsito'
-    DELIVERED   = 'delivered',   'entregue'
-    FAILED      = 'failed',      'falha na Entrega'
-    CANCELLED   = 'cancelled',   'cancelada'
+    PENDING             = 'pending',             'Pendente'
+    IN_SCRIPT           = 'in_script',           'Em Roteiro'
+    IN_LOAD             = 'in_load',             'Alocado'
+    PICKED              = 'picked',              'Separado'
+    LOADED              = 'loaded',              'Carregado'
+    IN_TRANSIT          = 'in_transit',          'Em Trânsito'
+    DELIVERED           = 'delivered',           'Entregue'
+    FAILED              = 'failed',              'Falha na Entrega'
+    CANCELLED           = 'cancelled',           'Cancelado'
 
 class Delivery(models.Model):
     """
@@ -39,7 +42,7 @@ class Delivery(models.Model):
 
     status = models.CharField(
         'Status',
-        max_length=15,
+        max_length=30,
         choices=DeliveryStatus.choices,
         default=DeliveryStatus.PENDING,
         db_index=True,
@@ -67,7 +70,11 @@ class Delivery(models.Model):
     class Meta:
         verbose_name = 'Entrega'
         verbose_name_plural = 'Entregas'
-
+        
+    @property
+    def code(self) -> str:
+        return f'ENT-{self.pk}'
+    
     @property
     def full_address(self) -> str:
         """
@@ -76,6 +83,13 @@ class Delivery(models.Model):
         parts = [self.street, self.number, self.neighborhood, self.city, self.state, 'Brasil']
         return ', '.join(filter(None, parts))
     
+    @property
+    def full_address_and_postal_code(self) -> str:
+        """
+        Monta endereço completo com cep.
+        """
+        parts = [self.street, self.number, self.neighborhood, self.postal_code, self.city, self.state, 'Brasil']
+        return ', '.join(filter(None, parts))
     @property
     def customer_name(self) -> str:
         if self.customer:

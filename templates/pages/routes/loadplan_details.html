@@ -1,148 +1,371 @@
-{# templates/page/routes/loadplan_drawer.html #}
-<div class="card card-flush h-100">
+<div class="card card-flush">
   <!-- HEADER -->
-  <div class="card-header d-flex justify-content-between align-items-center px-6">
+  <div class="d-flex justify-content-between align-items-center p-6">
     <div class="d-flex align-items-center">
-      <i data-action="close-details" class="ki-outline bg-hover-light ki-left fs-1 rounded me-4 cursor-pointer"></i>
+      <i
+        data-action="close-details"
+        class="ki-outline bg-hover-light ki-left fs-1 rounded me-4 cursor-pointer"
+      ></i>
       <h3 class="fw-bold text-dark p-0 m-0 me-4">{{ plan.code }}</h3>
       {% if plan.status == 'draft' %}
-      <span class="fs-6 badge badge-light-warning"><span class="bullet bullet-dot bg-warning me-2"></span>Rascunho</span>
+      <span class="fs-7 badge badge-light-warning"
+        ><span class="bullet bullet-dot bg-warning me-2"></span>Rascunho</span
+      >
       {% elif plan.status == 'planned' %}
-      <span class="fs-6 badge badge-light-primary"><span class="bullet bullet-dot bg-primary me-2"></span>Planejado</span>
+      <span class="fs-6 badge badge-light-primary"
+        ><span class="bullet bullet-dot bg-primary me-2"></span>Planejado</span
+      >
       {% elif plan.status == 'loading' %}
-      <span class="fs-6 badge badge-light-info"><span class="bullet bullet-dot bg-info me-2"></span>Carregando</span>
+      <span class="fs-6 badge badge-light-info"
+        ><span class="bullet bullet-dot bg-info me-2"></span>Carregando</span
+      >
       {% elif plan.status == 'departed' %}
-      <span class="fs-6 badge badge-light-secondary"><span class="bullet bullet-dot bg-secondary me-2"></span>Saiu</span>
+      <span class="fs-6 badge badge-light-secondary"
+        ><span class="bullet bullet-dot bg-secondary me-2"></span>Saiu</span
+      >
       {% elif plan.status == 'completed' %}
-      <span class="fs-6 badge badge-light-success"><span class="bullet bullet-dot bg-success me-2"></span>Concluído</span>
+      <span class="fs-6 badge badge-light-success"
+        ><span class="bullet bullet-dot bg-success me-2"></span>Concluído</span
+      >
       {% elif plan.status == 'cancelled' %}
-      <span class="fs-6 badge badge-light-danger"><span class="bullet bullet-dot bg-danger me-2"></span>Cancelado</span>
+      <span class="fs-6 badge badge-light-danger"
+        ><span class="bullet bullet-dot bg-danger me-2"></span>Cancelado</span
+      >
       {% endif %}
+    </div>
+    <!-- Dropdown de controle de carga -->
+    <div class="dropdown">
+      <button
+        class="btn btn-sm btn-light text-dark pe-1 py-1 fs-8 dropdown-toggle"
+        type="button"
+        id="loadplanControlDropdown"
+        data-bs-toggle="dropdown"
+        aria-expanded="false"
+      >
+        Controle de Carga
+      </button>
+      <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="loadplanControlDropdown">
+        <!-- Você pode adicionar data-action ou data-* para capturar no JS -->
+        <li>
+          <form class="form form-confirm" data-message="Tem certeza que deseja deletar essa carga?" action="{% url 'tmsapp:fleetapp:delete_loadplan' scripting.id plan.id %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="dropdown-item text-danger">Deletar</button>
+          </form>
+        </li>
+
+        <li><hr class="dropdown-divider"></li>
+        <li><a class="dropdown-item disabled" href="#" data-action="print-manifest">Imprimir Manifesto</a></li>
+        <li><a class="dropdown-item disabled" href="#" data-action="export-pdf">Exportar PDF</a></li>
+      </ul>
     </div>
   </div>
 
   <!-- BODY -->
-  <div class="card-body pt-0 px-6">
+  <div class="card-body py-0 px-6">
     {# —— Resumo de Totais —— #}
-    <div class="d-flex flex-wrap mb-8">
-      <div class="d-flex align-items-center me-10 mb-5">
-        <i class="ki-outline ki-dollar fs-1 text-primary me-3"></i>
-        <div class="d-flex flex-column">
-          <span class="fw-bold fs-3">${{ plan.totals.value }}</span>
-          <span class="fs-7 text-gray-600">Valor Total</span>
+    <div class="d-flex align-items-center mb-4">
+      <div class="d-flex shadow-inset me-6">
+        <div
+          class="d-flex align-items-center rounded bg-gray-100 py-2 px-4 border border-gray-200"
+        >
+          <i class="ki-outline ki-dollar fs-3 text-success me-2"></i>
+          <span class="fw-bold text-gray">${{ plan.totals.value }}</span>
         </div>
       </div>
-      <div class="d-flex align-items-center me-10 mb-5">
-        <i class="ki-outline ki-list-check fs-1 text-info me-3"></i>
-        <div class="d-flex flex-column">
-          <span class="fw-bold fs-3">{{ plan.totals.deliveries }}</span>
-          <span class="fs-7 text-gray-600">Entregas</span>
+      <div class="d-flex shadow-inset me-6">
+        <div
+          class="d-flex align-items-center rounded bg-gray-100 py-2 px-4 border border-gray-200"
+        >
+          <i class="fa-solid fa-weight-hanging text-info fs-5 me-2"></i>
+          <span class="fw-bold {% if plan.is_weight_overloaded %}text-danger{% endif %}">{{ plan.totals.weight_kg }}<span class="text-muted">/{{ plan.totals.max_weight_kg }}</span></span>
         </div>
       </div>
-      <div class="d-flex align-items-center me-10 mb-5">
-        <i class="fa-solid fa-weight-hanging fs-1 text-warning me-3"></i>
-        <div class="d-flex flex-column">
-          <span class="fw-bold fs-3">
-            {{ plan.totals.weight_kg }} / {{ plan.totals.max_weight_kg }}
-          </span>
-          <span class="fs-7 text-gray-600">Peso (kg)</span>
+      <div class="d-flex shadow-inset me-6">
+        <div
+          class="d-flex align-items-center rounded bg-gray-100 py-2 px-4 border border-gray-200"
+        >
+          <i class="fa-solid fa-cube text-info fs-5 me-2"></i>
+          <span class="fw-bold {% if plan.is_volume_overloaded %}text-danger{% endif %}">{{ plan.totals.volume_m3 }}<span class="text-muted">/{{ plan.totals.max_volume_m3 }}</span></span>
         </div>
       </div>
-      <div class="d-flex align-items-center me-10 mb-5">
-        <i class="fa-solid fa-cube fs-1 text-success me-3"></i>
-        <div class="d-flex flex-column">
-          <span class="fw-bold fs-3">
-            {{ plan.totals.volume_m3 }} / {{ plan.totals.max_volume_m3 }}
-          </span>
-          <span class="fs-7 text-gray-600">Volume (m³)</span>
-        </div>
-      </div>
-      <div class="d-flex align-items-center me-10 mb-5">
-        <i class="fa-solid fa-truck fs-1 text-dark me-3"></i>
-        <div class="d-flex flex-column">
-          <span class="fw-bold fs-3">{{ plan.vehicle.license_plate }}</span>
-          <span class="fs-7 text-gray-600">Veículo</span>
-        </div>
-      </div>
-      <div class="d-flex align-items-center mb-5">
-        <i class="fa-solid fa-user fs-1 text-dark me-3"></i>
-        <div class="d-flex flex-column">
-          <span class="fw-bold fs-3">{{ plan.vehicle.driver }}</span>
-          <span class="fs-7 text-gray-600">Motorista</span>
+      <div class="d-flex shadow-inset me-6">
+        <div
+          class="d-flex align-items-center rounded bg-gray-100 py-2 px-4 border border-gray-200"
+        >
+          <span
+            style="background-color: {{ plan.route.route_area.hex_color }};"
+            class="bullet h-15px w-15px bullet-dot me-2"
+          ></span>
+          <span class="fw-bold text-gray"
+            >{{ plan.route.route_area.name|title }}</span
+          >
         </div>
       </div>
     </div>
+    <div class="d-flex align-items-center mb-4">
+      <!-- begin card vehicle -->
+      <div class="d-flex shadow-inset me-6 cursor-pointer">
+        <div
+          class="d-flex align-items-center justify-content-between rounded bg-gray-100 px-4 border border-gray-200 h-50px max-w-325px"
+        >
+          <div class="d-flex align-items-center me-4">
+            {% if plan.vehicle.type == 'Carro' %}
+            <i class="fa-solid fa-car-side fs-2x text-gray-400 me-2"></i>
+            {% else %}
+            <i class="fa-solid fa-truck fs-2x text-gray-400 me-2"></i>
+            {% endif %}
+            <div class="d-flex flex-column">
+              <div class="d-flex align-items-center">
+                <span
+                  onclick="window.location.href = '{% url 'tmsapp:fleetapp:vehicle_update' plan.vehicle.id %}'"
+                  class="fw-bold text-dark me-2 text-hover-primary"
+                  >{{ plan.vehicle.license_plate|upper }}</span
+                >
+                <span class="fw-bold text-muted"
+                  >{{ plan.vehicle.type|title }}</span
+                >
+              </div>
+              <div class="d-flex align-items-center">
+                <span class="fw-bold text-gray-500 me-2">
+                  <i class="fa-solid fa-weight-hanging text-muted"></i>
+                  {{ plan.vehicle.max_weight_kg }}
+                </span>
+                <span class="fw-bold text-gray-500">
+                  <i class="fa-solid fa-cube text-muted"></i>
+                  {{ plan.vehicle.max_volume_m3 }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- end card vehicle -->
+      <!-- begin card driver -->
+      <div class="d-flex shadow-inset me-6 cursor-pointer">
+        <div
+          class="d-flex align-items-center justify-content-between rounded bg-gray-100 px-4 border border-gray-200 h-50px max-w-325px"
+        >
+          <div class="d-flex align-items-center me-4">
+            <i class="fa-regular fa-id-card fs-2x text-gray-400 me-2"></i>
+            <div class="d-flex flex-column">
+              <div class="d-flex align-items-center">
+                <span
+                  onclick="window.location.href = '{% url 'tmsapp:fleetapp:driver_update' plan.vehicle.driver.id %}'"
+                  class="fw-bold text-dark me-2 text-hover-primary"
+                  >{{ plan.vehicle.driver.name|title }}</span
+                >
+                {% if plan.vehicle.driver.is_outsourced %}
+                <span class="fw-bold text-muted">Terceirizado</span>
+                {% endif %}
+              </div>
+              <div class="d-flex align-items-center">
+                <span class="fw-bold text-gray-500 me-2">
+                  <i class="fa-solid fa-phone text-muted"></i>
+                  {{ plan.vehicle.driver.phone }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- end card driver -->
+      <!-- begin card carrier -->
+      {% if plan.vehicle.carrier %}
+      <div class="d-flex shadow-inset me-6 cursor-pointer">
+        <div
+          class="d-flex align-items-center justify-content-between rounded bg-gray-100 px-4 border border-gray-200 h-50px max-w-325px"
+        >
+          <div class="d-flex align-items-center me-4">
+            <i class="fa-solid fa-truck-fast fs-2x text-gray-400 me-2"></i>
+            <div class="d-flex flex-column">
+              <div class="d-flex align-items-center">
+                <span
+                  onclick="window.location.href = '{% url 'tmsapp:fleetapp:carrier_update' plan.vehicle.carrier.id %}'"
+                  class="fw-bold text-dark me-2 text-hover-primary"
+                  >{{ plan.vehicle.carrier.name|title }}</span
+                >
+              </div>
+              <div class="d-flex align-items-center">
+                <span class="fw-bold text-gray-500 me-2">
+                  <i class="fa-solid fa-phone text-muted"></i>
+                  {{ plan.vehicle.carrier.phone }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+      <!-- end card carrier -->
+    </div>
+  </div>
+</div>
+<div class="card card-flush mt-2">
+  {# —— Abas —— #}
+  <ul class="nav nav-tabs nav-line-tabs mb-5 fs-6 fw-bold">
+    <li class="nav-item bg-hover-gray-100">
+      <a
+        class="nav-link m-0 px-6 py-3 active"
+        data-bs-toggle="tab"
+        href="#tab-stops"
+      >
+        Entregas <span class="badge badge-light ms-1">{{ stops|length }}</span>
+      </a>
+    </li>
+    <li class="nav-item bg-hover-gray-100">
+      <a class="nav-link m-0 px-6 py-3" data-bs-toggle="tab" href="#tab-doc">
+        Documentos <span class="badge badge-light ms-1">0</span>
+      </a>
+    </li>
+  </ul>
 
-    {# —— Abas —— #}
-    <ul class="nav nav-tabs nav-line-tabs mb-5 fs-6 fw-bold">
-      <li class="nav-item">
-        <a class="nav-link active" data-bs-toggle="tab" href="#tab-stops">
-          Load Stops <span class="badge badge-light ms-1">{{ stops|length }}</span>
-        </a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" data-bs-toggle="tab" href="#tab-docs">
-          Documents <span class="badge badge-light ms-1">{{ docs_count }}</span>
-        </a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" data-bs-toggle="tab" href="#tab-financials">
-          Financials <span class="badge badge-light ms-1">{{ financials_count }}</span>
-        </a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" data-bs-toggle="tab" href="#tab-vehicles">
-          Vehicles <span class="badge badge-light ms-1">{{ vehicles_count }}</span>
-        </a>
-      </li>
-    </ul>
-
-    <div class="tab-content">
-      {# —— Load Stops —— #}
-      <div class="tab-pane fade show active" id="tab-stops">
-        <div class="timeline timeline-3">
+  <div class="tab-content">
+    <div class="tab-pane fade show active" id="tab-stops">
+      {% if  plan.status == 'draft' %}
+      <div class="row px-1 pb-4">
+        <div class="col-md-6 pe-0">
+          <div class="d-flex align-items-center justify-content-between mb-2 px-2">
+            <h4 class="text-muted m-0 p-0">Carga</h4>
+            <button class="btn btn-sm w-100px py-1 btn-light-danger ms-2 pe-1" id="rmvLoad" disabled>Retirar<i class="ki-duotone fs-3 ki-black-right"></i></button>
+          </div>
+          <div class=" scroll-y mh-500px">
+          {% if stops %}
           {% for stop in stops %}
-          <div class="timeline-item align-items-start">
-            <div class="timeline-label fw-semibold text-gray-800 me-3">{{ stop.position }}.</div>
-            <div class="timeline-badge">
-              <i class="fa fa-circle fs-1 text-primary"></i>
+          <div class="card card-flush m-2">
+            <div class="d-flex justify-content-between"> 
+              <p class="mb-0 text-dark text-start p-2">
+                <span class="badge badge-light-primary me-2 text-primary">
+                  {{ stop.position }}
+                </span>
+                <span class="copy-btn">
+                  {{ stop.order_number }}
+                  <i class="fa-regular fa-copy ms-2 cursor-pointer text-muted text-hover-success" 
+                  data-regex="/\d+$/" data-copy-text="{{ stop.order_number }}"></i>
+                </span>
+              </p>
+              <div class="d-flex align-items-center">
+                <p class="mb-0 text-dark text-end p-2">
+                  {% if stop.status == 'pending' %}
+                  <span class="badge badge-light-warning">
+                    <span class="bullet bullet-dot bg-warning me-2"></span>Pendente
+                  </span>
+                  {% elif stop.status == 'in-load' %}
+                  <span class="badge badge-light-primary">
+                    <span class="bullet bullet-dot bg-primary me-2"></span>Em Carga
+                  </span>
+                  {% elif stop.status == 'in-transit' %}
+                  <span class="badge badge-light-info">
+                    <span class="bullet bullet-dot bg-info me-2"></span>Em Trânsito
+                  </span>
+                  {% elif stop.status == 'delivered' %}
+                  <span class="badge badge-light-success">
+                    <span class="bullet bullet-dot bg-success me-2"></span>Entregue
+                  </span>
+                  {% elif stop.status == 'failed' %}
+                  <span class="badge badge-light-danger">
+                    <span class="bullet bullet-dot bg-danger me-2"></span>Falha na Entrega
+                  </span>
+                  {% elif stop.status == 'cancelled' %}
+                  <span class="badge badge-light-danger">
+                    <span class="bullet bullet-dot bg-danger me-2"></span>Cancelado
+                  </span>
+                  {% endif %}
+                </p>
+                <div class="form-check form-check-custom form-check-solid form-check-sm me-2">
+                    <input class="form-check-input" type="checkbox" name='in_load' value="{{ stop.id }}" id="flexCheckChecked" />
+                </div>
+              </div>
             </div>
-            <div class="fw-normal timeline-content text-gray-600 ps-3">
-              <strong>Pedido:</strong> {{ stop.order_number }}<br>
-              <strong>Cliente:</strong> {{ stop.client }}<br>
-              <strong>Endereço:</strong> {{ stop.address }}
+            <div class="mx-2">
+              <span class="fw-bold d-flex">
+                <span class="badge badge-light-info me-2">{{ stop.filial }}</span>
+                {{ stop.client|title }}
+              </span>
+              <p class="mb-1 text-muted">{{ stop.address|lower }}</p>
+              <div class="d-flex gap-2 align-items-center mb-2">
+                <i class="fa-solid fa-dollar-sign text-muted"></i>
+                <span class="text-success badge badge-light-success">{{ stop.price }}</span>
+                <i class="fa-solid fa-cube text-muted"></i>
+                <span class="text-info badge badge-light-info">{{ stop.volume_m3}} m³</span>
+                <i class="fa-solid fa-weight-hanging text-muted"></i>
+                <span class="text-info badge badge-light-info">{{ stop.weight_kg }} kg</span>
+              </div>
             </div>
           </div>
           {% endfor %}
-
-          {% if extras %}
-          <div class="timeline-item mt-8">
-            <h6 class="text-warning mb-3">Entregas sem Carga</h6>
-          </div>
-          {% for extra in extras %}
-          <div class="timeline-item align-items-start">
-            <div class="timeline-label fw-semibold text-gray-800 me-3">{{ extra.sequence }}.</div>
-            <div class="timeline-badge">
-              <i class="fa fa-exclamation-triangle fs-1 text-warning"></i>
-            </div>
-            <div class="fw-normal timeline-content text-gray-600 ps-3">
-              <strong>Pedido:</strong> {{ extra.order_number }}<br>
-              <strong>Cliente:</strong> {{ extra.client }}<br>
-              <strong>Endereço:</strong> {{ extra.address }}
-            </div>
-          </div>
-          {% endfor %}
+          {% else %}
+          <p class="text-muted text-center">Nenhum item na carga</p>
           {% endif %}
+          </div>
+        </div>
+        <div class="col-md-6 ps-0">
+          <div class="d-flex align-items-center justify-content-between mb-2 pe-2">
+            <button class="btn btn-sm py-1 btn-light-success w-100px ps-2" id="addLoad" disabled><i class="ki-duotone fs-3 ki-black-left"></i>Adicionar</button>
+            <h4 class="text-muted m-0 p-0">Fora de Carga</h4>
+          </div>
+
+          <div class="scroll-y mh-500px">
+          {% if extras %}
+            {% for extra in extras %}
+              <div class="card card-flush m-2">
+                <div class="d-flex justify-content-between">
+                  <p class="mb-0 text-dark text-start p-2">
+                    <span class="badge badge-light me-2 fs-8">
+                      fora de carga
+                    </span>
+                    <span class="copy-btn" data-copy-text="{{ extra.order_number }}">
+                      {{ extra.order_number }}
+                      <i
+                        class="fa-regular fa-copy ms-2 cursor-pointer text-muted text-hover-success"
+                        data-regex="/\d+$/"
+                        data-copy-text="{{ extra.order_number }}"
+                      ></i>
+                    </span>
+                  </p>
+                    <div class="form-check form-check-custom form-check-solid form-check-sm me-2">
+                        <input class="form-check-input" name="out_load" type="checkbox" value="{{ extra.id }}" id="flexCheckChecked" />
+                    </div>
+                </div>
+                <div class="mx-2">
+                  <span class="fw-bold d-flex">
+                    <span class="badge badge-light-info me-2">{{ extra.filial }}</span>
+                    {{ extra.client|title }}
+                  </span>
+                  <p class="mb-1 text-muted">{{ extra.address|lower }}</p>
+                  <div class="d-flex gap-2 align-items-center mb-2">
+                    <i class="fa-solid fa-dollar-sign text-muted"></i>
+                    <span class="text-success badge badge-light-success">{{ extra.price }}</span>
+                    <i class="fa-solid fa-cube text-muted"></i>
+                    <span class="text-info badge badge-light-info">{{ extra.volume_m3}} m³</span>
+                    <i class="fa-solid fa-weight-hanging text-muted"></i>
+                    <span class="text-info badge badge-light-info">{{ extra.weight_kg }} kg</span>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          {% else %}
+          <p class="text-muted text-center">Nenhum item fora de carga</p>
+          {% endif %}
+          </div>
         </div>
       </div>
-
-      {# abas vazias para futuramente preencher #}
-      <div class="tab-pane fade" id="tab-docs"></div>
-      <div class="tab-pane fade" id="tab-financials"></div>
-      <div class="tab-pane fade" id="tab-vehicles"></div>
+      {% else %}
+      <p class="text-center d-flex justify-content-center">
+        <span class="fw-bold text-muted text-center rounded fs-6 d-flex align-items-center">
+          <i class="ki-duotone ki-lock-2 fs-2 me-2">
+          <span class="path1"></span>
+          <span class="path2"></span>
+          <span class="path3"></span>
+          <span class="path4"></span>
+          <span class="path5"></span>
+          </i>
+        Carga trancada
+        </span>
+      </p>
+      {% endif %}
     </div>
 
-    {# —— Mapa —— #}
-    <div id="load-plan-map" class="min-h-250px rounded mb-5"></div>
+    <div class="tab-pane fade" id="tab-docs">
+    </div>
   </div>
 </div>

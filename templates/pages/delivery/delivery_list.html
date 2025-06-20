@@ -120,11 +120,14 @@ document.addEventListener('DOMContentLoaded', () => {
       const date = row.created_at.slice(0,10).split('-').reverse().join('/');
       const stt_obj = {
         pending: "<span class='badge badge-light-warning'>Pendente</span>",
-        scheduled: "<span class='badge badge-light-success'>agendada</span>",
-        in_transit: "<span class='badge badge-light-info'>em trânsito</span>",
-        delivered: "<span class='badge badge-light-success'>entregue</span>",
-        failed: "<span class='badge badge-light-danger'>falha na entrega</span>",
-        cancelled: "<span class='badge badge-light-danger'>cancelada</span>",
+        in_script: "<span class='badge badge-light-warning'>Em Roteiro</span>",
+        in_load: "<span class='badge badge-light-primary'>Alocado</span>",
+        picked: "<span class='badge badge-light-info'>Separado</span>",
+        loaded: "<span class='badge badge-light-info'>Carregado</span>",
+        in_transit: "<span class='badge badge-light-info'>Em Trânsito</span>",
+        delivered: "<span class='badge badge-light-success'>Entregue</span>",
+        failed: "<span class='badge badge-light-danger'>Falha na Entrega</span>",
+        cancelled: "<span class='badge badge-light-danger'>Cancelado</span>",
       }
       return `
         <tr class="cursor-pointer bg-hover-light h-15px border-1 border-bottom border-gray-200">

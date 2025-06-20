@@ -14,7 +14,6 @@ class LocationType(models.TextChoices):
     STORE = 'store', 'Loja'
     DISTRIBUTION_CENTER = 'distribution_center', 'Centro de Distribuição'
     HUB = 'hub', 'Hub'
-    DEPARTURE_POINT = 'departure_point', 'Ponto de Saída'
     SECONDARY_WAREHOUSE = 'secondary_warehouse', 'Armazém Secundário'
     OTHER = 'other', 'Outro'
 
@@ -44,7 +43,7 @@ class CompanyLocation(models.Model):
     neighborhood = models.CharField('Bairro', max_length=255, blank=True, null=True)
     city = models.CharField('Cidade', max_length=100, db_index=True)
     state = models.CharField('Estado', max_length=100, db_index=True)
-    zip_code = models.CharField('CEP', max_length=20, blank=True, null=True, db_index=True)
+    postal_code = models.CharField('CEP', max_length=20, blank=True, null=True, db_index=True)
     country = models.CharField('País', max_length=100, default='Brasil')
     
     # Coordenadas
@@ -108,7 +107,11 @@ class CompanyLocation(models.Model):
             
             if existing_principal.exists():
                 raise ValidationError('Já existe um local principal ativo definido.')
-
+   
+    @property
+    def get_type(self):
+        return self.type.capitalize()
+    
     def full_address(self) -> str:
         """
         Monta string completa de endereço para geocodificação.
@@ -120,7 +123,7 @@ class CompanyLocation(models.Model):
             self.neighborhood,
             self.city,
             self.state,
-            self.zip_code,
+            self.postal_code,
             self.country
         ]
         return ', '.join(filter(None, parts))
@@ -141,14 +144,14 @@ class CompanyLocation(models.Model):
                     should_geocode = True
                 else:
                     # se qualquer campo de endereço mudou, refaz geocodificação
-                    for field in ('street','number','postal_code','neighborhood','city','state'):
+                    for field in ('address','number','postal_code','neighborhood','city','state'):
                         if getattr(old, field) != getattr(self, field):
                             should_geocode = True
                             break
 
         if should_geocode:
             lat, lon = geocode_endereco(
-                self.street,
+                self.address,
                 self.number,
                 self.postal_code,
                 self.neighborhood,
