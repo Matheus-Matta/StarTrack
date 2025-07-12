@@ -20,6 +20,12 @@ def update_composition_status(request, scripting_id: int, new_status: str):
             return redirect('tmsapp:scriptapp:scripting_view', scripting_id)
         
         composition = get_object_or_404(RouteComposition, pk=scripting_id)
+
+        if new_status == 'delete':
+            composition.delete()
+            messages.success(request, "Composição excluida com sucesso.")
+            return redirect('tmsapp:scriptapp:create_scripting')
+
         # Valida o novo status
         if new_status not in RouteCompositionStatus.values:
             messages.error(

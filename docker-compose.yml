@@ -13,8 +13,6 @@ services:
       - "8581:8000"
     depends_on:
       - redis
-    networks:
-      - minha_rede
 
   websocket:
     build:
@@ -28,8 +26,6 @@ services:
       - "8582:8001"
     depends_on:
       - redis
-    networks:
-      - minha_rede
 
   worker:
     build:
@@ -41,8 +37,6 @@ services:
       - .:/app
     depends_on:
       - redis
-    networks:
-      - minha_rede
 
   redis:
     image: redis:latest
@@ -51,8 +45,6 @@ services:
       - "6379:6379"
     volumes:
       - redis:/data
-    networks:
-      - minha_rede
 
 
   nginx:
@@ -65,12 +57,6 @@ services:
     depends_on:
       - web
       - websocket
-    networks:
-      - minha_rede
 
 volumes:
   redis:
-
-networks:
-  minha_rede:
-    external: true

@@ -380,6 +380,16 @@ class RouteMap {
               ${this._createLoadDropdown(load, p)}
             </form>
             </div>
+            <div class="mt-4">
+              <div class="d-flex gap-2 align-items-center">
+                <i class="fa-solid fa-cube text-muted"></i>
+                <span class="text-info badge badge-light-info">${p.total_volume_m3 || 0}</span>
+                <i class="fa-solid fa-weight-hanging text-muted"></i>
+                <span class="text-info badge badge-light-info">${p.total_weight_kg || 0}</span>
+                <i class="fa-solid fa-dollar-sign text-muted"></i>
+                <span class="text-success badge badge-light-success">${p.price || 0}</span>
+              </div>
+            </div>
           `;
 
       } else {
@@ -418,7 +428,7 @@ class RouteMap {
         <select data-select class="form-select form-select-sm" aria-label=".form-select-sm example" style="max-height: 250px; overflow-y: auto;">
           <option value="0">Entrega sem rota e carga definida</option>
           ${this.rotas.filter(rt => rt.id > 0).map(rt => `
-            <option value="${rt.id}" ${load.id === rt.loadPlan.id ? 'selected' : ''}>
+            <option style="color: ${rt.color}" value="${rt.id}" ${load.id === rt.loadPlan.id ? 'selected' : ''}>
               ${rt.loadPlan.code} - ${rt.name}
             </option>
           `).join('')}
@@ -443,8 +453,6 @@ class RouteMap {
           old_loadplan_id: load.id,
           new_loadplan_id: selectedLoadplanId
         };
-
-        console.log('Enviando dados via WebSocket:', payload);
 
         // Envia via WebSocket
         this._sendWebSocketMessage({
@@ -524,13 +532,6 @@ class RouteMap {
       const elTotalDel = row.querySelector('[data-total-deliveries]');
       if (elTotalDel) {
         elTotalDel.textContent = plan.totals?.deliveries ?? '';
-      }
-
-      const elsArea = row.querySelectorAll('[data-total-area-deliveries]');
-      if (elsArea.length) {
-        elsArea.forEach(el => {
-          el.textContent = `${plan.totals?.area_deliveries ?? ''}`;
-        });
       }
 
       const elWeight = row.querySelector('[data-total-weight]');

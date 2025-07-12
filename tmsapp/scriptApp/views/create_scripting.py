@@ -7,6 +7,9 @@ import uuid
 from tmsapp.tasks import create_script_perso_task
 from datetime import datetime
 from djangonotify.models import TaskRecord
+from tmsapp.fleetApp.models import Vehicle
+from tmsapp.scriptApp.models import RouteArea
+
 @login_required
 def create_scripting(request):
     if request.method == "POST":
@@ -20,6 +23,8 @@ def create_scripting(request):
 
             start_date = datetime.strptime(start_str, "%d/%m/%Y").date()
             end_date   = datetime.strptime(end_str,   "%d/%m/%Y").date()
+ 
+            vehicles_areas = request.POST.get("vehicles_areas", "")
 
             # 2) formata como ISO string (YYYY-MM-DD)
             start = start_date.strftime("%Y-%m-%d")
@@ -27,7 +32,7 @@ def create_scripting(request):
 
             if sp_router == "route_perso":
                 tkrecord = TaskRecord.objects.create(user=request.user, name='Criando roterização', status='started')
-                create_script_perso_task.delay(request.user.id, tkrecord.id, start, end)
+                create_script_perso_task.delay(request.user.id, tkrecord.id, vehicles_areas, start, end)
                 messages.info(request, f"Processo roterização iniciado - {start} - {end}")
             else:
                 messages.error(request, f"Roterização por cidade indisponível para o momento.")
@@ -42,3 +47,12 @@ def create_scripting(request):
 
     return redirect("tmsapp:scriptapp:create_scripting")
 
+
+
+@login_required
+def create_scripting_view(request):
+    context = {
+        'vehicles': Vehicle.objects.filter(is_active=True),
+        'areas': RouteArea.objects.filter(is_active=True),
+    }
+    return render(request, 'pages/route.html', context)

@@ -7,3 +7,4 @@ from .get_routes_scripting import *
 from .update_composition_status import *
 from .add_load_to_composition import *
 from .redistribute_composition import *
+from .export_scripting import *

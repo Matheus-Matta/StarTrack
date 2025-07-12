@@ -81,6 +81,7 @@ class DataSerializer:
         route_area = route.route_area if route.route_area else None
         return {
             'id': route.id,
+            'name': getattr(route, 'name', ''),
             'route_area': {
                 'id': route_area.id if route_area else 0,
                 'name': route_area.name if route_area else '',

@@ -50,6 +50,8 @@ class Notification(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     read       = models.BooleanField(default=False)
     link       = models.URLField(null=True, blank=True)
+    link_name  = models.CharField(max_length=255, null=True, blank=True)
+    action     = models.CharField(max_length=255, null=True, blank=True)
     def __str__(self):
         return f"[{self.level}] {self.title}"
     @property

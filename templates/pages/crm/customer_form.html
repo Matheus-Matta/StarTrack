@@ -67,6 +67,7 @@
                 <label for="id_full_name" class="form-label fw-semibold">Nome Completo</label>
                 <input type="text"
                        name="full_name"
+                       pattern="[^\d]*" 
                        id="id_full_name"
                        required
                        class="form-control form-control-solid form-control-sm {% if form.full_name.errors %}is-invalid{% endif %}"

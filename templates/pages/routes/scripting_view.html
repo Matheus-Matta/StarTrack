@@ -76,65 +76,67 @@
                                         </button>
                                         <ul class="dropdown-menu bg-body-content px-2 border border-gray-100 dropdown-menu-end" aria-labelledby="acoesDropdown">
                                             <!-- Iniciar carga no roteiro selecionado -->
-                                            {% if scripting.status == 'draft' %}
+                                            
                                             <li>
                                                 <form method="post" class="form form-confirm" data-icon="question" data-message="tem certeza que deseja iniciar esse roteiro?" data-color="primary" action="{% url 'tmsapp:scriptapp:update_scripting_status' scripting.id 'planned' %}">
                                                     {% csrf_token %}
-                                                    <button type="submit" class="dropdown-item" id="action-start-loading">
-                                                        <i class="fa-solid text-primary fa-play me-2"></i>
+                                                    <button type="submit" class="dropdown-item" id="action-start-loading" {% if scripting.status != 'draft' %} disabled {% endif %}>
+                                                        <i class="fa-solid text-primary fa-play me-2 {% if scripting.status != 'draft' %} text-muted {% endif %}"></i>
                                                         Iniciar Roteiro
                                                     </button>
                                                 </form>
                                             </li>
-                                            {% endif %}
 
                                             <!-- Cancelar plano de carga -->
-                                            {% if scripting.status != 'cancelled' %}
+                                            
                                             <li>
                                                 <form class="form form-confirm" data-message="tem certeza que deseja cancelar esse roteiro?" method="post" action="{% url 'tmsapp:scriptapp:update_scripting_status' scripting.id 'cancelled' %}">
                                                     {% csrf_token %}
-                                                    <button type="submit" class="dropdown-item" id="action-start-loading">
-                                                        <i class="fa-solid text-danger fa-ban me-2"></i>
+                                                    <button type="submit" class="dropdown-item" id="action-start-loading" {% if scripting.status == 'cancelled' %} disabled {% endif %}>
+                                                        <i class="fa-solid text-danger fa-ban me-2 {% if scripting.status == 'cancelled' %} text-muted {% endif %}"></i>
                                                         Cancelar Roteiro
                                                     </button>
                                                 </form>
                                             </li>
-                                            {% endif %}
+                                           
 
-                                            {% if scripting.status == 'cancelled' %}
+                                            
                                             <li>
-                                                <form method="post" action="{% url 'tmsapp:scriptapp:update_scripting_status' scripting.id 'draft' %}">
+                                                <form method="post" action="{% url 'tmsapp:scriptapp:update_scripting_status' scripting.id 'delete' %}">
                                                     {% csrf_token %}
-                                                    <button type="submit" class="dropdown-item" id="action-start-loading">
-                                                        <i class="fa-solid fa-undo text-success me-2"></i>
-                                                        Reiniciar Roteiro
+                                                    <button type="submit" class="dropdown-item" id="action-start-loading" {% if scripting.status != 'cancelled' %} disabled {% endif %}>
+                                                        <i class="fa-solid fa-trash text-danger me-2 {% if scripting.status != 'cancelled' %} text-muted {% endif %}"></i>
+                                                        Excluir Roteiro
                                                     </button>
                                                 </form>
                                             </li>
-                                            {% endif %}
 
-                                            {%  if scripting.status == 'draft' %}
+                                            
                                             <li><hr class="dropdown-divider" /></li>
                                             <li>
                                                 <a
-                                                    class="dropdown-item"
+                                                    class="dropdown-item {% if scripting.status != 'draft' %} disabled {% endif %}"
                                                     href="#"
                                                     data-bs-toggle="modal"
                                                     data-bs-target="#addLoadModal"
                                                     data-bs-dismiss="dropdown"
+                                                    disabled
                                                 >
-                                                    <i class="fa-solid fa-truck me-2"></i>Adicionar Carga
+                                                    <i type="button" class="fa-solid fa-truck me-2"></i>
+                                                    Adicionar Carga
                                                 </a>
                                             </li>
-                                            {% endif %}
                                             
                                             <li><hr class="dropdown-divider" /></li>
 
                                             <!-- Exportar roteiro (por exemplo, PDF ou Excel) -->
                                             <li>
-                                            <a class="dropdown-item disabled" href="#" id="action-export-route">
-                                                <i class="fa-solid fa-file-export me-2"></i>Exportar Roteiro
-                                            </a>
+                                                <form method="post" class="form" action="{% url 'tmsapp:scriptapp:export_scripting' scripting.id %}">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="dropdown-item {% if scripting.status != 'planned' %} disabled {% endif %}" id="action-export-route">
+                                                        <i class="fa-solid fa-file-export me-2"></i>Exportar Roteiro
+                                                    </button>
+                                                </form>
                                             </li>
 
                                             <!-- Imprimir roteiro -->
@@ -154,7 +156,7 @@
                     <div class="col-md-12 plans-list">
                         <div class="card card-flush h-100">
                             <div class="card-body px-0 py-0 pt-0">
-                                <div style="max-height:470px; min-height: 70px;" class="table-responsive scrollable">
+                                <div style="max-height:480px; min-height: 70px;" class="table-responsive scrollable">
                                     {% if scripting.load_plans %}
                                     <table id="load_plans_table"
                                         class="table table-hover table-row-dashed table-row-gray-200 align-middle gs-0 gy-3">
@@ -181,7 +183,6 @@
                                                 </td>
                                                 <td class="text-center">
                                                     <span data-total-deliveries class="badge badge-light-primary text-nowrap">{{ plan.total_deliveries }}</span>
-                                                    <small class="text-muted">/ <span data-total-area-deliveries>{{ plan.total_area_deliveries }}</span></small>
                                                 </td>
                                                 <td class="text-center text-gray-800">
                                                     <span data-license-plate class="text-hover-primary cursor-pointer"
@@ -204,9 +205,9 @@
                                                     <span
                                                         style="background-color: {{ plan.route.route_area.hex_color }};"
                                                         class="bullet bullet-dot w-10px h-10px"></span>
-                                                    {{ plan.route.route_area.name|default:'Sem rota definida'|title }}
+                                                    {{ plan.route.name|default:'Sem rota definida' }}
                                                     <br>
-                                                    <small class="text-muted"><span data-total-area-deliveries>{{ plan.total_area_deliveries }}</span> entregas
+                                                    <small class="text-muted"><span data-total-area-deliveries>{{ plan.total_areas|default:0 }}</span> Areas de entrega
                                                         nessa rota</small>
                                                 </td>
                                                 <td class="text-center text-nowrap">
@@ -376,7 +377,7 @@
                         <option value="0" selected>Todas Rotas</option>
                         {% for plan in scripting.load_plans %}
                         <option style="color: {{ plan.route.route_area.hex_color }};" value="{{ plan.route.id }}">
-                            {{ plan.code }} - {{ plan.route.route_area.name|title }}
+                            {{ plan.code }} - Carga {{ plan.vehicle.license_plate}}
                         </option>
                         {% endfor %}
                     </select>

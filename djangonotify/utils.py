@@ -40,7 +40,9 @@ def send_notification(
     title: str,
     message: str,
     level: str = 'info',
-    link: str | None = None
+    link: str | None = None,
+    link_name: str | None = None,
+    action: str | None = None
 ) -> Notification:
     """
     Cria uma Notification e envia via WebSocket para o grupo alerts_{user_id}.
@@ -51,7 +53,9 @@ def send_notification(
         title=title,
         message=message,
         level=level,
-        link=link
+        link=link,
+        link_name=link_name,
+        action=action
     )
 
     # 2) Prepara payload
@@ -65,6 +69,10 @@ def send_notification(
     }
     if link:
         payload['link'] = link
+    if link_name:
+        payload['link_name'] = link_name
+    if action:
+        payload['action'] = action
 
     # 3) Dispara via Channels
     channel_layer = get_channel_layer()

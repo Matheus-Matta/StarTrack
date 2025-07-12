@@ -113,6 +113,14 @@
                                             </div>
                                             </div>
                                         </div>
+                                        <!-- end::Item -->
+                                        {% if note.link %}
+                                        <div class="d-flex align-items-center justify-content-center w-100 pt-2 bg-hover-light">
+                                            <a 
+                                            class="btn btn-sm py-1 w-100 btn-light-success" 
+                                            href="{{ note.link }}">{% if note.link_name %}{{ note.link_name }}{% endif %}</a>
+                                        </div>
+                                        {% endif %}
                                     </div>
                                     <!-- end::Item -->
                                 {% endfor %}

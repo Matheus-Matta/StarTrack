@@ -37,6 +37,8 @@ class Delivery(models.Model):
     total_volume_m3 = models.DecimalField('Capacidade (m³)', max_digits=8, decimal_places=2, default=0)
     total_weight_kg = models.DecimalField('Capacidade (kg)', max_digits=8, decimal_places=2, default=0)
     
+    date_delivery = models.DateField('Data de Entrega', default=timezone.now)
+
     latitude = models.DecimalField('Latitude', max_digits=9, decimal_places=6, blank=True, null=True)
     longitude = models.DecimalField('Longitude', max_digits=9, decimal_places=6, blank=True, null=True)
 

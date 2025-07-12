@@ -70,6 +70,7 @@
                       <th data-field="order_number"    class="py-2 text-hover-dark">Pedido</th>
                       <th data-field="full_address"    class="py-2 text-hover-dark">Endereço</th>
                       <th data-field="postal_code"     class="py-2 text-hover-dark">CEP</th>
+                      <th data-field="date_delivery"  class="py-2 text-hover-dark">Data Entrega</th>
                       <th data-field="created_at"     class="py-2 text-hover-dark">Criação</th>
                       <th data-field="status,status_display" class="py-2 text-hover-dark">Status</th>
                       <th class="rounded-end-5"></th>
@@ -117,7 +118,8 @@ document.addEventListener('DOMContentLoaded', () => {
     rowRenderer: row => {
       const url = `/tms/delivery/${row.id}/update/`;
       const customer = row?.customer_name || '...';
-      const date = row.created_at.slice(0,10).split('-').reverse().join('/');
+      const date = row.created_at?.slice(0,10).split('-').reverse().join('/');
+      const date_delivery = row.date_delivery?.slice(0,10).split('-').reverse().join('/');
       const stt_obj = {
         pending: "<span class='badge badge-light-warning'>Pendente</span>",
         in_script: "<span class='badge badge-light-warning'>Em Roteiro</span>",
@@ -144,6 +146,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <td class="text-gray-700 py-1">${row.order_number}</td>
           <td class="text-gray-700 py-1">${row.full_address}</td>
           <td class="text-gray-700 py-1">${row.postal_code}</td>
+          <td class="text-gray-700 py-1">${date_delivery}</td>
           <td class="text-gray-700 py-1">${date}</td>
           <td class="py-1">
             ${stt_obj[row.status]}

@@ -119,10 +119,12 @@
                           title="Escolha a cor">
                       </div>
                   </div>
+                  <input type="hidden" name="vehicles_areas" value="">
                 </form>
                 {# Botões de ação #}
                 <div class="d-flex align-items-center justify-content-between gap-2"">
-                <form class="form-delete-confirm" action=" {% url 'tmsapp:scriptapp:delete_routearea' rota.id %}" method="post">
+                  <form class="form-confirm" data-message="Deseja excluir essa rota?" data-icon="warning" action=" {% url 'tmsapp:scriptapp:delete_routearea' rota.id %}" method="post">
+                  {% csrf_token %}
                   <button type="submit" class="btn btn-sm btn-light-danger px-2 py-1">
                     <i class="ki-solid p-0 ki-trash"></i>
                   </button>
@@ -141,21 +143,21 @@
                 <dt class="col-4 d-flex align-items-center">
                   <i class="ki-solid ki-user-tick me-2 fw-semibold"></i> Criado por
                 </dt>
-                <dd class="col-8">
+                <dd class="col-8 d-flex align-items-center">
                   {{ rota.created_by }}
                 </dd>
 
                 <dt class="col-4 d-flex align-items-center">
                   <i class="ki-solid ki-calendar-add me-2 fw-semibold"></i> Criado em
                 </dt>
-                <dd class="col-8">
+                <dd class="col-8 d-flex align-items-center">
                   {{ rota.created_at|date:"d/m/Y H:i" }}
                 </dd>
 
                 <dt class="col-4 d-flex align-items-center">
-                  <i class="ki-solid ki-arrows-loop me-2 fw-semibold"></i> Atualizado em
+                  <i class="ki-solid ki-arrows-loop me-2 fw-semibold"></i> Atualizado
                 </dt>
-                <dd class="col-8">
+                <dd class="col-8 d-flex align-items-center">
                   {{ rota.updated_at|date:"d/m/Y H:i" }}
                 </dd>
               </dl>
@@ -169,8 +171,8 @@
           <div class="card mb-4">
             <div class="card-body p-0 position-relative" style="height: 500px;">
               <div id="map" class="w-100 h-100 rounded-3"></div>
-              <div id="saveMap"
-                class="z-index-2 card hidden position-absolute bottom-0 start-50 translate-middle-x m-3 py-1 ps-5 pe-1 animation-fade-up">
+              <div style="z-index: 2000 !important;" id="saveMap"
+                class="card hidden position-absolute bottom-0 start-50 translate-middle-x m-3 py-1 ps-5 pe-1 animation-fade-up">
                 <span class="d-flex align-items-center">Alterações não salvas.<button
                     class="btn btn-sm btn-success px-3 py-2 ms-2 d-inline-block"
                     onclick="saveGeoJSON()">Salvar</button></span>

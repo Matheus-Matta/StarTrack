@@ -66,6 +66,17 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     `;
 
+    if (note.link) {
+      const btnWrapper = document.createElement('div');
+      btnWrapper.className = 'd-flex align-items-center justify-content-center w-100 pt-2 bg-hover-light';
+      btnWrapper.innerHTML = `
+        <a class="btn btn-sm py-1 w-100 btn-light-success" href="${note.link}">
+          ${note.link_name || 'Ver detalhes'}
+        </a>
+      `;
+      item.appendChild(btnWrapper);
+    }
+
     markRead(item)
     container.prepend(item);
   }
@@ -140,6 +151,21 @@ document.addEventListener('DOMContentLoaded', () => {
       badge.textContent = 'Em andamento';
       bar.style.width = `${task.percent || 0}%`;
       bar.textContent = task.percent || 0;
+    }
+
+    let existingBtn = item.querySelector('.task-action-btn');
+    if (existingBtn) existingBtn.remove();
+
+    if (task.link) {
+      const actionDiv = document.createElement('div');
+      actionDiv.className = 'd-flex align-items-center justify-content-center w-100 pt-2 bg-hover-light';
+      actionDiv.innerHTML = `
+        <a class="btn btn-sm py-1 w-100 btn-light-${task.status==='failure'?'danger':'success'} task-action-btn"
+          href="${task.link}">
+          ${task.link_name || 'Ver'}
+        </a>
+      `;
+      item.appendChild(actionDiv);
     }
   }
 

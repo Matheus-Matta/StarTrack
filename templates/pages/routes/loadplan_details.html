@@ -93,11 +93,11 @@
           class="d-flex align-items-center rounded bg-gray-100 py-2 px-4 border border-gray-200"
         >
           <span
-            style="background-color: {{ plan.route.route_area.hex_color }};"
+            style="background-color: {{ plan.route.route_area.hex_color|default:'#cccccc' }};"
             class="bullet h-15px w-15px bullet-dot me-2"
           ></span>
           <span class="fw-bold text-gray"
-            >{{ plan.route.route_area.name|title }}</span
+            >{{ plan.route.name|default:'Sem rota definida' }}</span
           >
         </div>
       </div>
@@ -160,8 +160,8 @@
               </div>
               <div class="d-flex align-items-center">
                 <span class="fw-bold text-gray-500 me-2">
-                  <i class="fa-solid fa-phone text-muted"></i>
-                  {{ plan.vehicle.driver.phone }}
+                    <i class="fa-solid fa-phone text-muted"></i>
+                    {{ plan.vehicle.driver.phone|default:'Nenhum telefone' }}
                 </span>
               </div>
             </div>

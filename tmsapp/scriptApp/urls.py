@@ -13,11 +13,7 @@ app_name = 'scriptapp'
 urlpatterns = [
   
   ####### SCRIPTING PATH 
-  path(
-        'scripting/create/',
-        login_required(lambda request: render(request, 'pages/route.html')),
-        name='create_scripting'
-  ),
+  path('scripting/create/', create_scripting_view, name='create_scripting'),
   # pagina de loading rotas
   path('scripting/loading/<uuid:task_id>/', route_loading_view, name='route_loading'),
   # pagina de visualizar roteiro
@@ -34,8 +30,8 @@ urlpatterns = [
   path('scripting/<int:scripting_id>/add_load/', add_load_to_composition, name='add_load_to_composition'),
   # recalcular roteiro e suas rotas
   path('scripting/<int:scripting_id>/recalculate/', redistribute_composition, name='redistribute_composition'),
-
-  
+  # exporta loadplans do roteiro
+  path('scripting/export/<int:scripting_id>', export_scripting, name='export_scripting'),
   
   ####### ROUTE PATH 
   path('route/create/',  create_routearea, name='create_routearea'),

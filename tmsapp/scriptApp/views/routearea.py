@@ -28,34 +28,39 @@ def create_routearea(request):
 @login_required
 def route_view(request, route_id):
     try:
-        rota = RouteArea.objects.get(id=route_id)
-    except RouteArea.DoesNotExist:
-        messages.error(request, "Rota não encontrada ou pode ter sido removida.")
-        return redirect(request.META.get('HTTP_REFERER', 'tmsapp:route'))  # fallback
-
-    outras_rotas = RouteArea.objects.exclude(id=rota.id).exclude(geojson__isnull=True).exclude(geojson="")
-
-    all_vehicles = Vehicle.objects.filter(
-        Q(route_area__isnull=True) |  # veículos sem rota
-        Q(route_area=rota)            # ou já nesta rota
-    ).distinct()
-
-    outras = []
-    for r in outras_rotas:
         try:
-            outras.append({
-                "geojson": json.loads(r.geojson),
-                "name": r.name,
-                "id": r.id
-            })
-        except json.JSONDecodeError:
-            pass
+            rota = RouteArea.objects.get(id=route_id)
+        except RouteArea.DoesNotExist:
+            messages.error(request, "Rota não encontrada ou pode ter sido removida.")
+            return redirect(request.META.get('HTTP_REFERER', 'tmsapp:scriptapp:route'))  # fallback
 
-    return render(request, 'pages/routes/view_routearea.html', {
-        "rota": rota,
-        "outras": json.dumps(outras),
-        "all_vehicles": all_vehicles,
-    })
+        rotas = RouteArea.objects.filter(geojson__isnull=False, is_active=True).exclude(geojson="")
+        outras_rotas = rotas.exclude(id=rota.id)
+
+        all_vehicles = Vehicle.objects.filter(
+            Q(route_area__isnull=True) |  # veículos sem rota
+            Q(route_area=rota)            # ou já nesta rota
+        ).distinct()
+
+        outras = []
+        for r in outras_rotas:
+            try:
+                outras.append({
+                    "geojson": json.loads(r.geojson),
+                    "name": r.name,
+                    "id": r.id
+                })
+            except json.JSONDecodeError:
+                pass
+
+        return render(request, 'pages/routes/view_routearea.html', {
+            "rota": rota,
+            "outras": json.dumps(outras),
+            "all_vehicles": all_vehicles,
+        })
+    except Exception as e:
+        messages.error(request, f"Erro ao atualizar rota: {e}")
+        return redirect('tmsapp:scriptapp:route')
 
 
 
@@ -133,7 +138,7 @@ def edit_routearea(request, route_id):
 def delete_routearea(request, route_id):
     try:
         rota = get_object_or_404(RouteArea, id=route_id)
-        rota.is_active = False
+        rota.delete()
         rota.save()
         messages.success(request, "Rota deletada com sucesso.")
         return redirect('tmsapp:scriptapp:route')  # redirecione para sua lista de rotas
@@ -144,7 +149,7 @@ def delete_routearea(request, route_id):
 
 def list_routearea(request):
     # traz apenas as áreas ativas
-    areas_qs = RouteArea.objects.filter(status='active').order_by('-created_at')
+    areas_qs = RouteArea.objects.filter(status='active', is_active=True).order_by('-created_at')
 
     # prepara lista serializável
     areas = []

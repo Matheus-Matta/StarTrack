@@ -109,6 +109,12 @@ class LoadPlan(models.Model):
         ).distinct().count()
 
     @property
+    def total_areas(self) -> int:
+        if not self.route:
+            return 0
+        return 1
+
+    @property
     def is_volume_overloaded(self) -> bool:
         """Indica se o volume total excede a capacidade."""
         return self.total_volume_m3 > self.max_volume_m3
@@ -129,7 +135,7 @@ class LoadPlan(models.Model):
         v = float(self.max_weight_kg)
         s = f"{v:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
         return s
-
+    
     @property
     def formatted_total_volume_m3(self) -> str:
         v = float(self.total_volume_m3)
@@ -148,6 +154,7 @@ class LoadPlan(models.Model):
         s = f"{val:,.2f}"
         s = s.replace(",", "X").replace("X", ".")
         return f"{s}"
+
 
 # registra no auditlog
 auditlog.register(LoadPlan)

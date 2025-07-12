@@ -141,6 +141,9 @@ def send_route_update_via_ws(composition, loadplan_id=None):
             'filial': d.filial,
             'lat': float(d.latitude),
             'long': float(d.longitude),
+            'total_volume_m3': d.total_volume_m3,
+            'total_weight_kg': d.total_weight_kg,
+            'price': d.price,
         })
     if extra_stops:
         payload.append({
