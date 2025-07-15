@@ -38,6 +38,7 @@ def custom_login(request):
     return render(request, 'authapp/login.html', {'form': form, 'next': next_url})
 
 def register(request):
+    return render(request, 'authapp/register.html')
     next_url = request.GET.get('next') or request.POST.get('next')
 
     if request.method == 'POST':
