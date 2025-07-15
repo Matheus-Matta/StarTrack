@@ -1,0 +1,139 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-07-14 12:02-0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: Portuguese (Brazil)\n"
+"Language: pt_BR\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: .\config\settings.py:161
+msgid "Português"
+msgstr ""
+
+#: .\config\settings.py:162
+msgid "English"
+msgstr ""
+
+#: .\config\unfold\sidebar.py:5
+msgid "Administrador"
+msgstr "Administrador"
+
+#: .\config\unfold\sidebar.py:6
+msgid "Mx Route"
+msgstr "Mx Route"
+
+#: .\config\unfold\sidebar.py:7
+msgid "Painel de Controle"
+msgstr "Painel de Controle"
+
+#: .\config\unfold\sidebar.py:16
+msgid "Navegação"
+msgstr "Navegação"
+
+#: .\config\unfold\sidebar.py:22
+msgid "Início"
+msgstr "Início"
+
+#: .\config\unfold\sidebar.py:27
+msgid "Entregas"
+msgstr "Entregas"
+
+#: .\config\unfold\sidebar.py:32
+msgid "Clientes"
+msgstr "Clientes"
+
+#: .\config\unfold\sidebar.py:37
+msgid "Locais da Empresa"
+msgstr "Locais da Empresa"
+
+#: .\config\unfold\sidebar.py:44
+msgid "Frota"
+msgstr "Frota"
+
+#: .\config\unfold\sidebar.py:50
+msgid "Motoristas"
+msgstr "Motoristas"
+
+#: .\config\unfold\sidebar.py:55
+msgid "Veículos"
+msgstr "Veículos"
+
+#: .\config\unfold\sidebar.py:60
+msgid "Transportadoras"
+msgstr "Transportadoras"
+
+#: .\config\unfold\sidebar.py:67
+msgid "Roteirização"
+msgstr "Roteirização"
+
+#: .\config\unfold\sidebar.py:73
+msgid "Planos de Carga"
+msgstr "Planos de Carga"
+
+#: .\config\unfold\sidebar.py:78
+msgid "Rotas"
+msgstr "Rotas"
+
+#: .\config\unfold\sidebar.py:83
+msgid "Composição de Rotas"
+msgstr "Composição de Rotas"
+
+#: .\config\unfold\sidebar.py:88
+msgid "Entregas da Composição"
+msgstr "Entregas da Composição"
+
+#: .\config\unfold\sidebar.py:95
+msgid "Usuários & Grupos"
+msgstr "Usuários & Grupos"
+
+#: .\config\unfold\sidebar.py:101
+msgid "Usuários"
+msgstr "Usuários"
+
+#: .\config\unfold\sidebar.py:106
+msgid "Grupos"
+msgstr "Grupos"
+
+#: .\config\unfold\sidebar.py:111
+msgid "Permissões"
+msgstr "Permissões"
+
+#: .\config\unfold\sidebar.py:118
+msgid "Alertas & Tarefas"
+msgstr "Alertas & Tarefas"
+
+#: .\config\unfold\sidebar.py:124
+msgid "Alertas"
+msgstr "Alertas"
+
+#: .\config\unfold\sidebar.py:129
+msgid "Tarefas"
+msgstr "Tarefas"
+
+#: .\config\unfold\sidebar.py:136
+msgid "Auditoria"
+msgstr ""
+
+#: .\config\unfold\sidebar.py:142
+msgid "Log de Auditoria"
+msgstr ""
+
+#: .\templates\unfold\helpers\search.html:22
+msgid "Search apps and models…"
+msgstr "Buscar apps e modelos…"
+
+#: .\templates\unfold\helpers\search.html:23
+msgid "Filter navigation items"
+msgstr ""

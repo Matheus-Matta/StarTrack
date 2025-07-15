@@ -67,6 +67,7 @@ def send_notification(
         'level_icon': notif.level_icon,
         'created_at': notif.created_at.strftime('%Y-%m-%dT%H:%M:%S'),
     }
+    
     if link:
         payload['link'] = link
     if link_name:

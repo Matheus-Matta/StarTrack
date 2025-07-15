@@ -21,8 +21,11 @@ from django.conf import settings
 from django.views.generic import TemplateView
 from django.shortcuts import redirect
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+from django.conf.urls.i18n import i18n_patterns
+
 
 urlpatterns = [
+    path('i18n/', include('django.conf.urls.i18n')),
     path('', lambda request: redirect('homeapp:dashboard', permanent=False), name='index'),
     path('djangotables/', include('djangotables.urls')),
     path('djangoselect/', include('djangoselect.urls')),

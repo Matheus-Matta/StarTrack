@@ -1,13 +1,19 @@
-#!/bin/bash
+#!/usr/bin/env sh
+set -e
 
-echo ">>> buscando migrações..."
-python manage.py makemigrations --noinput
+# 1) espera o Postgres, se estiver usando
+if [ "$DATABASE" = "postgres" ]; then
+  echo "→ Waiting for Postgres at $SQL_HOST:$SQL_PORT…"
+  until pg_isready -h "$SQL_HOST" -p "$SQL_PORT" -U "$POSTGRES_USER" > /dev/null 2>&1; do
+    sleep 0.1
+  done
+  echo "→ PostgreSQL started"
+fi
 
-echo ">>> Aplicando migrações..."
-python manage.py migrate --noinput
+# 2) executa makemigrations e migrate
+python manage.py makemigrations --no-input
+python manage.py migrate --no-input
 
-echo ">>> Coletando arquivos estáticos..."
-python manage.py collectstatic --noinput
+# 3) executa collectstatic
+python manage.py collectstatic --no-input --clear
 
-echo ">>> Iniciando serviço: $@"
-exec "$@"

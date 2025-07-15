@@ -102,6 +102,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
             // Adiciona marcadores como antes
             rt.stops.forEach(p => {
+                
                 const icon = p.order_number === "SAIDA"
                     ? L.AwesomeMarkers.icon({ icon: 'home', markerColor: 'red', prefix: 'fa' })
                     : L.AwesomeMarkers.icon({

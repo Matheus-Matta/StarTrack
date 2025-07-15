@@ -14,7 +14,11 @@ from decouple import config, Csv
 from pathlib import Path
 import dj_database_url
 import os
+from config.apps import APPS
+from django.utils.translation import gettext_lazy as _
 
+from dotenv import load_dotenv
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -24,54 +28,68 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config('DJANGO_SECRET_KEY')
+SECRET_KEY = os.getenv('SECRET_KEY', 'chave-padrao-insegura')
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config('DJANGO_DEBUG', cast=bool)
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
+def _get_env_list(var_name: str) -> list[str]:
+    """
+    Retorna uma lista de strings a partir de uma variável de ambiente
+    separada por vírgulas, removendo espaços em branco e itens vazios.
+    """
+    return [
+        item.strip() 
+        for item in os.getenv(var_name, "").split(",") 
+        if item and item.strip()
+    ]
 
 # Hosts permitidos (do .env, separados por vírgula)
-#ALLOWED_HOSTS = config('DJANGO_ALLOWED_HOSTS', cast=Csv())
-ALLOWED_HOSTS = ['*']
-# Gera os domínios de origem confiáveis para CSRF
-CSRF_TRUSTED_ORIGINS = [
-    'http://localhost:8580',
-    'https://localhost:8580',
-    'http://127.0.0.1',
-    'https://127.0.0.1',
-    'http://127.0.0.1:8580',
-    'https://127.0.0.1:8580',
-    "http://10.0.0.4:8580",
-    "https://10.0.0.4:8580",
-    "http://10.0.0.253:8001",
-    "https://10.0.0.253:8001",
-    "http://mxrouter.starseguro.com.br",
-    "https://mxrouter.starseguro.com.br",
+ALLOWED_HOSTS = _get_env_list("ALLOWED_HOSTS")
+
+# Origem(s) que podem ser CORS / CSRF
+_origins = _get_env_list("ALLOWED_HOSTS")
+
+# Adiciona http e https para cada domínio
+CORS_ALLOWED_ORIGINS = [
+    f"{scheme}://{origin}"
+    for origin in _origins
+    for scheme in ("http", "https")
 ]
 
-# Application definition
+CSRF_TRUSTED_ORIGINS = CORS_ALLOWED_ORIGINS.copy()
 
 INSTALLED_APPS = [
+    'django.contrib.staticfiles',
+
+    "unfold",                                # tema principal
+    "unfold.contrib.filters",                # filtros avançados
+    "unfold.contrib.forms",                  # campos/formulários especiais
+    "unfold.contrib.inlines",                # inlines paginados/ordenáveis
+    "unfold.contrib.import_export",          # integração django-import-export
+    "unfold.contrib.guardian",               # se usar django-guardian
+    "unfold.contrib.simple_history",  
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
+
     'django_celery_results',
-    'djangonotify',
+    "crispy_forms", 
+    'channels',
+    'simple_history',
+    'auditlog', 
     'djangotables',
     'djangoselect',
     'compressor',     
-    'channels',
-    'simple_history',
-    'auditlog',
-    'authapp',
-    'homeapp',
-    'tmsapp',
-    'crmapp',
-]
+
+
+] + APPS
+
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -111,11 +129,24 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
-    'default': dj_database_url.parse(
-        config('DATABASE_URL', default='sqlite:///db.sqlite3')
-    )
-}
+if DEBUG:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': os.getenv('DB_ENGINE'),
+            'NAME': os.getenv('DB_NAME'),
+            'USER': os.getenv('DB_USER'),
+            'PASSWORD': os.getenv('DB_PASSWORD'),
+            'HOST': os.getenv('DB_HOST'),
+            'PORT': os.getenv('DB_PORT'),
+        }
+    }
 
 
 # Password validation
@@ -146,6 +177,13 @@ TIME_ZONE = 'America/Sao_Paulo'
 
 USE_I18N = True
 
+LANGUAGES = [
+    ('pt-br', _('Português')),
+    ('en',    _('English')),
+]
+
+LOCALE_PATHS = [ BASE_DIR / 'locale' ]
+
 USE_TZ = False
 
 USE_L10N = True 
@@ -155,6 +193,10 @@ SHORT_DATE_FORMAT = 'd/m/Y'
 DATETIME_FORMAT  = 'd/m/Y H:i:s'
 TIME_FORMAT      = 'H:i:s'
 
+
+CRISPY_ALLOWED_TEMPLATE_PACKS = ["unfold_crispy"]
+CRISPY_TEMPLATE_PACK        = "unfold_crispy"
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
@@ -163,6 +205,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 STATIC_URL = '/static/'
+STATIC_ROOT = "/home/app/web/staticfiles"
 
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
@@ -171,16 +214,22 @@ STATICFILES_DIRS = [
 STATIC_ROOT = BASE_DIR / 'staticfiles'  # Usado em produção (ex: com collectstatic)
 STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
 
+STATICFILES_FINDERS = [
+    # procura em STATICFILES_DIRS
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    # procura em cada app/<app>/static/
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    # somente se você realmente usar django-compressor
+    'compressor.finders.CompressorFinder',
+]
+
 COMPRESS_ROOT = BASE_DIR / 'static'
 
 COMPRESS_ENABLED = True
 
-STATICFILES_FINDERS = ('compressor.finders.CompressorFinder',)
-
-
 # Static files ( upload image )
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT  = "/home/app/web/mediafiles"
 
 
 # Default primary key field type
@@ -213,7 +262,7 @@ EMAIL_HOST_USER = 'seuemail@gmail.com'
 EMAIL_HOST_PASSWORD = 'sua_senha_de_app'  # use senha de app, não a principal
 DEFAULT_FROM_EMAIL = '[empresa] <seuemail@gmail.com>'
 
-REDIS_URL = config('REDIS_URL', default='redis://127.0.0.1:6379/0')
+REDIS_URL = os.getenv('REDIS_URL', 'redis://127.0.0.1:6379/0')
 
 # Celery Broker (Redis é o melhor para agora)
 CELERY_BROKER_URL = REDIS_URL
@@ -244,3 +293,6 @@ CHANNEL_LAYERS = {
         },
     },
 }
+
+from config.unfold.sidebar import SIDEBAR
+UNFOLD = SIDEBAR

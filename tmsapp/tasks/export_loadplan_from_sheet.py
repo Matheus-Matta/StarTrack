@@ -10,10 +10,12 @@ from djangonotify.models import TaskRecord
 from django.db.models import QuerySet
 from tmsapp.models import RouteCompositionDelivery
 from django.utils import timezone
+import os
+
 
 class DeliveryExporter:
     """
-    Exporta entregas de um RouteComposition para planilha Excel no formato do template.
+    Exporta entregas de um RouteComposition para planilha CSV no formato do template.
     """
     def __init__(self, user_id: int, task_id: str, composition_id: int):
         self.user_id = user_id
@@ -31,11 +33,11 @@ class DeliveryExporter:
             lp = rc.load_plan
             # Montagem da linha conforme template
             rows.append({
-                'NOME':                       d.customer.full_name or '',
+                'NOME':                       'Rota 1',
                 'VEICULO':                    lp.vehicle.license_plate if lp else '',
-                'EVENTO':                     d.get_status_display(),
+                'EVENTO':                     'serviço',
                 'CODIGO LOCAL':               d.postal_code or '',
-                'NOME LOCAL':                 d.city or '',
+                'NOME LOCAL':                 d.customer.full_name or '',
                 'ENDERECO':                   d.full_address or '',
                 'PESO (kg)':                  float(d.total_weight_kg or 0),
                 'VOLUME (m3)':                float(d.total_volume_m3 or 0),
@@ -49,7 +51,7 @@ class DeliveryExporter:
                 'INFORMAÇÃO ADICIONAL 1':     '',
                 'INFORMAÇÃO ADICIONAL 2':     '',
                 'NÚMERO NF':                  getattr(d, 'invoice_number', '') or '',
-                'NÚMERO PEDIDO':              d.order_number or '',
+                'NÚMERO PEDIDO':              f"{d.filial}-{d.order_number}" if d.order_number else "",
                 'OPERADOR':                   d.created_by.get_full_name() if d.created_by else '',
                 'PLACA DO VEICULO':           lp.vehicle.license_plate if lp else '',
                 'CÓD. TRANSPORTADORA':        getattr(d, 'transporter_code', '') or '',
@@ -69,7 +71,7 @@ class DeliveryExporter:
 
     def export(self) -> str:
         """
-        Executa consulta, monta DataFrame e salva arquivo Excel.
+        Executa consulta, monta DataFrame e salva arquivo CSV.
         """
         # Filtra assignments desta composição com load_plan vinculado
         qs = RouteCompositionDelivery.objects.filter(
@@ -81,10 +83,16 @@ class DeliveryExporter:
         send_progress(self.task_id, self.user_id, f"Exportando {total} entregas...", 50)
 
         df = self.build_dataframe(qs)
-        filename = f"export_{timezone.now().strftime('%Y%m%d%H%M%S')}.xlsx"
+        filename = f"export_{timezone.now().strftime('%Y%m%d%H%M%S')}.csv"
 
-        path = f"{settings.MEDIA_ROOT}/exports/{filename}"
-        df.to_excel(path, index=False)
+        # Garante que o diretório exports existe
+        export_dir = f"{settings.MEDIA_ROOT}/exports"
+        os.makedirs(export_dir, exist_ok=True)
+
+        path = f"{export_dir}/{filename}"
+        
+        # Exporta para CSV com encoding UTF-8 e separador de ponto-e-vírgula
+        df.to_csv(path, index=False, encoding='ISO-8859-1', sep=';')
 
         url = f"{settings.MEDIA_URL}exports/{filename}"
 
@@ -92,7 +100,7 @@ class DeliveryExporter:
         send_notification(
             self.user_id,
             "Exportação de entregas concluída",
-            f"Seu arquivo está disponível",
+            f"Seu arquivo CSV está disponível",
             level='success',
             link=url,
             link_name='Baixar arquivo',

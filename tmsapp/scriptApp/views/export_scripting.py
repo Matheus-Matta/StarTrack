@@ -23,9 +23,8 @@ def export_scripting(request, scripting_id):
         # Cria um registro de tarefa para rastrear progresso e notificações
         tk = TaskRecord.objects.create(
             user=request.user,
-            name=f"Exportação de entregas da composição {comp.pk}"
+            name=f"Exportação de Roteiro Iniciada"
         )
-
         # 3) Dispara a task Celery
         export_loadplan_from_sheet.delay(
             request.user.id,
