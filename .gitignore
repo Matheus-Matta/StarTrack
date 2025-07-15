@@ -7,6 +7,15 @@ __pycache__/
 *.sqlite3
 *.log
 
+
+# Django migrations
+/migrations
+*/migrations
+migrations/
+*/migrations/
+*/migrations/*
+!*/migrations/__init__.py
+
 # Virtual env
 env/
 venv/
