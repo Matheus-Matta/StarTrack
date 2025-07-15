@@ -7,7 +7,6 @@ __pycache__/
 *.sqlite3
 *.log
 
-
 # Django migrations
 /migrations
 */migrations
