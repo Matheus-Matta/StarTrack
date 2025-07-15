@@ -2,13 +2,11 @@
 set -e
 
 # 1) espera o Postgres, se estiver usando
-if [ "$DATABASE" = "postgres" ]; then
-  echo "→ Waiting for Postgres at $SQL_HOST:$SQL_PORT…"
-  until pg_isready -h "$SQL_HOST" -p "$SQL_PORT" -U "$POSTGRES_USER" > /dev/null 2>&1; do
-    sleep 0.1
-  done
-  echo "→ PostgreSQL started"
-fi
+echo "→ Aguardando Postgres em $DB_HOST:$DB_PORT…"
+until pg_isready -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" > /dev/null 2>&1; do
+  sleep 0.5
+done
+echo "→ PostgreSQL pronto!"
 
 # 2) executa makemigrations e migrate
 python manage.py makemigrations --no-input
