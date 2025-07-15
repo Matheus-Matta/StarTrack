@@ -3,10 +3,6 @@ version: "3"
 services:
   web:
     build: .
-    # Agora usando Uvicorn para rodar o ASGI (Channels)
-    command: >
-      uvicorn config.asgi:application
-      --host 0.0.0.0 --port 8000
     volumes:
       - static_volume:/home/app/web/staticfiles
       - media_volume:/home/app/web/mediafiles
@@ -47,7 +43,7 @@ services:
       - static_volume:/home/app/web/staticfiles:ro
       - media_volume:/home/app/web/mediafiles:ro
     ports:
-      - 1337:80
+      - 8000:80
 
 
 volumes:

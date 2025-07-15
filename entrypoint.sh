@@ -17,3 +17,6 @@ python manage.py migrate --no-input
 # 3) executa collectstatic
 python manage.py collectstatic --no-input --clear
 
+# 4) executa o daphne (channels)
+exec uvicorn config.asgi:application --host 0.0.0.0 --port 8000
+
