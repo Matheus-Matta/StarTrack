@@ -28,6 +28,9 @@ RUN pip install --upgrade pip wheel \
 ####################################
 FROM python:3.11.4-slim-bullseye AS web
 
+RUN addgroup --system app \
+ && adduser --system --ingroup app app
+ 
 # cria usuário e diretórios
 RUN mkdir -p /home/app/web/staticfiles \
  && mkdir -p /home/app/web/mediafiles \
