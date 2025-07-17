@@ -4,6 +4,7 @@ services:
   web:
     build: .
     volumes:
+      - tmp_volume:/tmp
       - static_volume:/home/app/web/staticfiles
       - media_volume:/home/app/web/mediafiles
     expose:
@@ -18,6 +19,9 @@ services:
     command: celery -A config worker --loglevel=info --without-gossip --without-mingle --without-heartbeat --max-tasks-per-child=100
     env_file: .env
     volumes:
+      - tmp_volume:/tmp
+      - static_volume:/home/app/web/staticfiles
+      - media_volume:/home/app/web/mediafiles
       - .:/app
     depends_on:
       - redis
@@ -27,7 +31,7 @@ services:
     image: redis:latest
     container_name: redis_mxrouter
     ports:
-      - "6379:6379"
+      - "6880:6379"
     volumes:
       - redis:/data
 
@@ -43,10 +47,11 @@ services:
       - static_volume:/home/app/web/staticfiles:ro
       - media_volume:/home/app/web/mediafiles:ro
     ports:
-      - 8000:80
+      - 8010:80
 
 
 volumes:
+  tmp_volume:
   postgres_data:
   static_volume:
   media_volume:
