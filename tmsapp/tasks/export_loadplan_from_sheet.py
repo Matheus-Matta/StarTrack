@@ -88,7 +88,13 @@ class DeliveryExporter:
         self.composition_id = composition_id
         self.loadplan_id = loadplan_id
         self._validate_parameters()
-        self.loadplan = LoadPlan.objects.get(pk=self.loadplan_id)
+        if self.loadplan_id is not None:
+            try:
+                self.loadplan = LoadPlan.objects.get(pk=self.loadplan_id)
+            except LoadPlan.DoesNotExist:
+                raise ObjectDoesNotExist(f"LoadPlan {self.loadplan_id} não encontrado")
+        else:
+            self.loadplan = None
 
     def _validate_parameters(self) -> None:
         """
@@ -299,7 +305,10 @@ class DeliveryExporter:
             str: Nome do arquivo
         """
         timestamp = timezone.now().strftime('%Y%m%d_%H%M%S')
-        export_type = "Roteiro" if self.composition_id else f"{self.loadplan.name}"
+        if self.composition_id is not None:
+            export_type = "Roteiro"
+        else:
+            export_type = self.loadplan.name or "Carga"
         return f"{export_type}_{timestamp}.csv"
 
     def _ensure_export_directory(self) -> str:
