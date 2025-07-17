@@ -33,7 +33,7 @@ RUN addgroup --system app \
  
 # cria usuário e diretórios
 RUN mkdir -p /home/app/web/staticfiles \
- && mkdir -p /home/app/web/mediafiles \
+ && mkdir -p /home/app/web/media \
  && addgroup --system app \
  && adduser --system --ingroup app app
 

@@ -205,7 +205,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 STATIC_URL = '/static/'
-STATIC_ROOT = "/home/app/web/staticfiles"
+COMPRESS_ROOT = BASE_DIR / 'staticfiles'
 
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
@@ -229,7 +229,7 @@ COMPRESS_ENABLED = True
 
 # Static files ( upload image )
 MEDIA_URL = '/media/'
-MEDIA_ROOT  = "/home/app/web/mediafiles"
+MEDIA_ROOT = BASE_DIR / 'media' 
 
 
 # Default primary key field type

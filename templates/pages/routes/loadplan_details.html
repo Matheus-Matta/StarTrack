@@ -49,13 +49,35 @@
         <li>
           <form class="form form-confirm" data-message="Tem certeza que deseja deletar essa carga?" action="{% url 'tmsapp:fleetapp:delete_loadplan' scripting.id plan.id %}" method="post">
             {% csrf_token %}
-            <button type="submit" class="dropdown-item text-danger">Deletar</button>
+            <button type="submit" class="dropdown-item text-danger">
+              <i class="fa-solid fa-trash me-2"></i>Deletar
+            </button>
           </form>
         </li>
 
         <li><hr class="dropdown-divider"></li>
-        <li><a class="dropdown-item disabled" href="#" data-action="print-manifest">Imprimir Manifesto</a></li>
-        <li><a class="dropdown-item disabled" href="#" data-action="export-pdf">Exportar PDF</a></li>
+        <li>
+          <a class="dropdown-item disabled" href="#" data-action="print-manifest">
+            <i class="fa-solid fa-print me-2"></i>Imprimir Manifesto
+          </a>
+        </li>
+        <li>
+          <form 
+          action="{% url 'tmsapp:scriptapp:export_scripting_by_loadplan' plan.id %}" 
+          method="post" 
+          style="display: inline;"
+          >
+          {% csrf_token %}
+          <button 
+          type="submit" 
+          class="dropdown-item {% if plan.status == 'draft' or plan.status == 'cancelled'  %} disabled {% endif %}"
+          >
+              <i class="fa-solid fa-file-export me-2"></i>
+              Exportar Carga
+            </button>
+          </form>
+          
+        </li>
       </ul>
     </div>
   </div>

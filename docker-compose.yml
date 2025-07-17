@@ -6,7 +6,7 @@ services:
     volumes:
       - tmp_volume:/tmp
       - static_volume:/home/app/web/staticfiles
-      - media_volume:/home/app/web/mediafiles
+      - media_volume:/home/app/web/media
     expose:
       - 8000
     env_file:
@@ -21,7 +21,7 @@ services:
     volumes:
       - tmp_volume:/tmp
       - static_volume:/home/app/web/staticfiles
-      - media_volume:/home/app/web/mediafiles
+      - media_volume:/home/app/web/media
       - .:/app
     depends_on:
       - redis
@@ -45,7 +45,7 @@ services:
     build: ./nginx
     volumes:
       - static_volume:/home/app/web/staticfiles:ro
-      - media_volume:/home/app/web/mediafiles:ro
+      - media_volume:/home/app/web/media:ro
     ports:
       - 8010:80
 

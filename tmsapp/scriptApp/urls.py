@@ -32,7 +32,9 @@ urlpatterns = [
   path('scripting/<int:scripting_id>/recalculate/', redistribute_composition, name='redistribute_composition'),
   # exporta loadplans do roteiro
   path('scripting/export/<int:scripting_id>', export_scripting, name='export_scripting'),
-  
+  # exporta loadplans do roteiro por loadplan
+  path('scripting/export/load/<int:loadplan_id>', export_scripting_by_loadplan, name='export_scripting_by_loadplan'),
+
   ####### ROUTE PATH 
   path('route/create/',  create_routearea, name='create_routearea'),
   path('route/edit/<int:route_id>/', edit_routearea, name='edit_routearea'),

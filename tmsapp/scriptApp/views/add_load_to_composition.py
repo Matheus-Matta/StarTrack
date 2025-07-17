@@ -45,7 +45,7 @@ def add_load_to_composition(request, scripting_id):
         
         area = vehicle.route_area
         rt = Route.objects.create(
-                name=f"Rota {area.name} - {vehicle.name}",
+                name=f"RT-",
                 route_area=area,
                 stops=0,
                 distance_km=0,
@@ -54,9 +54,11 @@ def add_load_to_composition(request, scripting_id):
                 points=[],
                 created_by=request.user
             )
+        rt.name = f"RT-{rt.id}"
+        rt.save()
         
         # Se ainda não existe, cria um novo LoadPlan sem rota definida
-        new_load_name = f"Carga {area.name}"
+        new_load_name = f"Carga {vehicle.name}"
         load_plan = LoadPlan.objects.create(
             name=new_load_name,
             route=rt,

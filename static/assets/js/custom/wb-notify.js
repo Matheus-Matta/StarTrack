@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
     const payload = JSON.parse(e.data);
+    console.log(payload);
     renderOrUpdateTask(payload);
     markUnreadNotifications();
   };

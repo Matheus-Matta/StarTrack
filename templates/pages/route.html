@@ -422,7 +422,7 @@
               <div>
                 <div class="fw-bold text-gray-700 fs-7 d-flex align-items-center">
                   <i class="bi bi-truck fs-4 me-2"></i>
-                  {{ v.license_plate }} - {{ v.get_vehicle_type_display }} - {{ v.driver.full_name|default:'Sem Motorista' }}
+                  {{ v.license_plate }} - {{ v.driver.full_name|default:'Sem Motorista' }}
                 </div>
               </div>
               <button type="button" class="btn btn-sm btn-light-success py-1" data-select-area data-id="{{ v.id }}" data-place="{{ v.license_plate }}">
