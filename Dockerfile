@@ -10,7 +10,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 WORKDIR /usr/src/app
 
 # instala compiladores e libs para psycopg2 e pysqlite3
-RUN 
+RUN apt-get update \
  && apt-get install -y --no-install-recommends \
       gcc \
       libpq-dev \
