@@ -10,7 +10,8 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 WORKDIR /usr/src/app
 
 # instala compiladores e libs para psycopg2 e pysqlite3
-RUN apt-get install -y --no-install-recommends \
+RUN 
+ && apt-get install -y --no-install-recommends \
       gcc \
       libpq-dev \
       libsqlite3-dev \
@@ -42,7 +43,8 @@ ENV APP_HOME=/home/app/web
 WORKDIR $APP_HOME
 
 # instala runtime deps
-RUN apt-get install -y --no-install-recommends \
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends \
       netcat \
       postgresql-client \
       sqlite3 \
