@@ -1,3 +1,5 @@
+# DEPLOY DO PROJETO EM: https://startrack.starseguro.com.br/
+
 # StarTrack – Plataforma de Roteirização e Entregas
 
 StarTrack é um sistema de **gestão de rotas e entregas** desenvolvido em **Django**, com processamento assíncrono em **Celery** e servidor **ASGI com Daphne**, integrado ao **OpenRouteService (ORS)** e **VROOM** para otimização de rotas, exibindo tudo em mapa com **OpenStreetMap**.
@@ -10,7 +12,7 @@ O objetivo é facilitar o dia a dia da operação logística: cadastro de motori
 
 ### Login
 
-![Tela de Login](https://imgur.com/dAAOFbZ)
+![Tela de Login](https://i.imgur.com/dAAOFbZ.png)
 
 Tela de autenticação dos usuários do painel StarTrack.  
 Permite login com usuário e senha, opção de “lembrar-me” e link para recuperação de senha.
@@ -179,11 +181,3 @@ Base cartográfica com **OpenStreetMap**, integrada via **Leaflet** (ou bibliote
 - Daphne (ou outro servidor ASGI)
 
 ---
-
-## Como Executar (exemplo)
-
-1. **Clonar o projeto**
-
-   ```bash
-   git clone https://seu-repo/startrack.git
-   cd startrack
