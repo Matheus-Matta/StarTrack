@@ -21,7 +21,7 @@ Permite login com usuário e senha, opção de “lembrar-me” e link para recu
 
 ### Dashboard de Frota
 
-![Dashboard de Frota](/mnt/data/91775abd-7bec-44f3-b8e3-7738193f51db.png)
+![Dashboard de Frota](https://i.imgur.com/w3L5CqJ.png)
 
 Visão geral da frota:
 
@@ -37,7 +37,7 @@ Na parte inferior há listas detalhadas de **Motoristas** e **Veículos**, com i
 
 ### Cadastro de Motoristas
 
-![Cadastro de Motorista](/mnt/data/38feb8f4-eedf-4d99-8783-3e4015439d55.png)
+![Cadastro de Motorista](https://i.imgur.com/ynxFZ3O.png)
 
 Formulário completo para cadastro de motoristas, com abas de:
 
@@ -50,7 +50,7 @@ Formulário completo para cadastro de motoristas, com abas de:
 
 ### Áreas de Rota (Regionais)
 
-![Áreas de Rota](/mnt/data/f20a58a3-1b28-45c2-8b61-8f3e59b0f02d.png)
+![Áreas de Rota](https://i.imgur.com/VxytJcC.png)
 
 Módulo de **Rotas** com:
 
@@ -64,7 +64,7 @@ As áreas são usadas como base para agrupar entregas e distribuir cargas por re
 
 ### Roteirização de Cargas
 
-![Roteirização – Cargas](/mnt/data/6e425842-e18b-47e9-a513-e2894a6df8da.png)
+![Roteirização – Cargas](https://i.imgur.com/OwvT0yr.png)
 
 Tela de **Roteirização** de uma roteirização específica (ex.: `RTR-102`):
 
@@ -91,7 +91,7 @@ Botão **“Ver mapa”** abre a visualização detalhada da rota no mapa.
 
 ### Mapa das Rotas
 
-![Mapa das Rotas](/mnt/data/0908877c-347c-40ef-a7f8-0573a5234267.png)
+![Mapa das Rotas](https://i.imgur.com/z3sTaOL.png)
 
 Modal de **Mapa das Rotas**:
 
