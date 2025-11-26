@@ -10,7 +10,7 @@ O objetivo é facilitar o dia a dia da operação logística: cadastro de motori
 
 ### Login
 
-![Tela de Login](/mnt/data/ac06f61e-00f7-4025-b128-7a8762decd00.png)
+![Tela de Login](https://imgur.com/dAAOFbZ)
 
 Tela de autenticação dos usuários do painel StarTrack.  
 Permite login com usuário e senha, opção de “lembrar-me” e link para recuperação de senha.
